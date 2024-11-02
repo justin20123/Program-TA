@@ -13,6 +13,98 @@ class VendorController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+
+    public function getJarak($vendor, $latitude, $longitude){
+        $latitudeUser = deg2rad($latitude);
+        $longitudeUser = deg2rad($longitude);
+        $latitudeVendor = deg2rad($vendor->latitude);
+        $longitudeVendor = deg2rad($vendor->longitude);
+
+        $deltaLatitude = $latitudeVendor - $latitudeUser;
+        $deltaLongitude = $longitudeVendor - $longitudeUser;
+
+        $r = 6371;  //radius bumi (km)
+
+        $d = (2*$r)*(asin(sqrt(pow(sin($deltaLatitude/2),2) + 
+            cos($latitudeUser)*cos($latitudeVendor)*pow(sin($deltaLongitude/2),2))));
+        //rumus haversine
+        // jarak(d) = 2*radius bumi * arcsin(sqrt(sin^2 * (deltaLatitude/2) + cos(lat1) * cos(lat2) *(sin^2 * (deltaLongitude/2)))
+
+
+        return round($d, 2);
+    }
+
+    public function storeLocation(Request $request)
+    {
+        $request->validate([
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+        ]);
+    
+        $latitude = $request->latitude;
+        $longitude = $request->longitude;
+        
+        //hitung jarak
+        $vendors = DB::table('vendors')
+        ->select()
+        ->get();
+
+        foreach($vendors as $v){
+            $v->jarak = $this->getJarak($v, $latitude, $longitude);
+        }
+
+
+        //sort dari yang terdekat
+        $jarak_unsort = [];
+        $jarak_idvendor_unsort = [];
+        foreach($vendors as $v){
+            array_push($jarak_unsort, $v->jarak);
+            array_push($jarak_idvendor_unsort, $v->id);
+        }
+        $jarak_sorted = [];
+        $jarak_idvendor_sorted = [];
+
+        $i = 0;
+        while (count($jarak_unsort) > 0){
+            $min = 99999;
+            $index = 0;
+            foreach($jarak_unsort as $key => $j){
+                if($j < $min){
+                    $min = $j;
+                    $index = $key;
+                }
+            }
+            array_push($jarak_sorted, $min);
+            array_push($jarak_idvendor_sorted, $jarak_idvendor_unsort[$index]);
+
+            unset($jarak_unsort[$index]);
+            unset($jarak_idvendor_unsort[$index]);
+
+            
+        }
+
+        $vendorSorted = [];
+        foreach($jarak_idvendor_sorted as $key=>$vs){
+            if($key<4){
+                $vendorData = DB::table('vendors')
+                ->where('id', '=', $vs)
+                ->first();
+
+                $vendorData->jarak = $jarak_sorted[$key];
+                array_push($vendorSorted, $vendorData);
+            }
+            
+        }
+
+        //get street name based on longitude and latitude
+    
+        
+        return response()->json(['message' => 'success', 'data' => $vendorSorted]);
+    }
+    
+ 
+
     public function index()
     {
         $vendors = Vendor::all();

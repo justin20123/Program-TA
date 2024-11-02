@@ -7,49 +7,92 @@
   </ol>
 @endsection
 @section('menu')
-<h1 class="text-center p-5">Vendor Anda</h1>
-@php
-    $totalVendors = count($vendors);
-    $itemsPerRow = 4; 
-    $invisibleCards = ($itemsPerRow - ($totalVendors % $itemsPerRow)) % $itemsPerRow; // Calculate invisible cards needed
-@endphp
-
-<ul class="list-inline justify-content-center" style="display: flex; flex-wrap: wrap;">
-@foreach ($vendors as $v)
-
-<li class="list-inline-item p-2">
-        <a href="{{ asset('/layanans/'. $v->id) }}">
-            <div class="card" style="width: 18rem; height: 23rem">
-                <img class="card-img-top" style="height: 12rem;" src="{{ $v->foto_lokasi }}" alt="Card image cap">
-                <div class="card-body">
-                    <ul class="list-inline">
-                        <li class="list-inline-item">
-                            <div class="rating-images ">
-                                @for ($i = 0; $i < 5; $i++)
-                                    @if ($i < round($v->vendor_rating))    
-                                        <img class="img-fluid" src="{{ asset('../assets/images/rating.png') }}" alt="">
-                                    @else
-                                        <img style="opacity: 0.5;" class="img-fluid" src="{{ asset('../assets/images/rating.png') }}" alt="">
-                                    @endif
-                                @endfor
-                            </div>
-                        </li>
-                        <li class="list-inline-item">( {{ $v->total_nota }} )</li>
-                    </ul>
-                    <h5 class="card-title">{{ $v->nama }}</h5>
-                </div>
-            </div>
-        </a>
-    </li>
-@endforeach
-
-@for ($i = 0; $i < $invisibleCards; $i++)
-<li class="list-inline-item p-2">
-    <div class="card" style="width: 18rem; height: 23rem; visibility: hidden;"> <!-- Use visibility: hidden to maintain layout -->
-        <div class="card-body">
-        </div>
+<div class="d-flex justify-content-between align-items-center px-4 pt-3">
+    <div class="h5 p-2">List Vendor</div>
+    <a href="#" class="text-danger h5 p-2">Lihat Semua</a></div>
+<div class="container mt-5">
+    <div class="row" id="vendorsJarak">
     </div>
-</li>
-@endfor
-</ul>
+</div>
+    <p id="status"></p>
+@endsection
+
+@section('script')
+<script>
+    // Function to get the user's location
+    function sendLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                const latitude = position.coords.latitude;
+                const longitude = position.coords.longitude;
+
+                // Send the latitude and longitude to the Laravel backend using jQuery
+                $.ajax({
+                    url: '  location',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        latitude: latitude,
+                        longitude: longitude
+                    }),
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}' // Include CSRF token for security
+                    },
+                    success: function(data) {
+                        html = "";
+                        $.each(data['data'], function(index, item) {
+                            console.log(item);
+                            html += `
+                            <div class="col-md-3">
+                                <div class="card">
+                                    <img style='width:15rem; height:12rem;' src="`+ item['foto_lokasi'] +`" class="card-img-top" alt="Card image 1">
+                                    <div class="card-body">
+                                        <h6 class="card-title">`+ item['nama'] +`</h6>
+                                        <p class="card-text">` + item['jarak'] +` km dari lokasi anda</p>
+                                        <a href="https://www.openstreetmap.org/?mlat=` + item['latitude'] +`&mlon=` + item['longitude'] +`#map=15/` + item['latitude'] +`/` + item['longitude'] +`" target="_blank">Lihat di map</a>
+                                    </div>
+                                </div>
+                            </div>
+                            `;
+                        })
+                        $('#vendorsJarak').html(html);
+                        // $('#status').text('Location sent successfully: ' + JSON.stringify(data));
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error:'+ error);
+                        console.error(xhr.responseText);
+                        $('#status').text('Error sending location. '+ xhr);
+                    }
+                });
+            }, function(error) {
+                handleError(error);
+            });
+        } else {
+            $('#status').text("Geolocation is not supported by this browser.");
+        }
+    }
+
+    // Handle errors from geolocation
+    function handleError(error) {
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                $('#status').text("User  denied the request for Geolocation.");
+                break;
+            case error.POSITION_UNAVAILABLE:
+                $('#status').text("Location information is unavailable.");
+                break;
+            case error.TIMEOUT:
+                $('#status').text("The request to get user location timed out.");
+                break;
+            case error.UNKNOWN_ERROR:
+                $('#status').text("An unknown error occurred.");
+                break;
+        }
+    }
+
+    // Automatically get the location when the document is fully loaded
+    $(document).ready(function() {
+        sendLocation();
+    });
+</script>
 @endsection

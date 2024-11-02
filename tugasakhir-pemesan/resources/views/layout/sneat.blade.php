@@ -167,7 +167,8 @@
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
     <script src="{{ asset('../assets/js/config.js')}}"></script>
 
-    
+    <!-- jquery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> 
 
     <!-- DataTables -->
     <link rel="stylesheet" href="{{ asset('../assets/DataTables/datatables.css') }}">

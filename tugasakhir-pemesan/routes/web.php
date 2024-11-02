@@ -15,3 +15,4 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [VendorController::class, 'index'])->name('home');
+Route::post('/location', [VendorController::class, 'storeLocation']);

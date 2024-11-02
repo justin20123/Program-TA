@@ -16,7 +16,7 @@ class VendorSeeder extends Seeder
      */
     public function run()
     {
-        $faker = Faker::create();
+        $faker = Faker::create('id_ID');
         $layanan = array("Fotokopi","Stiker","Buku","Spanduk/Banner","Pakaian","Paper Bag","Aksesoris","Undangan","Kalender","Kartu Nama","Brosur","Amplop","Case HP");
         $satuan = array("pcs", "lot", "pcs", "pcs", "pcs", "pcs", "pcs", "lot", "pcs", "pcs", "pcs", "pcs", "pcs");
         $kesetaraan = array(1, 50, 1, 1, 1, 1, 1, 100, 1, 1, 500, 250, 1);
@@ -34,8 +34,8 @@ class VendorSeeder extends Seeder
                 'lokasi' => $faker->city,
                 'status' => $faker->randomElement(['active', 'inactive']),
                 'foto_lokasi' => "https://picsum.photos/id/". $faker->numberBetween(1, 300) . "/200/300",
-                'longitude' => $faker->longitude,
-                'latitude' => $faker->latitude,
+                'longitude' => $faker->longitude(112.7, 112.8),
+                'latitude' => $faker->latitude(-7.3, -7.2),
             ]);
             foreach ($layanan as $key=>$value) {
                 for ($j = 0; $j < 11; $j++) {
