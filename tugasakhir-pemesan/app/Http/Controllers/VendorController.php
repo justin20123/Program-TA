@@ -35,7 +35,7 @@ class VendorController extends Controller
         return round($d, 2);
     }
 
-    public function storeLocation(Request $request)
+    public function getLocation(Request $request, $number=null)
     {
         $request->validate([
             'latitude' => 'required|numeric',
@@ -86,22 +86,66 @@ class VendorController extends Controller
 
         $vendorSorted = [];
         foreach($jarak_idvendor_sorted as $key=>$vs){
-            if($key<4){
-                $vendorData = DB::table('vendors')
-                ->where('id', '=', $vs)
-                ->first();
-
-                $vendorData->jarak = $jarak_sorted[$key];
-                array_push($vendorSorted, $vendorData);
+            if($number != null){
+                if($key<$number){
+                    $vendorData = DB::table('vendors')
+                    ->where('id', '=', $vs)
+                    ->first();
+    
+                    $vendorData->jarak = $jarak_sorted[$key];
+                    array_push($vendorSorted, $vendorData);
+                    //beberapa vendor terdekat
+                }
             }
+            else{
+                $vendorData = DB::table('vendors')
+                    ->where('id', '=', $vs)
+                    ->first();
+    
+                    $vendorData->jarak = $jarak_sorted[$key];
+                    array_push($vendorSorted, $vendorData);
+                    //semua vendor
+            }
+            
             
         }
 
-        //get street name based on longitude and latitude
-    
-        
-        return response()->json(['message' => 'success', 'data' => $vendorSorted]);
+        return $vendorSorted;
     }
+
+    public function getRating(){
+        $vendors = DB::table('vendors')->select()->get();
+        $dataRating = [];
+        foreach($vendors as $v){
+            $ratingController = new RatingController();
+            $ratingKualitas = $ratingController->getRating($v->id, "kualitas");
+            $ratingPelayanan = $ratingController->getRating($v->id, "pelayanan");
+            $ratingFasilitas = $ratingController->getRating($v->id, "fasilitas");
+            $ratingPengantaran = $ratingController->getRating($v->id, "pengantaran");
+            $ratingVendor = [
+                "kualitas"=>$ratingKualitas,
+                "pelayanan"=>$ratingPelayanan,
+                "fasilitas"=>$ratingFasilitas,
+                "pengantaran"=>$ratingPengantaran,
+            ];
+            array_push($dataRating, $ratingVendor);
+
+        }
+        
+        dd($dataRating);
+        return view("tes",compact('ratingVendor'));
+    }
+
+    public function getHarga(){
+        
+    }
+
+    public function load(Request $request){
+        $layanans = $this->getLocation($request, 4);
+        return response()->json(['message' => 'success', 'data' => $layanans]);
+    }
+
+
     
  
 

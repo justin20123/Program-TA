@@ -14,13 +14,14 @@
     <div class="row" id="vendorsJarak">
     </div>
 </div>
-    <p id="status"></p>
+    <p id="status" class="px-5">Loading Data...</p>
+    <a href="/vendor/rating">tes</a>
 @endsection
 
 @section('script')
 <script>
     // Function to get the user's location
-    function sendLocation() {
+    function pageLoad() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function(position) {
                 const latitude = position.coords.latitude;
@@ -28,7 +29,7 @@
 
                 // Send the latitude and longitude to the Laravel backend using jQuery
                 $.ajax({
-                    url: '  location',
+                    url: 'location',
                     type: 'POST',
                     contentType: 'application/json',
                     data: JSON.stringify({
@@ -57,6 +58,7 @@
                         })
                         $('#vendorsJarak').html(html);
                         // $('#status').text('Location sent successfully: ' + JSON.stringify(data));
+                        $('#status').text('');
                     },
                     error: function(xhr, status, error) {
                         console.error('Error:'+ error);
@@ -72,27 +74,9 @@
         }
     }
 
-    // Handle errors from geolocation
-    function handleError(error) {
-        switch(error.code) {
-            case error.PERMISSION_DENIED:
-                $('#status').text("User  denied the request for Geolocation.");
-                break;
-            case error.POSITION_UNAVAILABLE:
-                $('#status').text("Location information is unavailable.");
-                break;
-            case error.TIMEOUT:
-                $('#status').text("The request to get user location timed out.");
-                break;
-            case error.UNKNOWN_ERROR:
-                $('#status').text("An unknown error occurred.");
-                break;
-        }
-    }
-
     // Automatically get the location when the document is fully loaded
     $(document).ready(function() {
-        sendLocation();
+        pageLoad();
     });
 </script>
 @endsection

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RatingController;
 use App\Http\Controllers\VendorController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,4 +16,5 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [VendorController::class, 'index'])->name('home');
-Route::post('/location', [VendorController::class, 'storeLocation']);
+Route::post('/location', [VendorController::class, 'load']);
+Route::get('/vendor/rating', [VendorController::class, 'getRating']);
