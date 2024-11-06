@@ -15,10 +15,14 @@ class HargaCetakController extends Controller
      */
 
     public function cekHarga($jumlahCetak, $idjenisBahan){
-        $hargacetak = DB::table('harga_cetaks')->where('id_bahan_cetaks','=',$idjenisBahan)->get();
+        $hargacetak = DB::table('harga_cetaks')
+        ->where('id_bahan_cetaks','=',$idjenisBahan)
+        ->select()
+        ->get();
         $maxJumlahMin = 0;
         $hargaMaxJumlahMin = 0;
         $harga = null;
+
         foreach($hargacetak as $h){
             
             if($h->jumlah_cetak_minimum <= $jumlahCetak && $h->jumlah_cetak_maksimum >= $jumlahCetak){
@@ -40,24 +44,29 @@ class HargaCetakController extends Controller
     public function getHarga($idvendor, $idlayanan){
         $jenisbahan = DB::table('vendors_has_jenis_bahan_cetaks')
         ->join('jenis_bahan_cetaks', 'jenis_bahan_cetaks.id','=','vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id')
+        ->join('harga_cetaks', 'harga_cetaks.id_bahan_cetaks','=', 'jenis_bahan_cetaks.id')
         ->where('vendors_has_jenis_bahan_cetaks.vendors_id','=',$idvendor)
         ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id','=',$idlayanan)
         ->select()
         ->get();
+
         $arrAvgHarga = [];
-        foreach($jenisbahan as $jb){
+
+        foreach($jenisbahan as $keyjb=>$jb){
             //cek harga satuan tergeneralisasi dengan 10, 100, 200, 300, 400, 500, 1000
-            $harga10 = $this->cekHarga(10, $jb);
-            $harga100 = $this->cekHarga(100, $jb);
-            $harga200 = $this->cekHarga(200, $jb);
-            $harga300 = $this->cekHarga(300, $jb);
-            $harga400 = $this->cekHarga(400, $jb);
-            $harga500 = $this->cekHarga(500, $jb);
-            $harga1000 = $this->cekHarga(1000, $jb);
+            $harga10 = $this->cekHarga(10, $jb->id);
+            $harga100 = $this->cekHarga(100, $jb->id);
+            $harga200 = $this->cekHarga(200, $jb->id);
+            $harga300 = $this->cekHarga(300, $jb->id);
+            $harga400 = $this->cekHarga(400, $jb->id);
+            $harga500 = $this->cekHarga(500, $jb->id);
+            $harga1000 = $this->cekHarga(1000, $jb->id);
 
             $avgHarga = ($harga10 + $harga100 + $harga200 + $harga300 + $harga400 + $harga500 + $harga1000)/7;
             array_push($arrAvgHarga, $avgHarga);
+            
         }
+        
         $totalHargaSatuan = 0;
         $totalJenisBahan = 0;
         //setiap jenis bahan masuk foreach
@@ -67,7 +76,49 @@ class HargaCetakController extends Controller
         }
         //average harga di vendor (sesuai layanan)
         $avgHargaPerVendor = $totalHargaSatuan/$totalJenisBahan;
-        return $avgHargaPerVendor;
+        return ['avg_harga'=> $avgHargaPerVendor];
+    }
+
+    public function getMinValue($idvendor, $idlayanan){
+        $hargas = DB::table('vendors_has_jenis_bahan_cetaks')
+        ->join('jenis_bahan_cetaks', 'jenis_bahan_cetaks.id','=','vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id')
+        ->join('harga_cetaks', 'harga_cetaks.id_bahan_cetaks','=', 'jenis_bahan_cetaks.id')
+        ->where('vendors_has_jenis_bahan_cetaks.vendors_id','=',$idvendor)
+        ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id','=',$idlayanan)
+        ->select('harga_cetaks.harga_satuan')
+        ->get();
+
+        $min = 0;
+        foreach($hargas as $key=>$h){
+            if($key == 0){
+                $min = $h->harga_satuan;
+            }
+            else{
+                if($h->harga_satuan < $min){
+                    $min = $h->harga_satuan;
+                }
+            }
+            
+        }
+        return $min;
+    }
+
+    public function getMaxValue($idvendor, $idlayanan){
+        $hargas = DB::table('vendors_has_jenis_bahan_cetaks')
+        ->join('jenis_bahan_cetaks', 'jenis_bahan_cetaks.id','=','vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id')
+        ->join('harga_cetaks', 'harga_cetaks.id_bahan_cetaks','=', 'jenis_bahan_cetaks.id')
+        ->where('vendors_has_jenis_bahan_cetaks.vendors_id','=',$idvendor)
+        ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id','=',$idlayanan)
+        ->select('harga_cetaks.harga_satuan')
+        ->get();
+
+        $max = 0;
+        foreach($hargas as $h){
+            if($h->harga_satuan > $max){
+                $max = $h->harga_satuan;
+            }
+        }
+        return $max;
     }
 
     public function index($id)

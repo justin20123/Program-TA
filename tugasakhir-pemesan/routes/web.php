@@ -16,5 +16,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [VendorController::class, 'index'])->name('home');
-Route::post('/location', [VendorController::class, 'load']);
-Route::get('/vendor/rating', [VendorController::class, 'getRating']);
+Route::post('/location', [VendorController::class, 'loadVendorsTerdekat']);
+Route::get('/vendor/rating/{idvendor}', [VendorController::class, 'getRating']);
+Route::get('/vendor/harga/{idlayanan}', [VendorController::class, 'getHarga']);
+Route::post('/untukanda', [VendorController::class, 'loadUntukAnda']);

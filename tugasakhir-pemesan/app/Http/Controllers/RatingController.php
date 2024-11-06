@@ -31,21 +31,28 @@ class RatingController extends Controller
             ->groupBy('notas.id')
             ->get();
             if($ratings->isNotEmpty()){
+               
                 $totalRating = 0;
                 $totalNota = DB::table('notas')
                 ->join('pemesanans', 'pemesanans.notas_id', '=', 'notas.id')
                 ->where('pemesanans.vendors_id', $idvendor)
                 ->count();
-        
+                
                 foreach ($ratings as $r) {
                     $totalRating += $r->average_rating;
-
-                }        
-                $vendor_rating = $totalRating / $totalNota;
+                }   
+                     
+                $vendor_rating = $totalRating / ($totalNota/3);
                 return [
                     'vendor_rating' => $vendor_rating,
                     'total_nota' => $totalNota
                 ];           
+            }
+            else{
+                return [
+                    'vendor_rating' => 3, //data netral u/ memberi peluang vendor baru
+                    'total_nota' => 0
+                ]; 
             }
         }
         else{
@@ -71,6 +78,12 @@ class RatingController extends Controller
                     'vendor_rating' => $vendor_rating,
                     'total_nota' => $totalNota
                 ];           
+            }
+            else{
+                return [
+                    'vendor_rating' => 3, //data netral u/ memberi peluang vendor baru
+                    'total_nota' => 0
+                ]; 
             }
         }
     }
