@@ -23,100 +23,17 @@
   <head>
     <style>
 
-.rating-images {
-    display: flex;
-    flex-direction: row;
-}
-
-.rating-images img {
-    width: 40px;
-    height: 40px;
-    margin-right: 10px;
-}
-.select-container {
-  position: relative;
-}
-
-.caret-down-icon {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-}
-.od-image{
-    width: 8rem;
-    height: 5rem;
-    object-fit: cover;
-}
-.stepper {
-  display: flex;
-  justify-content: space-between;
-  position: relative;
-}
-
-.step-item {
-  flex: 1;
-  text-align: center;
-  position: relative;
-}
-
-.step-item.active {
-  color: #337ab7;
-}
-
-.step-item.active .step-number {
-  background-color: #337ab7;
-  color: #fff;
-}
-
-.step-item .step-number {
-  display: inline-block;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background-color: #ddd;
-  color: #666;
-  text-align: center;
-  line-height: 30px;
-  font-size: 14px;
-  font-weight: bold;
-}
-
-.step-item .step-title {
-  display: block;
-  margin-top: 5px;
-  font-size: 14px;
-  font-weight: bold;
-}
-.pb-container{
-  display: flex;
-  justify-content: ce;
-}
-
-.progress {
-    width: 300px; /* adjust the width as needed */
-     /* add this to center the progress bar */
-}
-
-.half-rating {
-  width: 50px;
-  height: 50px;
-  background: "{{ asset('../assets/images/rating.png') }}" no-repeat center center;
-  background-size: contain;
-  position: relative;
-}
-.half-rating::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(to right, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0.5) 50%);
-    /* The left side will be fully transparent (100%), and the right will be 50% opacity */
-}
-
+      .select-container {
+        position: relative;
+      }
+      
+      .caret-down-icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+      }
     </style>
     
     <meta charset="utf-8" />

@@ -256,6 +256,50 @@ class VendorController extends Controller
         return response()->json(['message' => 'success', 'data' => $vendors]);
     }
 
+    public function loadLayananTerdekat(Request $request){
+        $request->validate([
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+        ]);
+    
+        // Access the latitude and longitude from the request
+        $latitude = $request->latitude;
+        $longitude = $request->longitude;
+        $layanans = DB::table('layanan_cetaks')
+        ->select('id','nama')
+        ->get();
+        $vendorLayanans = [];
+        $i = 0;
+        foreach($layanans as $l){
+            if($i == 4){
+                break;
+            }
+            $closestVendors = $this->getLocation(null, $latitude, $longitude, 'sorted');
+            foreach($closestVendors as $c){
+                $getLayanan = DB::table('vendors_has_jenis_bahan_cetaks')
+                ->where('layanan_cetaks_id', '=', $l->id)
+                ->where('vendors_id', '=', $c->id)
+                ->first();
+                if($getLayanan){
+                    $c->layanan = $l->nama;
+                    array_push($vendorLayanans, $c);
+                    break;
+                }
+            }
+            $i++;
+            
+            
+        }
+        return response()->json(['message' => 'success', 'data' => $vendorLayanans]);
+    }
+
+    public function loadLayanans(){
+        $layanans = DB::table('layanan_cetaks')
+        ->select('id','nama')
+        ->get();
+        return response()->json(['message' => 'success', 'data' => $layanans]);
+    }
+
     //topsis functions
     public function normalize($matriksTopsis){
         $matriksNormal = [];

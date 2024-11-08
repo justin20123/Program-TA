@@ -20,3 +20,5 @@ Route::post('/location', [VendorController::class, 'loadVendorsTerdekat']);
 Route::get('/vendor/rating/{idvendor}', [VendorController::class, 'getRating']);
 Route::get('/vendor/harga/{idlayanan}', [VendorController::class, 'getHarga']);
 Route::post('/untukanda', [VendorController::class, 'loadUntukAnda']);
+Route::post('/layananterdekat', [VendorController::class, 'loadLayananTerdekat']);
+Route::post('/getLayanan', [VendorController::class, 'loadLayanans']);
