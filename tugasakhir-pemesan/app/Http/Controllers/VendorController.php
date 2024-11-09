@@ -281,6 +281,7 @@ class VendorController extends Controller
                 ->where('vendors_id', '=', $c->id)
                 ->first();
                 if($getLayanan){
+                    $c->idlayanan = $l->id;
                     $c->layanan = $l->nama;
                     array_push($vendorLayanans, $c);
                     break;
@@ -474,6 +475,14 @@ class VendorController extends Controller
         return $recommendvendor;
     }
  
+    public function getLayananVendor($idvendor){
+        $layanans = DB::table('vendors_has_jenis_bahan_cetaks')
+        ->join('layanan_cetaks', 'layanan_cetaks.id', '=', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id')
+        ->where('vendors_has_layanan_cetaks.vendors_id', '=', $idvendor)
+        ->select('layanan_cetaks.*')
+        ->get();
+        return $layanans;
+    }
 
     public function index()
     {
@@ -514,78 +523,8 @@ class VendorController extends Controller
         
         return view('home', compact('vendors'));
     }
-    public function indexOrders()
-    {
-        $vendors = DB::table('vendors')
-        // ->join('vendors_has_layanan_cetaks','vendors.id','=','vendors_has_layanan_cetaks.vendors_id')
-        // ->join('jenis_bahan_cetaks','jenis_bahan_cetaks.id','=','vendors_has_layanan_cetaks.jenis_bahan_cetaks_id')
-        // ->join('pemesanans','jenis_bahan_cetaks.id','=','pemesanans.jenis_bahan_cetaks_id')
-        ->select('*')
-        ->get();
-        
-        // dd($vendors);
+    
 
-        $jumlah_pesanan = DB::table('vendors_has_jenis_bahan_cetaks')
-        ->leftJoin('jenis_bahan_cetaks', 'jenis_bahan_cetaks.id', '=', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id')
-        ->leftJoin('pemesanans', 'jenis_bahan_cetaks.id', '=', 'pemesanans.jenis_bahan_cetaks_id')
-        ->select('vendors_has_jenis_bahan_cetaks.vendors_id', DB::raw('count(pemesanans.id) as jumlahpesanan'))
-        ->groupBy('vendors_has_jenis_bahan_cetaks.vendors_id')
-        ->get();
-        
-        // dd($jumlah_pesanan);
-
-        foreach ($vendors as $key=>$v) {
-            $v->jumlah_pesanan = $jumlah_pesanan[$key]->jumlahpesanan; 
-        }   
-
-        return view('pesanan.home', compact('vendors'));
-    }
-
-    public function indexPegawai()
-    {
-        $vendors = DB::table('vendors')
-        ->select('*')
-        ->get();
-        
-        // dd($vendors);
-
-        $jumlah_pegawai = DB::table('vendors_has_penggunas')
-        ->leftJoin('penggunas', 'penggunas.email', '=', 'vendors_has_penggunas.penggunas_email')
-        ->select(DB::raw('count(vendors_has_penggunas.penggunas_email) as jumlah_pegawai'))
-        ->where('penggunas.role','=','pegawai')
-        ->groupBy('vendors_has_penggunas.vendors_id')
-        ->get();
-
-        foreach ($vendors as $key=>$v) {
-            $v->jumlah_pegawai = $jumlah_pegawai[$key]->jumlah_pegawai; 
-        }   
-
-        return view('pegawai.home', compact('vendors'));
-    }
-
-    public function indexPengantar()
-    {
-        $vendors = DB::table('vendors')
-        ->select('*')
-        ->get();
-        
-        // dd($vendors);
-
-        $jumlah_pengantar = DB::table('vendors_has_penggunas')
-        ->leftJoin('penggunas', 'penggunas.email', '=', 'vendors_has_penggunas.penggunas_email')
-        ->select(DB::raw('count(vendors_has_penggunas.penggunas_email) as jumlah_pengantar'))
-        ->where('penggunas.role','=','pengantar')
-        ->groupBy('vendors_has_penggunas.vendors_id')
-        ->get();
-
-        // dd($jumlah_pengantar);
-
-        foreach ($vendors as $key=>$v) {
-            $v->jumlah_pengantar = $jumlah_pengantar[$key]->jumlah_pengantar; 
-        }   
-
-        return view('pengantar.home', compact('vendors'));
-    }
 
     /**
      * Show the form for creating a new resource.

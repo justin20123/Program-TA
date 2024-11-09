@@ -47,16 +47,17 @@ class LayananController extends Controller
             ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
             ->select('layanan_cetaks.*')->distinct()
             ->get();
+
+        $hargacetakcontroller = new HargacetakController();
         foreach ($layanans as $l) {
-            $ratings = $this->getRating($vendor_id, $l->id);
-            $l->layanan_rating = $ratings;
-            $l->total_nota =  $this->getTotalNota($vendor_id, $l->id);
+            $l->hargamin = $hargacetakcontroller->getMinValue($vendor_id, $l->id);
+            $l->hargamax = $hargacetakcontroller->getMaxValue($vendor_id, $l->id);
         }
         $vendor = DB::table('vendors')
             ->where('vendors.id', '=', $vendor_id)
             ->first();
 
-        return view('layanan.layanancetak', compact('layanans', 'vendor'));
+        return view('vendors.layanan', compact('layanans', 'vendor'));
     }
 
     public function detail_layanan($vendor_id, $idlayanan)
