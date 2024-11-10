@@ -29,4 +29,4 @@ Route::post('/getLayanan', [VendorController::class, 'loadLayanans']);
 Route::get('/vendor/{idvendor}', [LayananController::class,'index']);
 
 //detail layanan
-Route::get('/vendor/{idvendor}/layanan/{idlayanan}', [VendorController::class,'getDetailLayanan']);
+Route::get('/vendor/{idvendor}/layanan/{idlayanan}', [LayananController::class,'getDetailLayanan']);

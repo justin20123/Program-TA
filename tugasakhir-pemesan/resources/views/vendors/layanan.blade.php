@@ -6,44 +6,65 @@
     </ol>
 @endsection
 @section('menu')
+    {{-- banner --}}
+    <div class="container-fluid p-0">
+        <div class="vendor-banner py-5"
+            style="background-image: url('{{ $vendor->foto_lokasi }}'); background-color: rgba(255, 255, 255, 0.54);">
 
-{{-- banner --}}
-<div class="container-fluid p-0">
-    <div class="vendor-banner py-5" style="background-image: url('{{ $vendor->foto_lokasi }}'); background-color: rgba(255, 255, 255, 0.54);">
-        
-        <div class="overlay" style=""></div>
-        <div class="content">
-            {{ $vendor->nama }}
-        </div>
-    </div>
-
-    <div class="search-bar">
-        <form action="" method="GET" class="search-form">
-            <div class="input-container">
-                <input type="text" name="query" placeholder="Search..." class="search-input">
-                <button type="submit" class="search-button">
-                    <i class="fa fa-search" style="font-size: 16px;"></i>
-                </button>
+            <div class="overlay" style=""></div>
+            <div class="content">
+                {{ $vendor->nama }}
             </div>
-        </form>
-    </div>
+        </div>
 
-    <div class="layanans">
-        <div class="row">
-            @foreach($layanans as $l)
-                <div class="col-md-4 mb-4">
-                    <div class="card">
-                        <img src="{{ $l->url_image }}" class="card-img-top" alt="{{ $l->nama }}">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ $l->nama }}</h5>
-                            <p class="card-text">Rp {{ $l->hargamin }} - {{ $l->hargamax }}</p>
-                            <p class="card-text card-text-small">per {{ $l->satuan }}</p>
-                        </div>
-                    </div>
+        <div class="search-bar">
+            <form action="" method="GET" class="search-form">
+                <div class="input-container">
+                    <input type="text" name="query" placeholder="Search..." class="search-input">
+                    <button type="submit" class="search-button">
+                        <i class="fa fa-search" style="font-size: 16px;"></i>
+                    </button>
                 </div>
-            @endforeach
+            </form>
+        </div>
+
+        <div class="layanans">
+            @php
+                $totalLayanan = count($layanans);
+                $itemsPerRow = 4;
+                $invisibleCards = ($itemsPerRow - ($totalLayanan % $itemsPerRow)) % $itemsPerRow; // Calculate invisible cards needed
+            @endphp
+
+            <ul class="list-inline justify-content-center" style="display: flex; flex-wrap: wrap;">
+                @foreach ($layanans as $l)
+                    <li class="list-inline-item p-3">
+                        <a href="{{ asset('vendor/' . $vendor->id . '/layanan/' . $l->id) }}" style="color: inherit; text-decoration: none;">
+                            <div class="card" style="width: 18rem;">
+                                <img class="card-img-top" style="height: 13rem;" src="{{ $l->url_image }}"
+                                    alt="Card image cap">
+                                <div class="card-body">
+
+                                    <h5 class="card-title">{{ $l->nama }}</h5>
+                                    <p class="card-text">Rp {{ $l->hargamin }} - {{ $l->hargamax }}</p>
+                                    <p class="card-text card-text-small">per {{ $l->satuan }}</p>
+
+                                    
+                                </div>
+                            </div>
+                        </a>
+
+                    </li>
+                @endforeach
+
+                @for ($i = 0; $i < $invisibleCards; $i++)
+                    <li class="list-inline-item p-3">
+                        <div class="card p-3" style="width: 18rem; visibility: hidden;">
+                            <!-- Use visibility: hidden to maintain layout -->
+                            <div class="card-body">
+                            </div>
+                        </div>
+                    </li>
+                @endfor
         </div>
     </div>
-</div>
-
 @endsection
