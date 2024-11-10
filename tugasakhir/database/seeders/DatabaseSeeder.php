@@ -31,7 +31,7 @@ class DatabaseSeeder extends Seeder
             PengantarSeeder::class,
             PegawaiSeeder::class,
             VendorHasPenggunaSeeder::class,
-
+            PemesananaHasOpsiDetailSeeder::class,
             RatingSeeder::class,
             
             
