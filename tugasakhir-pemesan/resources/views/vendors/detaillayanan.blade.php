@@ -55,7 +55,9 @@
                         <label for="paperType" class="font-weight-bold">Pilih Jenis dan Bahan</label>
                         <div class="select-container">
                             <select class="form-control custom-select px-4" name="layanans" id="layanans">
-                                <option value="">HVS 80 Gsm A4 BW Hitam Putih</option>
+                                @foreach ($jenisbahan as $jb)
+                                <option value="{{ $jb->id }}">{{ $jb->nama }}</option>
+                                @endforeach
                             </select>
                             <span class="caret-down-icon"><i class="fas fa-caret-down"></i></span>
                         </div>

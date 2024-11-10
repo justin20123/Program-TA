@@ -62,9 +62,24 @@ class LayananController extends Controller
 
     public function getDetailLayanan($vendor_id, $idlayanan)
     {         
-        
+        $jenisbahan = DB::table('vendors_has_jenis_bahan_cetaks')
+        ->join('jenis_bahan_cetaks', 'jenis_bahan_cetaks.id','=','vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id')
+        ->where('vendors_has_jenis_bahan_cetaks.vendors_id','=',$vendor_id)
+        ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id','=',$idlayanan)
+        ->select('jenis_bahan_cetaks.*')
+        ->get();
 
-        return view('vendors.detaillayanan');
+        $detailcetaks = DB::table('detail_cetaks')
+        ->where('jenis_bahan_cetaks_id','=',$jenisbahan[0]->id)
+        ->get();
+
+        $hargacetaks = DB::table('harga_cetaks')
+        ->where('id_bahan_cetaks','=',$jenisbahan[0]->id)
+        ->get();
+
+
+
+        return view('vendors.detaillayanan', compact('jenisbahan', 'detailcetaks', 'hargacetaks'));
     }
 
     public function detail_layanan_load($vendor_id, $idlayanan, $idjenisbahan){
