@@ -14,125 +14,61 @@ class PemesananController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($vendor_id)
+    public function index()
     {
-        $notaData = DB::table('notas')
-        ->join('pemesanans', 'pemesanans.notas_id', '=', 'notas.id')
-        ->join('penggunas','penggunas.email','=','pemesanans.penggunas_email')
-        ->where('pemesanans.vendors_id', '=', $vendor_id)
-        ->select('notas.*', 'pemesanans.id as pemesanans_id','penggunas.nama as nama')
-        ->get();
-
-        $notaDetail = [];
-        foreach ($notaData as $nota) {
-
-        $pemesanan = DB::table('pemesanans')
-        ->join('jenis_bahan_cetaks','jenis_bahan_cetaks.id','=','pemesanans.jenis_bahan_cetaks_id')
-        ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
-        ->join('layanan_cetaks','layanan_cetaks.id','=','vendors_has_jenis_bahan_cetaks.layanan_cetaks_id')
-        ->where('pemesanans.id','=', $nota->pemesanans_id)
-        ->select('pemesanans.*', 'layanan_cetaks.satuan as satuan','layanan_cetaks.nama as layanan')
-        ->first();
-        // Check if the nota already exists in the detail array
-        if (!isset($notaDetail[$nota->id])) {
-            $notaDetail[$nota->id] = [
-                'nota' => $nota,
-                'pemesanans' => [],
-            ];
-        }
-        array_push($notaDetail[$nota->id]['pemesanans'],$pemesanan);
-    }
-        $notaDetail = array_values($notaDetail);
-
-        // dd($notaDetail);
-
-        return view('pesanan.orders', compact('notaDetail'));
-    }
-
-    public function detailPesanan($vendor_id, $idnota){
-        $notaData = DB::table('notas')
-        ->join('pemesanans', 'pemesanans.notas_id', '=', 'notas.id')
-        ->join('penggunas','penggunas.email','=','pemesanans.penggunas_email')
-        ->where('pemesanans.vendors_id', '=', $vendor_id)
-        ->where('notas.id', '=', $idnota)
-        ->select('notas.*', 'pemesanans.id as idpemesanans','penggunas.nama as nama')
-        ->first();
-
-        $notaDetail = [];
-
-        $pemesanan = DB::table('pemesanans')
-        ->join('jenis_bahan_cetaks','jenis_bahan_cetaks.id','=','pemesanans.jenis_bahan_cetaks_id')
-        ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
-        ->join('layanan_cetaks','layanan_cetaks.id','=','vendors_has_jenis_bahan_cetaks.layanan_cetaks_id')
-        ->where('pemesanans.id','=', $notaData->idpemesanans)
-        ->select('pemesanans.*', 'layanan_cetaks.satuan as satuan','layanan_cetaks.nama as layanan')
-        ->first();
-    
-        $harga_cetak = DB::table('harga_cetaks')
-        ->where('id','=', $pemesanan->harga_cetaks_id)
-        ->select('harga_satuan')
-        ->first();
-        $pemesanan->harga_satuan = $harga_cetak->harga_satuan;
-        if (!isset($notaDetail[$notaData->id])) {
-            $notaDetail[$notaData->id] = [
-                'nota' => $notaData,
-                'pemesanans' => [],
-            ];
-        }
-        array_push($notaDetail[$notaData->id]['pemesanans'],$pemesanan);
         
-        $notaDetail = array_values($notaDetail);
-        // dd($notaDetail);
-
-        return view('pesanan.orderdetail', compact('notaDetail'));
     }
 
-    public function pilihpengantar($idvendor, $idnota){
-        $notaData = DB::table('notas')
-        ->where('id','=',$idnota)
-        ->select()
-        ->first();
+    public function submitpesanan(Request $request){
+        $request->validate([
+            'jumlah' => 'required',
+            'url_file' => 'required',
+            'harga_cetaks_id' => 'required',
+            'jenis_bahan_cetaks_id' => 'required',
+            'vendors_id' => 'required',
+        ]);
 
-        $pengantar = DB::table('vendors_has_penggunas')
-        ->join('penggunas','penggunas.email','=','vendors_has_penggunas.penggunas_email')
-        ->where('vendors_has_penggunas.vendors_id','=',$idvendor)
-        ->where('penggunas.role','=', 'pengantar')
-        ->select('penggunas.nama as namapengantar','penggunas.email as email')
-        ->get();
+        $hargacetakcontroller = new HargaCetakController();
 
-        $data_pemesan = DB::table('pemesanans')
-        ->join('penggunas', 'penggunas.email','=','pemesanans.penggunas_email')
-        ->where('pemesanans.notas_id', '=', $notaData->id)
-        ->select('penggunas.nama', 'penggunas.email')
-        ->first();
-        $notaData->namaPemesan = $data_pemesan->nama;
+        $idhargacetak = $hargacetakcontroller->cekHarga($request->totalQuantity, $request->idjenisbahan, true);
+        
+        $pemesanan = Pemesanan::create([
+            'penggunas_email' => 'email1@email.com',
+            'jumlah' => $request->totalQuantity,
+            'url_file' => "", 
+            'catatan' => $request->catatan, 
+            'harga_cetaks_id' => $idhargacetak,
+            'jenis_bahan_cetaks_id' => $request->idjenisbahan,
+            'vendors_id' => $request->vendors_id,
+        ]);
 
-        // dd($notaData);
-        // dd($pengantar);
+        foreach($request->idopsidetail as $od){
+            DB::table('pemesanans_has_opsi_details')->insert([
+                'pemesanans_id'=>$pemesanan->id,
+                'opsi_details_id'=>$od,
+            ]);
+        }
 
-        return view('pesanan.pilihpengantar', compact('notaData','pengantar'));
+        return $pemesanan->id;
+
+
     }
 
-    public function antarkan($emailpengantar, $idnota){
-        $nota = Nota::findOrFail($idnota);
-        $nota->status = "sedang diantar";
-        $nota->save();
+    public function uploadfile(Request $request){
+        $file = $request->file('fileInput');
+        $fileName = $request->idpemesanan . '.pdf'; 
+        $directory = public_path('assets/pemesanans');
+        $file->move($directory, $fileName);
 
-        $pemesanans = DB::table('pemesanans')
-        ->where('notas_id','=',$idnota)
-        ->select('id', 'vendors_id')
-        ->get();
+        $fileUrl = asset('assets/pemesanans/' . $fileName);
+        $pemesanan = Pemesanan::find($request->idpemesanan);
+        $pemesanan->url_file = $fileUrl;
+        $pemesanan->save();
 
-        // foreach($pemesanans as $p){
-        //     $pesanan = Pemesanan::findOrFail($p->id);
+        return response()->json([
+            'message' => 'Pemesanan created successfully!',
+        ], 201);
 
-        // }
-        // $pemesanan->pengantar = $emailpengantar;
-        // $pemesanan->save();
-
-        $url = '/pesanancetak/'. $pemesanans[0]->vendors_id;
-        return redirect($url);
-        // return redirect()->route('pemesanans.index', [$pemesanans[0]->vendors_id]);
     }
 
     /**

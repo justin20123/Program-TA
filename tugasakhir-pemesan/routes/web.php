@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\LayananController;
+use App\Http\Controllers\PemesananController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\VendorController;
 use Illuminate\Support\Facades\Route;
@@ -30,3 +31,10 @@ Route::get('/vendor/{idvendor}', [LayananController::class,'index']);
 
 //detail layanan
 Route::get('/vendor/{idvendor}/layanan/{idlayanan}', [LayananController::class,'getDetailLayanan']);
+Route::get('/loadlayanan/{idvendor}/{idlayanan}/{idjenisbahan}', [LayananController::class,'detail_layanan_load']);
+
+
+//proses pemesanan
+Route::post('/submitpesanan', [PemesananController::class, 'submitpesanan']);
+Route::post('/uploadfilepesanan', [PemesananController::class, 'uploadfile']);
+

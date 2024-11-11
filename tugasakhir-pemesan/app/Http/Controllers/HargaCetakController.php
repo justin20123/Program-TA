@@ -14,7 +14,7 @@ class HargaCetakController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function cekHarga($jumlahCetak, $idjenisBahan){
+    public function cekHarga($jumlahCetak, $idjenisBahan, $getId=false){
         $hargacetak = DB::table('harga_cetaks')
         ->where('id_bahan_cetaks','=',$idjenisBahan)
         ->select()
@@ -22,22 +22,32 @@ class HargaCetakController extends Controller
         $maxJumlahMin = 0;
         $hargaMaxJumlahMin = 0;
         $harga = null;
-
+        $id = null;
         foreach($hargacetak as $h){
             
             if($h->jumlah_cetak_minimum <= $jumlahCetak && $h->jumlah_cetak_maksimum >= $jumlahCetak){
                 $harga = $h->harga_satuan;
-                if($h->jumlah_cetak_minimum > $maxJumlahMin){
-                    $maxJumlahMin = $h->jumlah_cetak_minimum;
-                    $hargaMaxJumlahMin = $h->harga_satuan;
-                }
+                $id = $h->id;
+                break;
+            }
+            if($h->jumlah_cetak_minimum > $maxJumlahMin){
+                $maxJumlahMin = $h->jumlah_cetak_minimum;
+                $hargaMaxJumlahMin = $h->harga_satuan;
+                $id = $h->id;
+            
             }
             if(!$harga){
                 $harga = $hargaMaxJumlahMin;
                 //kalau sampai terakhir belum dapat, masukkan ke minimum yang terbesar
             }
         }
-        return $harga;
+        if($getId){
+            return $id;
+        }
+        else{
+            return $harga;
+        }
+        
         
     }
 

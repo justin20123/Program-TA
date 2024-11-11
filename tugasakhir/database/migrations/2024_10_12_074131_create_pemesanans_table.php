@@ -18,10 +18,11 @@ return new class extends Migration
             $table->string('penggunas_email', 30);
             $table->integer('jumlah');
             $table->string('url_file', 100);
+            $table->string('catatan', 200)->nullable();
             $table->unsignedBigInteger('harga_cetaks_id');
             $table->unsignedBigInteger('jenis_bahan_cetaks_id');
             $table->unsignedBigInteger('vendors_id');
-            $table->unsignedBigInteger('notas_id');
+            $table->unsignedBigInteger('notas_id')->nullable();
             $table->foreign('penggunas_email')->references('email')->on('penggunas');
             $table->foreign('vendors_id')->references('id')->on('vendors');
             $table->foreign('jenis_bahan_cetaks_id')->references('id')->on('jenis_bahan_cetaks');

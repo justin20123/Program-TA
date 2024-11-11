@@ -70,16 +70,48 @@ class LayananController extends Controller
         ->get();
 
         $detailcetaks = DB::table('detail_cetaks')
-        ->where('jenis_bahan_cetaks_id','=',$jenisbahan[0]->id)
+        ->join('jenis_bahan_cetaks', 'detail_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
+        ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
+        ->leftJoin('opsi_details', 'detail_cetaks.id', '=', 'opsi_details.detail_cetaks_id') 
+        ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
+        ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $idlayanan)
+        ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $jenisbahan[0]->id)
+        ->select('detail_cetaks.*', 'opsi_details.id as idopsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan')
         ->get();
+
+        $opsidetail = [];
+        foreach ($detailcetaks as $detail) {
+            if (!isset($opsidetail[$detail->id])) {
+                $opsidetail[$detail->id] = [
+                    'detail' => $detail,
+                    'opsi' => [],
+                ];
+            }
+            if ($detail->idopsi) { 
+                $opsidetail[$detail->id]['opsi'][] = [
+                    'id' => $detail->idopsi,
+                    'opsi' => $detail->opsi, 
+                    'biaya_tambahan' => $detail->biaya_tambahan, 
+                ];
+            }
+        } 
+
+        $opsidetail = array_values($opsidetail);
 
         $hargacetaks = DB::table('harga_cetaks')
         ->where('id_bahan_cetaks','=',$jenisbahan[0]->id)
         ->get();
 
+        $satuan = DB::table('layanan_cetaks')
+        ->where('id', '=', $idlayanan)
+        ->first();
 
+        $layananData = ['idvendor'=>$vendor_id, 'idlayanan'=>$idlayanan];
 
-        return view('vendors.detaillayanan', compact('jenisbahan', 'detailcetaks', 'hargacetaks'));
+        // dd($hargacetaks);
+        // dd($opsidetail);
+
+        return view('vendors.detaillayanan', compact('jenisbahan', 'opsidetail', 'hargacetaks', 'satuan', 'layananData'));
     }
 
     public function detail_layanan_load($vendor_id, $idlayanan, $idjenisbahan){
@@ -115,30 +147,6 @@ class LayananController extends Controller
         // dd($opsiDetail);
 
             return json_encode(['result'=>'success', 'data'=>$opsiDetail]);
-    }
-
-    public function edit_opsi($vendor_id, $idlayanan, $idjenisbahan, $iddetail, $idopsi){
-        $detailcetaks = DB::table('detail_cetaks')
-        ->join('jenis_bahan_cetaks', 'detail_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
-        ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
-        ->leftJoin('opsi_details', 'detail_cetaks.id', '=', 'opsi_details.detail_cetaks_id') 
-        ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
-        ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $idlayanan)
-        ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $idjenisbahan)
-        ->where('detail_cetaks.id', '=', $iddetail)
-        ->where('opsi_details.id', '=', $idopsi)
-
-        ->select('detail_cetaks.*', 'opsi_details.id as idopsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan', 'detail_cetaks.value as namadetail')
-        ->first();
-
-        $layanan = [
-            "idvendor" => $vendor_id,
-            "idlayanan" => $idlayanan,
-            "idjenisbahan" => $idjenisbahan,
-            "iddetail" => $iddetail,
-        ];
-
-        return view('layanan.editoption', compact('detailcetaks','layanan'));
     }
 
     

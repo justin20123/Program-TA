@@ -7,9 +7,9 @@
 @endsection
 @section('menu')
     <div class="container py-5">
+        <div id="error-message"></div>
         <!-- Main Row Layout -->
         <div class="row">
-            <!-- Left Side: Image Gallery and Price List -->
             <div class="col-md-4">
                 <!-- Image Gallery -->
                 <div class="mb-4">
@@ -27,14 +27,15 @@
 
                 <!-- Price List Section -->
 
-                <h2 class="h4 font-weight-bold">Harga (1 lembar = 1 pcs)</h2>
+                <h2 class="h4 font-weight-bold">Harga (1 {{ $satuan->satuan }} = {{ $satuan->kesetaraan_pcs }} pcs)</h2>
                 <ul class="list-unstyled text-muted mb-0">
-                    <li>1–20 lembar = Rp. 400/lembar (1 hari)</li>
-                    <li>21–60 lembar = Rp. 350/lembar (1 hari)</li>
-                    <li>61–150 lembar = Rp. 300/lembar (1 hari)</li>
-                    <li>151–300 lembar = Rp. 250/lembar (1 hari)</li>
-                    <li>&gt;300 lembar = Rp. 200/lembar (1 hari)</li>
+                    @foreach ($hargacetaks as $h)
+                        <li>{{ $h->jumlah_cetak_minimum }}–{{ $h->jumlah_cetak_maksimum }} {{ $satuan->satuan }} = Rp.
+                            {{ $h->harga_satuan }}/{{ $satuan->satuan }}</li>
+                    @endforeach
                 </ul>
+                <input type="hidden" id="idvendor" value="{{$layananData['idvendor']}}">
+                <input type="hidden" id="idlayanan" value="{{$layananData['idlayanan']}}">
 
             </div>
 
@@ -49,34 +50,46 @@
                     <span class="ml-2 text-muted">(5 Customer Review)</span>
                 </div>
 
-                <form action="" method="post">
+                <form action="" method="post" id='form'>
                     @csrf
                     <div class="form-group">
                         <label for="paperType" class="font-weight-bold">Pilih Jenis dan Bahan</label>
                         <div class="select-container">
-                            <select class="form-control custom-select px-4" name="layanans" id="layanans">
+                            <select class="form-control custom-select px-4" name="jenisbahan" id="jenisbahan">
                                 @foreach ($jenisbahan as $jb)
-                                <option value="{{ $jb->id }}">{{ $jb->nama }}</option>
+                                    <option value="{{ $jb->id }}">{{ $jb->nama }}</option>
                                 @endforeach
                             </select>
                             <span class="caret-down-icon"><i class="fas fa-caret-down"></i></span>
                         </div>
                     </div>
                     <br>
-                    <div class="form-group">
-                        <label for="lamination" class="font-weight-bold">Tambahan Laminasi</label>
-                        <div class="select-container">
-                            <select class="form-control custom-select px-4" name="layanans" id="layanans">
-                                <option value="">Tidak Dilaminasi (+ Rp 0)</option>
-                            </select>
-                            <span class="caret-down-icon"><i class="fas fa-caret-down"></i></span>
-                        </div>  
+                    <div id="listdetail">
+                        @foreach ($opsidetail as $key => $od)
+                            <div class="form-group">
+                                <label class="font-weight-bold">{{ $od['detail']->value }}</label>
+                                <div class="select-container">
+                                    <select class="form-control custom-select px-4" name="opsidetail-{{ $key }}"
+                                        id="opsidetail-{{ $key }}">
+                                        @foreach ($od['opsi'] as $o)
+                                            <option value="{{ $o['id'] }}">{{ $o['opsi'] }} (+Rp.
+                                                {{ $o['biaya_tambahan'] }})</option>
+                                        @endforeach
+                                    </select>
+                                    <span class="caret-down-icon"><i class="fas fa-caret-down"></i></span>
+                                </div>
+                            </div>
+                            <br>
+                        @endforeach
                     </div>
-                    <br>
+
                     <!-- Quantity Selector -->
-                    <div class="form-group d-flex align-items-center">
-                        <label for="quantity" class="font-weight-bold mr-3">Jumlah</label>
-                        <input type="number" id="quantity" class="form-control w-25" min="1" value="1" required>
+                    <div class="form-group">
+                        <label id="labelQuantity" class="font-weight-bold mr-3">Jumlah (upload file terlebih
+                            dahulu!)</label>
+
+                        <input type="number" id="quantity" class="form-control w-25" min="1" value="1"
+                            required disabled>
                     </div>
                     <br>
 
@@ -89,8 +102,8 @@
                     <hr>
                     <!-- Notes and File Upload -->
                     <div class="form-group mt-4">
-                        <label for="notes" class="font-weight-bold">Catatan</label>
-                        <textarea id="notes" class="form-control" rows="3" placeholder="Catatan" required></textarea>
+                        <label for="catatan" class="font-weight-bold">Catatan</label>
+                        <textarea id="catatan" class="form-control" rows="3" placeholder="Catatan"></textarea>
                     </div>
                     <br>
 
@@ -104,6 +117,7 @@
                                     width="5%" height="5%">
                                 <p class="text-muted">Select Files</p>
                             </div>
+                            <div id="file-error"></div>
                         </div>
                         <div id="file-detail">
                             <div class="file-name-container d-flex justify-content-between">
@@ -134,8 +148,80 @@
 
 
 @section('script')
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    {{-- pdf.js --}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    {{-- swal (sweetalert) --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        function updateOpsiDetails(idvendor, idlayanan, idjenisbahan) {
+            $.ajax({
+                url: `/loadlayanan/${idvendor}/${idlayanan}/${idjenisbahan}`,
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    $('#listOpsi').html(''); // Clear the existing options
+                    let html = '';
+
+                    if (response.result === 'success' && Array.isArray(response.data)) {
+                        let opsiDetail = {};
+
+                        response.data.forEach(function(item) {
+                            const detailid = item.detail.id;
+
+                            if (!opsiDetail[detailid]) {
+                                opsiDetail[detailid] = {
+                                    id: detailid,
+                                    value: item.detail.value,
+                                    opsi: []
+                                };
+                            }
+
+                            item.opsi.forEach(function(opsi) {
+                                opsiDetail[detailid].opsi.push({
+                                    idopsi: opsi.id,
+                                    opsi: opsi.opsi,
+                                    biaya_tambahan: opsi.biaya_tambahan
+                                });
+                            });
+                        });
+
+                        // Construct the HTML for each detail and its options
+                        for (let key in opsiDetail) {
+                            const detail = opsiDetail[key];
+                            html += `
+                                     <div class="form-group">
+                                        <label class="font-weight-bold" id="detail-${key}">${detail.value}</label>                                         
+                                             `;
+                            if (detail.opsi.length > 0) {
+                                html +=
+                                    `<div class="select-container">
+                                             <select class="form-control custom-select px-4" name="opsidetail-${key}"
+                                                 id="opsidetail-{{ $key }}">`
+                                detail.opsi.forEach(function(option) {
+                                    html += `
+                                                <option value="${option.idopsi}">${option.opsi}(+Rp. 
+                                                ${option.biaya_tambahan})</option>
+                                            `;
+                                });
+                                html += `
+                                            </select>
+                                        <span class="caret-down-icon"><i class="fas fa-caret-down"></i></span>
+                                    </div>
+                                </div>
+                                <br>
+                            `;
+
+                            } else {
+                                html = '<p>No Options required.</p>';
+                            }
+
+                            $('#listdetail').html(html);
+                        }
+                    }
+                }
+            });
+        }
+
         function toggleUploadFile(isFileUploadHide) {
 
             if (isFileUploadHide == false) {
@@ -149,7 +235,41 @@
             }
 
         }
+
+        function uploadFile(idpemesanan) {
+            const formData = new FormData();
+            formData.append('fileInput', file);
+            formData.append('idpemesanan', idpemesanan);
+
+            $.ajax({
+                url: '/uploadfilepesanan',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: response.message,
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Redirect to the vendor page
+                            window.location.href = '/vendor/' + response
+                                .vendor_id; // Ensure you return vendor_id in your response
+                        }
+                    });
+                },
+                error: function(xhr, status, error) {
+                    $('#response').text('Error: ' + error);
+                }
+            });
+        }
+
         let file;
+        let jumlHalaman;
+        let totalLembar;
         $(document).ready(function() {
             if (!file) {
                 toggleUploadFile(false);
@@ -183,12 +303,30 @@
             // Handle file selection
             $('#fileElem').on('change', function() {
                 file = this.files[0]; // Get the selected file
-                if (file) {
-                    console.log(file);
-                    $('#file-name').text('Selected file: ' + file.name);
+                if (file && file.type === 'application/pdf') {
+                    const fileReader = new FileReader();
+                    fileReader.onload = function() {
+                        const arrPdf = new Uint8Array(this.result);
+
+                        pdfjsLib.getDocument(arrPdf).promise.then(function(pdf) {
+                            jumlHalaman = pdf.numPages;
+                            $('#file-name').text(
+                                `Selected file: ${file.name} (${jumlHalaman} halaman)`
+                            );
+                            totalLembar = $("#quantity").val() * jumlHalaman;
+                            $("#labelQuantity").text(
+                                `Jumlah (total: ${totalLembar} lembar)`);
+                        }).catch(function(error) {
+                            console.error('Error: ' + error);
+                        });
+                    };
+                    fileReader.readAsArrayBuffer(file);
+                    $('#quantity').prop('disabled', false);
+
                     toggleUploadFile(true);
                 } else {
-                    $('#file-name').text('No file selected'); // Handle no file selected
+                    $('#file-error').text(
+                        'Silahkan masukkan file dengan format "PDF"!'); // Handle no file selected
                 }
             });
 
@@ -196,6 +334,63 @@
                 if (file) {
                     const fileURL = URL.createObjectURL(file); // Create a URL for the file
                     window.open(fileURL); // Open the PDF in a new window/tab
+                }
+            });
+
+            $('#quantity').on('change', function() {
+                if (Number.isInteger(parseInt($("#quantity").val())) && jumlHalaman != null) {
+                    let value = $("#quantity").val();
+                    totalLembar = value * jumlHalaman;
+                    $("#labelQuantity").text(`Jumlah (total: ${totalLembar} lembar)`);
+
+                }
+            });
+            $('#jenisbahan').on('change', function() {
+                idvendor= $('#idvendor').val();
+                idlayanan = $('#idlayanan').val();
+                idjenisbahan = $('#jenisbahan').val();
+                updateOpsiDetails(idvendor, idlayanan, idjenisbahan);
+            });
+
+
+            $('#form').on('submit', function() {
+                if (file && file.type === 'application/pdf') {
+                    const idjenisbahan = $('#jenisbahan').val();
+                    let idopsidetail = [];
+                    const opsidetailElements = $('[id^="opsidetail-"]');
+
+                    for (let i = 0; i < opsidetailElements.length; i++) {
+                        idopsidetail.push($(opsidetailElements[i])
+                            .val()); // Push each value into the array
+                    }
+                    const totalQuantity = totalLembar;
+                    const catatan = $("#catatan").val();
+
+                    // Make the AJAX POST request
+                    $.ajax({
+                        url: '/submitpesanan', // Change this to your API endpoint
+                        type: 'POST',
+                        data: JSON.stringify({
+                            idjenisbahan,
+                            idopsidetail,
+                            totalQuantity,
+                            catatan
+                        }),
+                        contentType: false,
+                        processData: false,
+                        success: function(response) {
+                            console.log(response); // Handle the response as needed
+                            $('#response').text('Success: ' + response);
+                            this.uploadFile(response);
+                        },
+                        error: function(xhr, status, error) {
+                            $('#response').text('Error: ' + error);
+                        }
+                    });
+                } else {
+                    $("#error-message").html(`<div class="alert alert-danger" role="alert">
+                    File harus berupa PDF!
+                    </div>`);
                 }
             });
         });
