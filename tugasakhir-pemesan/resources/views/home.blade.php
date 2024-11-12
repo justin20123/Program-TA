@@ -251,8 +251,10 @@
                      <hr>`
                 let items = ['Terdekat', 'Termurah', 'Direkomendasikan']
                 for (let i = 0; i < items.length; i++) {
-                    // console.table(vendors);
-                    html += `<div class="h6 p-2 mb-2">${items[i]}</div>
+                    console.table(vendors);
+                    html += `
+                    <button class="btn-card border-0" onclick="toVendorData(`+ items[i]['id'] +`)">
+                    <div class="h6 p-2 mb-2">${items[i]}</div>
                      <div class="card mb-3" style="max-width: 540px;">
                         <div class="row no-gutters">
                           <div class="col-md-4">
@@ -273,7 +275,9 @@
                             <a href="https://www.openstreetmap.org/?mlat=${vendors[i].latitude}&mlon=${vendors[i].longitude}#map=15/${vendors[i].latitude}/${vendors[i].longitude}" target="_blank">Lihat di map</a>                            </div>
                           </div>
                         </div>
-                      </div>`;
+                      </div>
+                      </button>
+                      <br>`;
                 }
                 $('#untuk-anda').html(html);
                 return "done";

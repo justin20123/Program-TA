@@ -59,7 +59,7 @@
                 @for ($i = 0; $i < $invisibleCards; $i++)
                     <li class="list-inline-item p-3">
                         <div class="card p-3" style="width: 18rem; visibility: hidden;">
-                            <!-- Use visibility: hidden to maintain layout -->
+                            
                             <div class="card-body">
                             </div>
                         </div>

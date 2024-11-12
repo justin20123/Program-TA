@@ -33,8 +33,10 @@ Route::get('/vendor/{idvendor}', [LayananController::class,'index']);
 Route::get('/vendor/{idvendor}/layanan/{idlayanan}', [LayananController::class,'getDetailLayanan']);
 Route::get('/loadlayanan/{idvendor}/{idlayanan}/{idjenisbahan}', [LayananController::class,'detail_layanan_load']);
 
-
 //proses pemesanan
 Route::post('/submitpesanan', [PemesananController::class, 'submitpesanan']);
 Route::post('/uploadfilepesanan', [PemesananController::class, 'uploadfile']);
+
+//cart
+Route::get('/cart', [VendorController::class, 'indexCart']);
 

@@ -277,8 +277,10 @@ class VendorController extends Controller
             $closestVendors = $this->getLocation(null, $latitude, $longitude, 'sorted');
             foreach($closestVendors as $c){
                 $getLayanan = DB::table('vendors_has_jenis_bahan_cetaks')
+                ->join('vendors', 'vendors.id', '=', 'vendors_has_jenis_bahan_cetaks.vendors_id')
                 ->where('layanan_cetaks_id', '=', $l->id)
-                ->where('vendors_id', '=', $c->id)
+                ->where('vendors.id', '=', $c->id)
+                ->where('vendors.status', '=', "active")
                 ->first();
                 if($getLayanan){
                     $c->idlayanan = $l->id;
@@ -386,12 +388,16 @@ class VendorController extends Controller
     //end topsis functions
 
     public function topsisRecommended($layanan, $latitude, $longitude,){
-        $vendors = DB::table('vendors')->select()->get();
+        $vendors = DB::table('vendors')
+        ->where('status','=','active')
+        ->select()
+        ->get();
 
         $kualitasWeight = (4.96 + 4.89)/2; //rata-rata dari kualitas hasil cetak dan kesesuaian permintaan
         $pelayananWeight = 4.66;
-        $jarakWeight = 4.57;
-        $hargaWeight = 4.53; //rata-rata harga cetak yang diinginkan oleh customer
+        //jarak dan harga dikali 4 untuk menyesuaikan banyaknya variabel rating (kualitas, pelayanan, fasilitas, dan rata-rata)
+        $jarakWeight = 4 * 4.57;
+        $hargaWeight = 4 *4.53; //rata-rata harga cetak yang diinginkan oleh customer
         $fasilitasWeight = (4.45 + 4.38)/2; //rata-rata dari fasilitas pemesanan online dan fasilitas edit sebelum diambil
         $ratingRataRataWeight = 3.87;
         $weights = [$kualitasWeight, $pelayananWeight, $jarakWeight, $hargaWeight, $fasilitasWeight, $ratingRataRataWeight];
@@ -478,8 +484,9 @@ class VendorController extends Controller
     public function getLayananVendor($idvendor){
         $layanans = DB::table('vendors_has_jenis_bahan_cetaks')
         ->join('layanan_cetaks', 'layanan_cetaks.id', '=', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id')
-        ->where('vendors_has_layanan_cetaks.vendors_id', '=', $idvendor)
-        ->select('layanan_cetaks.*')
+        ->where('vendors_has_jenis_bahan_cetaks.vendors_has_layanan_cetaks.vendors_id', '=', $idvendor)
+        ->where('vendors.status','=','active')
+        ->select('vendors_has_jenis_bahan_cetaks.layanan_cetaks.*')
         ->get();
         return $layanans;
     }
@@ -522,6 +529,17 @@ class VendorController extends Controller
         }
         
         return view('home', compact('vendors'));
+    }
+
+    public function indexCart()
+    {
+        $vendors = DB::table('pemesanans')
+        ->join('vendors', 'pemesanans.vendors_id', '=', 'vendors.id')
+        ->select('vendors.id', 'vendors.nama','vendors.foto_lokasi', DB::raw('COUNT(pemesanans.id) as total_pemesanan')) // Use aggregate function
+        ->groupBy('vendors.id', 'vendors.nama','vendors.foto_lokasi')
+        ->get();
+        
+        return view('cart.vendors', compact('vendors'));
     }
     
 

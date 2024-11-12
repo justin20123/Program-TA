@@ -39,6 +39,7 @@ class PemesananController extends Controller
             'harga_cetaks_id' => $idhargacetak,
             'jenis_bahan_cetaks_id' => $request->input('jenis_bahan_cetaks_id'), 
             'vendors_id' => $request->input('vendors_id'), 
+            'created_at' => now()
         ]);
 
         foreach($request->idopsidetail as $od){
@@ -65,7 +66,7 @@ class PemesananController extends Controller
         $pemesanan->save();
 
         return response()->json([
-            'message' => 'Pemesanan created successfully!',
+            'message' => 'Pesanan berhasil ditambahkan ke dalam cart, pergi ke cart untuk memproses pemesanan',
         ], 201);
 
     }
