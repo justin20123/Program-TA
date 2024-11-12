@@ -56,7 +56,7 @@ class PemesananController extends Controller
     public function uploadfile(Request $request){
         $file = $request->file('fileInput');
         $fileName = $request->idpemesanan . '.pdf'; 
-        $directory = base_path('assets/pemesanans');
+        $directory = base_path('../pemesanans');
         $file->move($directory, $fileName);
 
         $fileUrl = '../pemesanans/' . $fileName;
