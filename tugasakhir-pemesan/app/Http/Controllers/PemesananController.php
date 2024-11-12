@@ -22,34 +22,33 @@ class PemesananController extends Controller
     public function submitpesanan(Request $request){
         $request->validate([
             'jumlah' => 'required',
-            'url_file' => 'required',
-            'harga_cetaks_id' => 'required',
             'jenis_bahan_cetaks_id' => 'required',
+            'idopsidetail' => 'required',
             'vendors_id' => 'required',
         ]);
 
         $hargacetakcontroller = new HargaCetakController();
 
-        $idhargacetak = $hargacetakcontroller->cekHarga($request->totalQuantity, $request->idjenisbahan, true);
+        $idhargacetak = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id, true);
         
-        $pemesanan = Pemesanan::create([
-            'penggunas_email' => 'email1@email.com',
-            'jumlah' => $request->totalQuantity,
-            'url_file' => "", 
-            'catatan' => $request->catatan, 
+        $id = DB::table('pemesanans')->insertGetId([
+            'penggunas_email' => 'email1@email.com', 
+            'jumlah' => $request->input('jumlah'), 
+            'url_file' => '', 
+            'catatan' => $request->input('catatan'),
             'harga_cetaks_id' => $idhargacetak,
-            'jenis_bahan_cetaks_id' => $request->idjenisbahan,
-            'vendors_id' => $request->vendors_id,
+            'jenis_bahan_cetaks_id' => $request->input('jenis_bahan_cetaks_id'), 
+            'vendors_id' => $request->input('vendors_id'), 
         ]);
 
         foreach($request->idopsidetail as $od){
             DB::table('pemesanans_has_opsi_details')->insert([
-                'pemesanans_id'=>$pemesanan->id,
+                'pemesanans_id'=>$id,
                 'opsi_details_id'=>$od,
             ]);
         }
 
-        return $pemesanan->id;
+        return ["idpemesanan"=>$id, "idvendor"=>$request->input('vendors_id')];
 
 
     }
@@ -57,10 +56,10 @@ class PemesananController extends Controller
     public function uploadfile(Request $request){
         $file = $request->file('fileInput');
         $fileName = $request->idpemesanan . '.pdf'; 
-        $directory = public_path('assets/pemesanans');
+        $directory = base_path('assets/pemesanans');
         $file->move($directory, $fileName);
 
-        $fileUrl = asset('assets/pemesanans/' . $fileName);
+        $fileUrl = '../pemesanans/' . $fileName;
         $pemesanan = Pemesanan::find($request->idpemesanan);
         $pemesanan->url_file = $fileUrl;
         $pemesanan->save();

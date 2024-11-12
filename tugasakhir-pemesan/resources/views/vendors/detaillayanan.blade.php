@@ -34,8 +34,8 @@
                             {{ $h->harga_satuan }}/{{ $satuan->satuan }}</li>
                     @endforeach
                 </ul>
-                <input type="hidden" id="idvendor" value="{{$layananData['idvendor']}}">
-                <input type="hidden" id="idlayanan" value="{{$layananData['idlayanan']}}">
+                <input type="hidden" id="idvendor" value="{{ $layananData['idvendor'] }}">
+                <input type="hidden" id="idlayanan" value="{{ $layananData['idlayanan'] }}">
 
             </div>
 
@@ -236,7 +236,7 @@
 
         }
 
-        function uploadFile(idpemesanan) {
+        function uploadFile(idpemesanan, idvendor) {
             const formData = new FormData();
             formData.append('fileInput', file);
             formData.append('idpemesanan', idpemesanan);
@@ -247,6 +247,9 @@
                 data: formData,
                 contentType: false,
                 processData: false,
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}' // Include CSRF token for security
+                },
                 success: function(response) {
                     Swal.fire({
                         title: 'Success!',
@@ -256,8 +259,7 @@
                     }).then((result) => {
                         if (result.isConfirmed) {
                             // Redirect to the vendor page
-                            window.location.href = '/vendor/' + response
-                                .vendor_id; // Ensure you return vendor_id in your response
+                            window.location.href = '/vendor/' + idvendor; 
                         }
                     });
                 },
@@ -346,42 +348,47 @@
                 }
             });
             $('#jenisbahan').on('change', function() {
-                idvendor= $('#idvendor').val();
+                idvendor = $('#idvendor').val();
                 idlayanan = $('#idlayanan').val();
                 idjenisbahan = $('#jenisbahan').val();
                 updateOpsiDetails(idvendor, idlayanan, idjenisbahan);
             });
 
 
-            $('#form').on('submit', function() {
+            $('#form').on('submit', function(event) {
+                event.preventDefault(); // Prevent form submission
                 if (file && file.type === 'application/pdf') {
                     const idjenisbahan = $('#jenisbahan').val();
                     let idopsidetail = [];
                     const opsidetailElements = $('[id^="opsidetail-"]');
 
                     for (let i = 0; i < opsidetailElements.length; i++) {
-                        idopsidetail.push($(opsidetailElements[i])
-                            .val()); // Push each value into the array
+                        idopsidetail.push($(opsidetailElements[i]).val());
                     }
-                    const totalQuantity = totalLembar;
+                    const totalQuantity = totalLembar; // This should be the 'jumlah' field
                     const catatan = $("#catatan").val();
+                    const jenis_bahan_cetaks_id = $('#jenisbahan')
+                .val(); // Collect the jenis bahan cetaks id
+                    const vendors_id = $('#idvendor').val(); // Assuming this is stored in a hidden input
 
                     // Make the AJAX POST request
                     $.ajax({
-                        url: '/submitpesanan', // Change this to your API endpoint
+                        url: '/submitpesanan',
                         type: 'POST',
+                        contentType: 'application/json',
                         data: JSON.stringify({
-                            idjenisbahan,
+                            jumlah: totalQuantity, // Include the jumlah field
+                            jenis_bahan_cetaks_id: jenis_bahan_cetaks_id, // Include the jenis_bahan_cetaks_id field
+                            vendors_id: vendors_id, // Include the vendors_id field
                             idopsidetail,
-                            totalQuantity,
                             catatan
                         }),
-                        contentType: false,
-                        processData: false,
+                        headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}' // Include CSRF token for security
+                },
                         success: function(response) {
-                            console.log(response); // Handle the response as needed
                             $('#response').text('Success: ' + response);
-                            this.uploadFile(response);
+                            uploadFile(response["idpemesanan"], response["idvendor"]);
                         },
                         error: function(xhr, status, error) {
                             $('#response').text('Error: ' + error);
@@ -389,8 +396,8 @@
                     });
                 } else {
                     $("#error-message").html(`<div class="alert alert-danger" role="alert">
-                    File harus berupa PDF!
-                    </div>`);
+        File harus berupa PDF!
+        </div>`);
                 }
             });
         });
