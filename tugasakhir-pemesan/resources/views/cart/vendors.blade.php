@@ -32,7 +32,7 @@
         <ul class="list-inline justify-content-center" style="display: flex; flex-wrap: wrap;">
             @foreach ($vendors as $v)
                 <li class="list-inline-item p-3">
-                    <a href="#" style="color: inherit; text-decoration: none;">
+                    <a href="/cart/orders/{{$v->id}}" style="color: inherit; text-decoration: none;">
                         <div class="card" style="width: 18rem;">
                             <img src="{{ $v->foto_lokasi }}" class="card-img-top" style="height: 13rem;">
                             <div class="card-body">

@@ -253,7 +253,7 @@
                 for (let i = 0; i < items.length; i++) {
                     console.table(vendors);
                     html += `
-                    <button class="btn-card border-0" onclick="toVendorData(`+ items[i]['id'] +`)">
+                    <button class="btn-card border-0" onclick="toVendorData(`+ vendors[i].id +`)">
                     <div class="h6 p-2 mb-2">${items[i]}</div>
                      <div class="card mb-3" style="max-width: 540px;">
                         <div class="row no-gutters">

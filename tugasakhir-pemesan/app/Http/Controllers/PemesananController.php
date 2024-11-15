@@ -19,13 +19,46 @@ class PemesananController extends Controller
         
     }
 
+    public function indexOrder($idvendors)
+    {
+        $pemesanans = DB::table('pemesanans')
+        ->where('pemesanans.notas_id','=',null)
+        ->where('pemesanans.vendors_id','=',$idvendors)
+        ->get();
+
+        $subtotal = 0;
+        foreach($pemesanans as $p){
+            $harga_cetaks = DB::table('harga_cetaks')
+            ->where('id','=',$p->harga_cetaks_id)
+            ->first();
+            $p->harga_satuan = $harga_cetaks->harga_satuan;
+
+            $subtotal += $p->harga_satuan * $p->jumlah;
+
+            $layanan = DB::table('vendors_has_jenis_bahan_cetaks')
+            ->join('layanan_cetaks','vendors_has_jenis_bahan_cetaks.layanan_cetaks_id','=', 'layanan_cetaks.id')
+            ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $p->jenis_bahan_cetaks_id)
+            ->select('layanan_cetaks.nama as namalayanan', 'layanan_cetaks.satuan as satuanlayanan')
+            ->first();
+            $p->layanan = $layanan->namalayanan;
+            $p->satuan = $layanan->satuanlayanan;
+        }
+        // dd($pemesanans);
+        
+
+        return view('cart.pesanan', compact('pemesanans', 'subtotal'));
+    }
+
     public function submitpesanan(Request $request){
         $request->validate([
             'jumlah' => 'required',
             'jenis_bahan_cetaks_id' => 'required',
             'idopsidetail' => 'required',
             'vendors_id' => 'required',
+            'file' => 'required|file|mimes:pdf|max:20480' //max 20mb
         ]);
+
+        $idopsidetail = explode(",", $request->idopsidetail);
 
         $hargacetakcontroller = new HargaCetakController();
 
@@ -42,34 +75,32 @@ class PemesananController extends Controller
             'created_at' => now()
         ]);
 
-        foreach($request->idopsidetail as $od){
+        foreach($idopsidetail as $od){
             DB::table('pemesanans_has_opsi_details')->insert([
                 'pemesanans_id'=>$id,
                 'opsi_details_id'=>$od,
             ]);
         }
 
+        $file = $request->file('file');
+        $fileName = $id . '.pdf';
+
+        $directory = base_path('../pemesanan');
+
+        $file->move($directory, $fileName);
+
+        $relativePath = 'pemesanan/' . $fileName;
+
+        $pemesanan = Pemesanan::find($id);
+        $pemesanan->url_file = $relativePath; 
+        $pemesanan->save();
+
         return ["idpemesanan"=>$id, "idvendor"=>$request->input('vendors_id')];
 
 
     }
 
-    public function uploadfile(Request $request){
-        $file = $request->file('fileInput');
-        $fileName = $request->idpemesanan . '.pdf'; 
-        $directory = base_path('../pemesanans');
-        $file->move($directory, $fileName);
 
-        $fileUrl = '../pemesanans/' . $fileName;
-        $pemesanan = Pemesanan::find($request->idpemesanan);
-        $pemesanan->url_file = $fileUrl;
-        $pemesanan->save();
-
-        return response()->json([
-            'message' => 'Pesanan berhasil ditambahkan ke dalam cart, pergi ke cart untuk memproses pemesanan',
-        ], 201);
-
-    }
 
     /**
      * Show the form for creating a new resource.

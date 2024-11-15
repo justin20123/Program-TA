@@ -27,21 +27,21 @@
 
                 <!-- Price List Section -->
 
-                <h2 class="h4 font-weight-bold">Harga (1 {{ $satuan->satuan }} = {{ $satuan->kesetaraan_pcs }} pcs)</h2>
+                <h2 class="h4 font-weight-bold">Harga (1 {{ $layanan->satuan }} = {{ $layanan->kesetaraan_pcs }} pcs)</h2>
                 <ul class="list-unstyled text-muted mb-0">
                     @foreach ($hargacetaks as $h)
-                        <li>{{ $h->jumlah_cetak_minimum }}–{{ $h->jumlah_cetak_maksimum }} {{ $satuan->satuan }} = Rp.
-                            {{ $h->harga_satuan }}/{{ $satuan->satuan }}</li>
+                        <li>{{ $h->jumlah_cetak_minimum }}–{{ $h->jumlah_cetak_maksimum }} {{ $layanan->satuan }} = Rp.
+                            {{ $h->harga_satuan }}/{{ $layanan->satuan }}</li>
                     @endforeach
                 </ul>
-                <input type="hidden" id="idvendor" value="{{ $layananData['idvendor'] }}">
-                <input type="hidden" id="idlayanan" value="{{ $layananData['idlayanan'] }}">
+                <input type="hidden" id="idvendor" value="{{ $jenisbahan[0]->idvendor }}">
+                <input type="hidden" id="idlayanan" value="{{ $layanan->id }}">
 
             </div>
 
             <!-- Right Side: Product Details -->
             <div class="col-md-8">
-                <h1 class="display-4">Fotokopi</h1>
+                <h1 class="display-4">{{ $layanan->nama }}</h1>
                 <div class="d-flex align-items-center mb-3">
                     <div class="text-warning">
                         <!-- 5 Star Rating Display -->
@@ -259,11 +259,12 @@
                     }).then((result) => {
                         if (result.isConfirmed) {
                             // Redirect to the vendor page
-                            window.location.href = '/vendor/' + idvendor; 
+                            window.location.href = '/vendor/' + idvendor;
                         }
                     });
                 },
                 error: function(xhr, status, error) {
+                    console.log(xhr.responseText);
                     $('#response').text('Error: ' + error);
                 }
             });
@@ -365,32 +366,49 @@
                     for (let i = 0; i < opsidetailElements.length; i++) {
                         idopsidetail.push($(opsidetailElements[i]).val());
                     }
-                    const totalQuantity = totalLembar; // This should be the 'jumlah' field
+                    const totalQuantity = totalLembar;
                     const catatan = $("#catatan").val();
-                    const jenis_bahan_cetaks_id = $('#jenisbahan')
-                .val(); // Collect the jenis bahan cetaks id
-                    const vendors_id = $('#idvendor').val(); // Assuming this is stored in a hidden input
+                    const jenis_bahan_cetaks_id = $('#jenisbahan').val();
+                    const vendors_id = $('#idvendor').val();
+
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('jumlah', totalQuantity);
+                    formData.append('jenis_bahan_cetaks_id', jenis_bahan_cetaks_id);
+                    formData.append('vendors_id', vendors_id);
+                    formData.append('idopsidetail', idopsidetail);
+                    formData.append('catatan', catatan);
+
+                    for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+    }
 
                     // Make the AJAX POST request
                     $.ajax({
                         url: '/submitpesanan',
                         type: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify({
-                            jumlah: totalQuantity, // Include the jumlah field
-                            jenis_bahan_cetaks_id: jenis_bahan_cetaks_id, // Include the jenis_bahan_cetaks_id field
-                            vendors_id: vendors_id, // Include the vendors_id field
-                            idopsidetail,
-                            catatan
-                        }),
+                        contentType: false,
+                        processData: false,
+                        data: formData,
                         headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}' // Include CSRF token for security
-                },
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}' // Include CSRF token for security
+                        },
                         success: function(response) {
-                            $('#response').text('Success: ' + response);
-                            uploadFile(response["idpemesanan"], response["idvendor"]);
+                            Swal.fire({
+                                title: 'Success!',
+                                text: response.message,
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    // Redirect to the vendor page
+                                    window.location.href = '/vendor/' + idvendor;
+                                }
+                            });
+
                         },
                         error: function(xhr, status, error) {
+                            console.log(xhr.responseText);
                             $('#response').text('Error: ' + error);
                         }
                     });

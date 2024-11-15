@@ -66,7 +66,7 @@ class LayananController extends Controller
         ->join('jenis_bahan_cetaks', 'jenis_bahan_cetaks.id','=','vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id')
         ->where('vendors_has_jenis_bahan_cetaks.vendors_id','=',$vendor_id)
         ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id','=',$idlayanan)
-        ->select('jenis_bahan_cetaks.*')
+        ->select('jenis_bahan_cetaks.*', 'vendors_has_jenis_bahan_cetaks.vendors_id as idvendor')
         ->get();
 
         $detailcetaks = DB::table('detail_cetaks')
@@ -102,16 +102,15 @@ class LayananController extends Controller
         ->where('id_bahan_cetaks','=',$jenisbahan[0]->id)
         ->get();
 
-        $satuan = DB::table('layanan_cetaks')
+        $layanan = DB::table('layanan_cetaks')
         ->where('id', '=', $idlayanan)
         ->first();
 
-        $layananData = ['idvendor'=>$vendor_id, 'idlayanan'=>$idlayanan];
 
         // dd($hargacetaks);
         // dd($opsidetail);
 
-        return view('vendors.detaillayanan', compact('jenisbahan', 'opsidetail', 'hargacetaks', 'satuan', 'layananData'));
+        return view('vendors.detaillayanan', compact('jenisbahan', 'opsidetail', 'hargacetaks', 'layanan'));
     }
 
     public function detail_layanan_load($vendor_id, $idlayanan, $idjenisbahan){

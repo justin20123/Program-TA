@@ -40,3 +40,15 @@ Route::post('/uploadfilepesanan', [PemesananController::class, 'uploadfile']);
 //cart
 Route::get('/cart', [VendorController::class, 'indexCart']);
 
+//orders
+Route::get('/cart/orders/{idvendor}', [PemesananController::class, 'indexOrder']);
+Route::get('/pemesanan/{filename}', function ($filename) {
+    $path = base_path('../pemesanan/' . $filename);
+
+    if (file_exists($path)) {
+        //ambil lokasi file pemesanan
+        return response()->file($path);
+    }
+
+    abort(404);
+});

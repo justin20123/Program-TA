@@ -537,6 +537,7 @@ class VendorController extends Controller
         ->join('vendors', 'pemesanans.vendors_id', '=', 'vendors.id')
         ->select('vendors.id', 'vendors.nama','vendors.foto_lokasi', DB::raw('COUNT(pemesanans.id) as total_pemesanan')) // Use aggregate function
         ->groupBy('vendors.id', 'vendors.nama','vendors.foto_lokasi')
+        ->where('pemesanans.notas_id', '=', null)
         ->get();
         
         return view('cart.vendors', compact('vendors'));
