@@ -99,6 +99,39 @@ class PemesananController extends Controller
 
 
     }
+    public function bukacheckout(Request $request){
+        $request->validate([
+            'idpemesanans' => 'required|array',
+            'subtotal' => 'required|gt:0',
+        ]);
+        $idpemesanans = $request->input('idpemesanans');
+        $pemesanans = [];
+        foreach($idpemesanans as $id){
+            $p = DB::table('pemesanans')
+            ->where('id','=',$id) 
+            ->first();
+
+            $harga_cetaks = DB::table('harga_cetaks')
+            ->where('id','=',$p->harga_cetaks_id)
+            ->first();
+            $p->harga_satuan = $harga_cetaks->harga_satuan;
+
+            $subtotal = $request->subtotal;
+
+            $layanan = DB::table('vendors_has_jenis_bahan_cetaks')
+            ->join('layanan_cetaks','vendors_has_jenis_bahan_cetaks.layanan_cetaks_id','=', 'layanan_cetaks.id')
+            ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $p->jenis_bahan_cetaks_id)
+            ->select('layanan_cetaks.nama as namalayanan', 'layanan_cetaks.satuan as satuanlayanan')
+            ->first();
+            $p->layanan = $layanan->namalayanan;
+            $p->satuan = $layanan->satuanlayanan;
+            array_push($pemesanans, $p);
+        }
+
+        dd($pemesanans);
+        // return ['subtotal'=>$subtotal, 'pemesanans'=>$pemesanans];
+        return view('cart.checkout', compact('pemesanans','subtotal'));
+    }
 
 
 

@@ -26,6 +26,9 @@ Route::post('/untukanda', [VendorController::class, 'loadUntukAnda']);
 Route::post('/layananterdekat', [VendorController::class, 'loadLayananTerdekat']);
 Route::post('/getLayanan', [VendorController::class, 'loadLayanans']);
 
+//semua vendor (belum ada)
+Route::get('/vendor', [VendorController::class,'indexVendors']);
+
 //vendor semua layanan
 Route::get('/vendor/{idvendor}', [LayananController::class,'index']);
 
@@ -52,3 +55,6 @@ Route::get('/pemesanan/{filename}', function ($filename) {
 
     abort(404);
 });
+
+//checkout
+Route::post('/checkout', [PemesananController::class, 'bukacheckout'])->name('bukacheckout');

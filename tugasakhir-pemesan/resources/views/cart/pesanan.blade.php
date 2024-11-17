@@ -24,14 +24,14 @@
                 @foreach ($pemesanans as $p)
                     <tr>
                         <td>
-                            <input type="checkbox" id="item-{{ $p->id }}" value="{{ $p->id }}" checked/>
+                            <input type="checkbox" id="item-{{ $p->id }}" value="{{ $p->id }}" checked />
                         </td>
                         <td>
                             <div>
                                 <iframe src="/{{ $p->url_file }}"
                                     style="width: 100px; height: 100px; border: none; overflow: hidden;"></iframe>
                                 <br>
-                                <a class="btn btn-primary" href="/{{ $p->url_file }}">Preview</a>
+                                <a class="btn btn-primary" href="/{{ $p->url_file }}" target="_blank">Preview</a>
                             </div>
                         </td>
                         <td>
@@ -44,12 +44,12 @@
                             </div>
                         </td>
                         <td>{{ number_format($p->harga_satuan, 0, '.', ',') }}</td>
-                        <td>{{  number_format($p->jumlah, 0, '.', ',') }} {{ $p->satuan }}</td>
+                        <td>{{ number_format($p->jumlah, 0, '.', ',') }} {{ $p->satuan }}</td>
                         <td class="font-weight-bold">
                             <div id='hargaitem-{{ $p->id }}'>
                                 {{ number_format($p->harga_satuan * $p->jumlah, 0, '.', ',') }}
                             </div>
-                            
+
                         </td>
                     </tr>
                 @endforeach
@@ -60,8 +60,8 @@
 
         <!-- Cart Buttons -->
         <div class="d-flex justify-content-between mb-4">
-            <a href="#" class="btn btn-outline-primary">Return to Shop</a>
-            <button class="btn btn-primary">Update Cart</button>
+            <a href="/vendor" class="btn btn-outline-primary">Lihat vendor lainnya</a>
+            <a href="/vendor/{{ $pemesanans[0]->vendors_id }}" class="btn btn-primary">Tambah Barang</a>
         </div>
 
         <!-- Balance and Checkout Summary -->
@@ -75,11 +75,17 @@
                     <h6 class="card-title">Card Totals</h6>
                     <div class="d-flex justify-content-between">
                         <span>Sub-total</span>
-                        <span class="font-weight-bold" id='subtotal'>Rp. {{ number_format($subtotal, 0, '.', ',') }}</span>
+                        <span class="font-weight-bold" id='subtotal'>Rp.
+                            {{ number_format($subtotal, 0, '.', ',') }}</span>
                     </div>
-                    <button class="btn btn-warning btn-block mt-3 font-weight-bold">
-                        PROCEED TO CHECKOUT →
-                    </button>
+                    <form action="{{ route('bukacheckout') }}" method="POST">
+                        @csrf
+                        <div id="hiddens">
+
+                        </div>
+                        <input type="submit" value="UPDATE CHECKOUT" class="btn btn-primary btn-block mt-3 font-weight-bold"> 
+                    </form>
+
                 </div>
             </div>
         </div>
@@ -89,25 +95,36 @@
 @section('script')
     <script>
         $(document).ready(function() {
+            
 
             let subtotal = 0;
+
             function updateSubtotal() {
                 subtotal = 0;
+                $('#hiddens').empty();
                 $('[id^="item-"]').each(function() {
                     var checkboxId = $(this).attr('id');
-                    var checkboxValue = $(this).val(); 
+                    var checkboxValue = $(this).val();
                     if ($(this).is(':checked')) {
-                        var priceString =  $('#hargaitem-' + checkboxValue).html();
-                        var price = parseInt(priceString.replace(/\,/g, ''), 10); 
+                        var priceString = $('#hargaitem-' + checkboxValue).html();
+                        var price = parseInt(priceString.replace(/\,/g, ''), 10);
                         subtotal += price;
+
+                        const itemId = $(this).val();
+                        $('#hiddens').append(`<input type="hidden" name="idpemesanans[]" value="${itemId}">`);
                     }
                 });
                 $('#subtotal').text('Rp. ' + subtotal.toLocaleString());
+                $('#hiddens').append(`<input type="hidden" name="subtotal" value="${subtotal}">`);
+
             }
 
+            updateSubtotal();
+
             $('[id^="item-"]').change(function() {
-                updateSubtotal(this); 
+                updateSubtotal(this);
             });
+
         });
     </script>
 @endsection
