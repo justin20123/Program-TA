@@ -126,7 +126,7 @@
                             </div>
 
 
-                            <button id="lihat-file" class="btn btn-primary">Preview PDF</button>
+                            <button type="button" id="lihat-file" class="btn btn-primary">Preview PDF</button>
 
 
 
@@ -236,39 +236,6 @@
 
         }
 
-        function uploadFile(idpemesanan, idvendor) {
-            const formData = new FormData();
-            formData.append('fileInput', file);
-            formData.append('idpemesanan', idpemesanan);
-
-            $.ajax({
-                url: '/uploadfilepesanan',
-                type: 'POST',
-                data: formData,
-                contentType: false,
-                processData: false,
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}' // Include CSRF token for security
-                },
-                success: function(response) {
-                    Swal.fire({
-                        title: 'Success!',
-                        text: response.message,
-                        icon: 'success',
-                        confirmButtonText: 'OK'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // Redirect to the vendor page
-                            window.location.href = '/vendor/' + idvendor;
-                        }
-                    });
-                },
-                error: function(xhr, status, error) {
-                    console.log(xhr.responseText);
-                    $('#response').text('Error: ' + error);
-                }
-            });
-        }
 
         let file;
         let jumlHalaman;
@@ -358,7 +325,7 @@
 
             $('#form').on('submit', function(event) {
                 event.preventDefault(); // Prevent form submission
-                if (file && file.type === 'application/pdf') {
+                if (file && file.type == 'application/pdf') {
                     const idjenisbahan = $('#jenisbahan').val();
                     let idopsidetail = [];
                     const opsidetailElements = $('[id^="opsidetail-"]');
@@ -379,9 +346,6 @@
                     formData.append('idopsidetail', idopsidetail);
                     formData.append('catatan', catatan);
 
-                    for (let [key, value] of formData.entries()) {
-        console.log(key, value);
-    }
 
                     // Make the AJAX POST request
                     $.ajax({
@@ -400,9 +364,9 @@
                                 icon: 'success',
                                 confirmButtonText: 'OK'
                             }).then((result) => {
+                                console.log(result);
                                 if (result.isConfirmed) {
-                                    // Redirect to the vendor page
-                                    window.location.href = '/vendor/' + idvendor;
+                                    window.location.href = '/pesanan';
                                 }
                             });
 

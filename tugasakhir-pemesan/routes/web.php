@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\LayananController;
+use App\Http\Controllers\NotaController;
 use App\Http\Controllers\PemesananController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\VendorController;
@@ -59,4 +60,7 @@ Route::get('/pemesanan/{filename}', function ($filename) {
 //checkout
 Route::post('/checkout', [PemesananController::class, 'bukacheckout'])->name('bukacheckout');
 Route::post('/getjarak', [VendorController::class, 'getSingleLocationRequest']);
+Route::post('/placeorder', [NotaController::class, 'placeorder']);
 
+//pesanan
+Route::get('/pesanan', [NotaController::class, 'indexPesanan']);

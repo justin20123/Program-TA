@@ -80,6 +80,7 @@
                     <input type="hidden" name="latitude" id="latitude">
                     <input type="hidden" name="longitude" id="longitude">
                     <input type="hidden" name="idvendor" id="idvendor" value="{{ $pemesanans[0]->vendors_id }}">
+                    <input type="hidden" name="diantar" id="diantar" value="{{ $pemesanans[0]->vendors_id }}">
                 </form>
             </div>
 
@@ -105,6 +106,8 @@
                             <span class="item-price">Rp.
                                 {{ number_format($p->jumlah * $p->harga_satuan, 0, '.', ',') }}</span>
                         </div>
+
+                        <input type="hidden" name="idpemesanan-{{$p->id}}" id="idpemesanan-{{$p->id}}" value="{{$p->id}}">
                     @endforeach
 
 
@@ -246,7 +249,59 @@
             });
 
             $("#btnPlaceOrder").click(function() {
-                $('#formBuatNota').submit();
+              let idpemesanans =[];
+              let opsiantar;
+
+              const formData = new FormData();
+
+              $('[id^="idpemesanan-"]').each(function() {
+                var value = $(this).val();
+                idpemesanans.push(value);
+              });
+
+
+              if ($('#statusantar').is(':checked')) {
+                opsiantar = "diantar";
+                formData.append('latitude', latitude);
+                formData.append('longitude', longitude);
+              } else {
+                opsiantar = "diambil";
+                latitude = null;
+                longitude = null;
+              }
+                formData.append('opsiantar', opsiantar);
+
+                formData.append('idpemesanans',idpemesanans);
+                formData.append('catatan_antar', $("#orderNotes").val());
+
+                $.ajax({
+                    url: '/placeorder',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}' // Include CSRF token for security
+                    },
+                    success: function(response) {
+                      Swal.fire({
+                                title: 'Success!',
+                                text: response.message,
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            }).then((result) => {
+                                console.log(result);
+                                if (result.isConfirmed) {
+                                    
+                                    // Redirect to the vendor page
+                                    window.location.href = '/vendor/' + response.idvendor;
+                                }
+                            });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error occurred:", xhr);
+                    }
+                });
             });
 
             $("#statusantar").on('change', function() {

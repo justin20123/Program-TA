@@ -23,7 +23,6 @@ class NotaSeeder extends Seeder
                 'waktu_transaksi' => $faker->dateTimeThisYear,
                 'status' => $faker->randomElement(["proses", "sedang diantar", "menunggu diambil", "selesai", "dibatalkan", "menunggu pembayaran"]),
                 'opsi_pengambilan' => $faker->randomElement(["diambil", "diantar"]),
-                'alamat_pengambilan' => $faker->address,
                 'tanggal_selesai' => $faker->date(),
                 'ulasan' => $faker->sentence,
             ]);

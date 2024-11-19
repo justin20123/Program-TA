@@ -43,7 +43,7 @@
                                 </div>
                             </div>
                         </td>
-                        <td>{{ number_format($p->harga_satuan, 0, '.', ',') }}</td>
+                        <td>{{ number_format(($p->harga_satuan + $p->biaya_tambahan), 0, '.', ',') }}</td>
                         <td>{{ number_format($p->jumlah, 0, '.', ',') }} {{ $p->satuan }}</td>
                         <td class="font-weight-bold">
                             <div id='hargaitem-{{ $p->id }}'>
@@ -52,6 +52,8 @@
 
                         </td>
                     </tr>
+                    <input type="hidden" name="biaya_tambahan-{{$p->id}}" id="biaya_tambahan-{{$p->id}}" value="{{$p->biaya_tambahan}}">
+                    <input type="hidden" name="jumlah-{{$p->id}}" id="jumlah-{{$p->id}}" value="{{$p->jumlah}}">
                 @endforeach
 
 
@@ -108,6 +110,12 @@
                     if ($(this).is(':checked')) {
                         var priceString = $('#hargaitem-' + checkboxValue).html();
                         var price = parseInt(priceString.replace(/\,/g, ''), 10);
+
+                        var biayaTambahanString = $('#biaya_tambahan-' + checkboxValue).html();
+                        var biayaTambahan = parseInt(biayaTambahanString.replace(/\,/g, ''), 10);
+
+                        var jumlahString = $('#jumlah-' + checkboxValue).html();
+                        var jumlah = parseInt(jumlahString.replace(/\,/g, ''), 10);
                         subtotal += price;
 
                         const itemId = $(this).val();

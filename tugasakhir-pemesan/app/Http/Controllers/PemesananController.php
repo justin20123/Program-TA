@@ -28,6 +28,20 @@ class PemesananController extends Controller
 
         $subtotal = 0;
         foreach($pemesanans as $p){
+            $biaya_tambahan = 0;
+
+            $tambahan_opsi = DB::table('pemesanans_has_opsi_details')
+            ->join('opsi_details', 'opsi_details.id','=','pemesanans_has_opsi_details.opsi_details_id')
+            ->where('pemesanans_has_opsi_details.pemesanans_id','=',$p->id)
+            ->select('opsi_details.biaya_tambahan')
+            ->get();
+
+            foreach($tambahan_opsi as $t){
+                $biaya_tambahan += $t->biaya_tambahan;
+            }
+
+            $p->biaya_tambahan = $biaya_tambahan;
+
             $harga_cetaks = DB::table('harga_cetaks')
             ->where('id','=',$p->harga_cetaks_id)
             ->first();
@@ -95,7 +109,7 @@ class PemesananController extends Controller
         $pemesanan->url_file = $relativePath; 
         $pemesanan->save();
 
-        return ["idpemesanan"=>$id, "idvendor"=>$request->input('vendors_id')];
+        return ["idpemesanan"=>$id, "idvendor"=>$request->input('vendors_id'), 'message'=>"Pesanan dimasukkan ke dalam cart"];
 
 
     }
