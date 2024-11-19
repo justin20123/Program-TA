@@ -58,3 +58,5 @@ Route::get('/pemesanan/{filename}', function ($filename) {
 
 //checkout
 Route::post('/checkout', [PemesananController::class, 'bukacheckout'])->name('bukacheckout');
+Route::post('/getjarak', [VendorController::class, 'getSingleLocationRequest']);
+

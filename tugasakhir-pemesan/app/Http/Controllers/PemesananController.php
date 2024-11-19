@@ -128,7 +128,7 @@ class PemesananController extends Controller
             array_push($pemesanans, $p);
         }
 
-        dd($pemesanans);
+        // dd($pemesanans);
         // return ['subtotal'=>$subtotal, 'pemesanans'=>$pemesanans];
         return view('cart.checkout', compact('pemesanans','subtotal'));
     }

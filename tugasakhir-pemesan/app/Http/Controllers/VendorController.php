@@ -127,11 +127,20 @@ class VendorController extends Controller
 
     public function getSingleLocation($latitude, $longitude,$vendorid){
         $vendor = Vendor::find($vendorid);
-        // $latitude = $request->latitude;
-        // $longitude = $request->longitude;
         $jarak = $this->getJarak($vendor, $latitude, $longitude);
         // dd($vendor->id);
         return $jarak;
+    }
+
+    public function getSingleLocationRequest(Request $request){
+        $latitude = $request->input('latitude');
+        $longitude = $request->input('longitude');
+        $vendorid = $request->input('idvendor');
+
+        $vendor = Vendor::find($vendorid);
+        $jarak = $this->getJarak($vendor, $latitude, $longitude);
+        // dd($vendor->id);
+        return round((float)$jarak,1);
     }
 
     public function getRating($idvendor, $status=null){

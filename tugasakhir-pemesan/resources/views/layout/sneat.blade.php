@@ -125,6 +125,102 @@
           padding: 0; 
       }
 
+      .form-container {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-title {
+      font-weight: 600;
+    }
+
+    .form-label {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .form-input {
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+
+    .custom-radio-label,
+    .form-check-label {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .card-custom {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+    }
+
+    .list-item {
+      font-size: 14px;
+      padding: 10px 15px;
+    }
+
+    .list-item span {
+      font-weight: bold;
+    }
+
+    .order-summary-container {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Title */
+.order-summary-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Order Items */
+.order-item {
+  font-size: 14px;
+}
+
+.item-details {
+  max-width: 70%;
+}
+
+.item-name {
+  font-weight: bold;
+  color: #555;
+}
+
+.item-description {
+  font-size: 12px;
+  color: #777;
+}
+
+.item-price {
+  font-weight: bold;
+  color: #333;
+}
+
+/* Subtotal, Shipping, and Total */
+.order-summary-info {
+  font-size: 14px;
+  color: #555;
+}
+
+.order-total {
+  font-size: 16px;
+  color: #333;
+}
+#map {
+    height: 400px; /* Ensure this is set */
+    width: 100%; /* Optional: set the width */
+}
+
+
     </style>
     
     <meta charset="utf-8" />
@@ -185,6 +281,10 @@
     <!-- flatpickr -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <script src="https://unpkg.com/deck.gl@^8.0.0/dist.min.js"></script>
+    <script src="https://unpkg.com/react@^17.0.0/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@^17.0.0/umd/react-dom.production.min.js"></script>
   </head>
 
   <body>
