@@ -57,6 +57,7 @@ Route::delete('opsiharga/destroy', [HargaCetakController::class, 'destroy'])->na
 //pesanan
 Route::get('/pesanancetak', [VendorController::class, 'indexOrders'])->name('pesanan');
 Route::get('/pesanancetak/{id}', [PemesananController::class, 'index'])->name('pesanan.index');
+Route::get('/terimapesanan/{id}', [NotaController::class, 'terimaPesanan']);
 Route::get('/pesanancetak2/{id}', [PemesananController::class, 'show'])->name('pesanancetak.show');
 
 //detailpesanan

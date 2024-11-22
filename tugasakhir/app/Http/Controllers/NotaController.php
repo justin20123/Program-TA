@@ -12,6 +12,15 @@ class NotaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function terimaPesanan($idnota){
+        $nota = Nota::findOrFail($idnota);
+        $nota->waktu_menerima_pesanan = now();
+        $nota->save();
+
+        return back()->with('message', 'Pesanan berhasil diterima');
+    }
+
     public function index()
     {
         $notas = Nota::all();

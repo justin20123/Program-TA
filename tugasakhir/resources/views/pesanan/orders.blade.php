@@ -18,13 +18,17 @@
             <span class="ms-auto">
                 <div>{{$nd['nota']->status}}</div>
                 <div>
-                  @if( $nd['nota']->opsi_pengambilan == "Diambil" )
+                  @if( $nd['nota']->opsi_pengambilan == "diambil" )
                     Tidak Diantar
                   @else
                     Diantar
                   @endif
                 </div>
+                
             </span>
+
+              
+
         </button>
       </h2>
       <div id="flush-collapse{{$nd['nota']->id}}" class="accordion-collapse collapse" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample">
@@ -34,9 +38,15 @@
                 <li>{{ $p->jumlah . ' '. $p->satuan .' '. $p->layanan }}</li>  
               @endforeach           
             </ul>
-            <a href="/pesanancetak/{{$nd['pemesanans'][0]->vendors_id}}/detail/{{$nd['nota']->id}}" class="btn btn-sm btn-primary">Details</a>
+            <div class="d-flex justify-content-between py-3">
+              <a href="/pesanancetak/{{$nd['pemesanans'][0]->vendors_id}}/detail/{{$nd['nota']->id}}" class="btn btn-primary">Details</a>
             {{-- 1 nota dari semua pesanan di vendor yang sama --}}
+            @if (!$nd['nota']->waktu_menerima_pesanan)
+            <a href="/terimapesanan/{{$nd['nota']->id}}" class="btn btn-primary">Terima Pesanan</a>
+            @endif
+            
         </div>
+          
       </div>
     </div>  
     @endforeach

@@ -14,6 +14,31 @@ class NotaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function getStatus($nota){
+        if(!$nota->waktu_menerima_pesanan){
+            $status_nota = "Menunggu diterima vendor";
+        }
+        elseif(!$nota->waktu_diantar && !$nota->waktu_tunggu_diambil){
+            $status_nota = "Pesanan diterima";
+            
+        }
+        else if($nota->waktu_diantar || $nota->waktu_tunggu_diambil){
+            if($nota->waktu_diantar){
+                $status_nota = "Diantar";
+            }
+            else{
+                $status_nota = "Menunggu diambil";
+            }
+            
+        }
+        else if($nota->waktu_selesai){
+            $status_nota = "Selesai";
+        }
+        return $status_nota;
+    }
+
+
     public function placeorder(Request $request)
     {
         $idnota = 0;
@@ -28,7 +53,10 @@ class NotaController extends Controller
                 'harga_total' => $request->harga_total,
                 'waktu_transaksi' => now(),
                 'opsi_pengambilan' => "diambil",
-                'tanggal_selesai' => null,
+                'waktu_menerima_pesanan' => null,
+                'waktu_diantar' => null,
+                'waktu_tunggu_diambil' => null,
+                'waktu_selesai' => null,
                 'ulasan' => "",
                 'catatan_antar' => $request->catatan_antar,
             ]); 
@@ -45,8 +73,12 @@ class NotaController extends Controller
             $idnota = DB::table('notas')->insertGetid([
                 'harga_total' => $request->harga_total,
                 'waktu_transaksi' => now(),
-                'opsi_pengambilan' => "diambil",
-                'tanggal_selesai' => null,
+                'waktu_menerima_pesanan' => now(),
+                'opsi_pengambilan' => "diantar",
+                'waktu_menerima_pesanan' => null,
+                'waktu_diantar' => null,
+                'waktu_tunggu_diambil' => null,
+                'waktu_selesai' => null,
                 'longitude_pengambilan'=>$request->longitude,
                 'latitude_pengambilan'=>$request->latitude,
                 'ulasan' => $request->catatan_antar,
@@ -78,20 +110,16 @@ class NotaController extends Controller
 
         $notas = DB::table('notas')
         ->join('pemesanans', 'notas.id', '=', 'pemesanans.notas_id')
-        ->select('notas.id as idnota', 'notas.waktu_transaksi as waktu_transaksi', 'pemesanans.vendors_id as idvendor' , DB::raw('COUNT(pemesanans.id) as jumlah_pesanan'))
-        ->groupBy('notas.id', 'notas.waktu_transaksi', 'pemesanans.vendors_id')
+        ->select('notas.id as idnota', 'notas.waktu_transaksi as waktu_transaksi', 'pemesanans.vendors_id as idvendor' ,'notas.waktu_menerima_pesanan','notas.waktu_diantar','notas.waktu_tunggu_diambil','notas.waktu_selesai' , DB::raw('COUNT(pemesanans.id) as jumlah_pesanan'))
+        ->groupBy('notas.id', 'notas.waktu_transaksi', 'pemesanans.vendors_id','notas.waktu_menerima_pesanan','notas.waktu_diantar','notas.waktu_tunggu_diambil','notas.waktu_selesai')
         ->orderBy('notas.waktu_transaksi')
         ->get();
 
-        $prioritas = [
-            'menunggu verifikasi', 
-            'proses', 
-            'menunggu diambil',  
-            'sedang diantar', 
-            'selesai'
-        ];
+        foreach ($notas as $n){ 
+            
+            $n->status = $this->getStatus($n);
+            
 
-        foreach ($notas as $n){
             $vendor = DB::table('vendors')
             ->where('id', $n->idvendor)
             ->first();
@@ -103,27 +131,7 @@ class NotaController extends Controller
             ->select('progress')
             ->get();
 
-            
-    
-            $status = "selesai";
-    
-            $filtered_prioritas = $prioritas;
-            foreach ($liststatus as $ls) {
-                foreach ($filtered_prioritas as $key => $f) {
-                    if ($ls->progress == $f) {
-                        $filtered_prioritas = array_slice($filtered_prioritas, 0, $key);
-                        
-                        $status = $f;
-                        break; 
-                    }
-                }
-            }
-
-            $n->status = $status;
-    
         }
-
-        // dd($notas);
 
         return view('pesanan.vendors', compact('notas'));
     }

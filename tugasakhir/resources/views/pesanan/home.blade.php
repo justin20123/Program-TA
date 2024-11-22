@@ -10,14 +10,14 @@
 <h1 class="text-center p-5">Pesanan Vendor Anda</h1>
 
 @php
-    $totalVendors = count($vendors);
+    $totalVendors = count($vendorpemesanan);
     $itemsPerRow = 4; 
     $invisibleCards = ($itemsPerRow - ($totalVendors % $itemsPerRow)) % $itemsPerRow; // Calculate invisible cards needed
 @endphp
 
 
 <ul class="list-inline justify-content-center" style="display: flex; flex-wrap: wrap;">
-@foreach ($vendors as $v)
+@foreach ($vendorpemesanan as $v)
 <li class="list-inline-item p-3">
     <a href="/pesanancetak/{{ $v->id }}">
         <div class="card" style="width: 16rem; height:19rem;">

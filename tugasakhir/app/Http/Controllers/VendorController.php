@@ -55,28 +55,46 @@ class VendorController extends Controller
     public function indexOrders()
     {
         $vendors = DB::table('vendors')
-        // ->join('vendors_has_layanan_cetaks','vendors.id','=','vendors_has_layanan_cetaks.vendors_id')
-        // ->join('jenis_bahan_cetaks','jenis_bahan_cetaks.id','=','vendors_has_layanan_cetaks.jenis_bahan_cetaks_id')
-        // ->join('pemesanans','jenis_bahan_cetaks.id','=','pemesanans.jenis_bahan_cetaks_id')
-        ->select('*')
         ->get();
-        
-        // dd($vendors);
 
-        $jumlah_pesanan = DB::table('vendors_has_jenis_bahan_cetaks')
+        $pemesanans = DB::table('pemesanans')->get();
+
+        $vendorpemesanan = [];
+
+        foreach($vendors as $v){
+            foreach($pemesanans as $p){
+                if($p->vendors_id == $v->id){
+                    array_push($vendorpemesanan, $v);
+                    break;
+                }
+            }
+        }
+        
+        // dd($vendorpemesanan);
+
+        $pesanan = DB::table('vendors_has_jenis_bahan_cetaks')
         ->leftJoin('jenis_bahan_cetaks', 'jenis_bahan_cetaks.id', '=', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id')
         ->leftJoin('pemesanans', 'jenis_bahan_cetaks.id', '=', 'pemesanans.jenis_bahan_cetaks_id')
-        ->select('vendors_has_jenis_bahan_cetaks.vendors_id', DB::raw('count(pemesanans.id) as jumlahpesanan'))
-        ->groupBy('vendors_has_jenis_bahan_cetaks.vendors_id')
+        ->whereNotNull('pemesanans.notas_id')
+        ->select('vendors_has_jenis_bahan_cetaks.vendors_id as idvendor', 'pemesanans.notas_id as idnota')
+        ->groupBy('vendors_has_jenis_bahan_cetaks.vendors_id', 'pemesanans.notas_id')
         ->get();
         
-        // dd($jumlah_pesanan);
+        // dd($pesanan);
 
-        foreach ($vendors as $key=>$v) {
-            $v->jumlah_pesanan = $jumlah_pesanan[$key]->jumlahpesanan; 
+        foreach ($vendorpemesanan as $key=>$v) {
+            $jumlah_nota = DB::table('pemesanans')
+            ->where('vendors_id', '=', $pesanan[$key]->idvendor)
+            ->distinct('notas_id')
+            ->count('notas_id');
+            // $jumlah_nota = DB::raw("SELECT count('notas_id') from pemesanans where vendors_id = ? group by notas_id");
+            // dd($jumlah_nota);
+            $v->jumlah_pesanan = $jumlah_nota; 
         }   
 
-        return view('pesanan.home', compact('vendors'));
+        // dd($vendorpemesanan);
+
+        return view('pesanan.home', compact('vendorpemesanan'));
     }
 
     public function indexPegawai()

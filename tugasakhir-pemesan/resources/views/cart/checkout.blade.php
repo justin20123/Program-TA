@@ -144,6 +144,7 @@
 @endsection
 
 @section('script')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         async function ambilLokasiUser() {
             return new Promise((resolve, reject) => {
@@ -200,7 +201,12 @@
                     var subtotalString = $('#subtotal').html();
                     var subtotal = parseInt(subtotalString.replace(/\,/g, ''), 10);
 
-                    updateTotal(subtotal);
+                    if ($('#statusantar').is(':checked')) {
+                totalBiaya = subtotal + biayaAntar;
+            } else {
+                totalBiaya = subtotal;
+            }
+            $('#totalBiaya').html(totalBiaya.toLocaleString());
 
                     // Check the state of the checkbox with ID 'statusantar'
 
@@ -213,13 +219,7 @@
         }
 
         async function updateTotal(subtotal) {
-            if ($('#statusantar').is(':checked')) {
-                totalBiaya = subtotal + biayaAntar;
-            } else {
-                totalBiaya = subtotal;
-            }
-
-            $('#totalBiaya').html(totalBiaya.toLocaleString());
+            
         }
 
         $(document).ready(function() {
@@ -230,6 +230,7 @@
 
             $(".delivery").hide();
             ambilLokasiSekarang();
+            
 
             // Open the map when the button is clicked
             $('#bukainputlatlong').click(function() {
@@ -254,7 +255,15 @@
 
               const formData = new FormData();
 
-              updateTotal();
+              var subtotalString = $('#subtotal').html();
+              var subtotal = parseInt(subtotalString.replace(/\,/g, ''), 10);
+
+              if ($('#statusantar').is(':checked')) {
+                totalBiaya = subtotal + biayaAntar;
+            } else {
+                totalBiaya = subtotal;
+            }
+
 
               formData.append('harga_total', totalBiaya);
 
@@ -298,7 +307,7 @@
                                 if (result.isConfirmed) {
                                     
                                     // Redirect to the vendor page
-                                    window.location.href = '/vendor/' + response.idvendor;
+                                    window.location.href = '/vendor/1';
                                 }
                             });
                     },
