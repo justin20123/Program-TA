@@ -6,7 +6,7 @@
         <a class="navbar-link">&ensp;</a>
         <a href="/cart" class="navbar-link">Cart</a>
         <a class="navbar-link">&ensp;</a>
-        <a href="/pengantar" class="navbar-link">Pengantar</a>
+        <a href="/pesanan" class="navbar-link">Pesanan</a>
         <a class="navbar-link">&ensp;</a>
         <a href="/pegawai" class="navbar-link">Pegawai</a>
     </div>

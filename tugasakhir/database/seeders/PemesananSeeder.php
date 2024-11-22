@@ -39,7 +39,7 @@ class PemesananSeeder extends Seeder
 
                     $idhargacetak = $list_harga_cetaks[$faker->numberBetween(1, count($list_harga_cetaks) -1)]->id;
 
-                    DB::table('pemesanans')->insert([
+                    $idpemesanan = DB::table('pemesanans')->insertGetId([
                         'penggunas_email' => "email$idpemesan@email.com",
                         'jumlah' => $faker->numberBetween(1, 100),
                         'url_file' => $faker->filePath(),
@@ -47,8 +47,32 @@ class PemesananSeeder extends Seeder
                         'jenis_bahan_cetaks_id' => $idjenisbahancetak,
                         'vendors_id' =>  $idvendor,
                         'notas_id' =>  $idnota,
+                        'perlu_verifikasi' => 0,
                     ]);
+                    $numprogress = $faker->numberBetween(1,3);
+                    for($j=0; $j<(($numprogress*2) + 1); $j++){
+                        $progress = "";
+                        if($j % 2 == 0 || $j != 7){
+                            $progress = "proses";
+                        }
+                        else if($j % 2 == 0 || $j != 7){
+                            $progress = "menunggu diambil";
+                        }
+                        else{
+                            $progress = "selesai";
+                        }
+                        DB::table('notas_progress')->insert([
+                            'pemesanans_id' => $idpemesanan,
+                            'notas_id' => $idnota,
+                            'tanggal_progress' => $faker->date(),
+                            'progress' => $progress,
+                            'url_ubah_file' => null,
+                            'terverifikasi' => null,
+
+                        ]); 
                     
+                        
+                    }
                 }
                 $idnota++; 
             }

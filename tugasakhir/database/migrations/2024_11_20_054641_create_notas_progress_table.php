@@ -13,11 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('pemesanans_has_opsi_details', function (Blueprint $table) {
+        Schema::create('notas_progress', function (Blueprint $table) {
             $table->unsignedBigInteger('pemesanans_id');
-            $table->unsignedBigInteger('opsi_details_id');
+            $table->unsignedBigInteger('notas_id');
+            $table->date('tanggal_progress')->nullable();
+            $table->enum('progress',['proses','menunggu verifikasi','selesai']);
+            $table->string('url_ubah_file',100)->nullable();
+            $table->tinyInteger('terverifikasi')->nullable();
             $table->foreign('pemesanans_id')->references('id')->on('pemesanans');
-            $table->foreign('opsi_details_id')->references('id')->on('opsi_details');
+            $table->foreign('notas_id')->references('id')->on('notas');
             $table->timestamps();
         });
     }
@@ -29,10 +33,11 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('pemesanans_has_opsi_details', function (Blueprint $table) {
+        Schema::table('notas_progress', function (Blueprint $table) {
             $table->dropForeign(['pemesanans_id']);
-            $table->dropForeign(['opsi_details_id']);
+            $table->dropForeign(['notas_id']);
         });
-        Schema::dropIfExists('pemesanans_has_opsi_details');
+
+        Schema::dropIfExists('notas_progress');
     }
 };

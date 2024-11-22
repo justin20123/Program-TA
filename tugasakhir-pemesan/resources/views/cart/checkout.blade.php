@@ -254,6 +254,10 @@
 
               const formData = new FormData();
 
+              updateTotal();
+
+              formData.append('harga_total', totalBiaya);
+
               $('[id^="idpemesanan-"]').each(function() {
                 var value = $(this).val();
                 idpemesanans.push(value);

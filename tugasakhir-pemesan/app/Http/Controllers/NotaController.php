@@ -25,8 +25,8 @@ class NotaController extends Controller
             $idpemesanans = explode(",", $request->idpemesanans);
 
             $idnota = DB::table('notas')->insertGetid([
+                'harga_total' => $request->harga_total,
                 'waktu_transaksi' => now(),
-                'status' => "proses",
                 'opsi_pengambilan' => "diambil",
                 'tanggal_selesai' => null,
                 'ulasan' => "",
@@ -43,8 +43,8 @@ class NotaController extends Controller
             ]);
 
             $idnota = DB::table('notas')->insertGetid([
+                'harga_total' => $request->harga_total,
                 'waktu_transaksi' => now(),
-                'status' => "proses",
                 'opsi_pengambilan' => "diambil",
                 'tanggal_selesai' => null,
                 'longitude_pengambilan'=>$request->longitude,
@@ -56,6 +56,13 @@ class NotaController extends Controller
             $pemesanan = Pemesanan::findOrFail($id);
             $pemesanan->notas_id = $idnota;
             $pemesanan->save();
+
+            DB::table('notas_progress')->insert([
+                'pemesanans_id' => $id,
+                'notas_id' => $idnota, 
+                'tanggal_progress' => now(),
+                'progress' => "proses",
+            ]);
         }
 
         return ["idnota"=>$idnota ,"message"=>"Pesanan berhasil dibuat, silahkan menunggu diproses"];
@@ -71,14 +78,162 @@ class NotaController extends Controller
 
         $notas = DB::table('notas')
         ->join('pemesanans', 'notas.id', '=', 'pemesanans.notas_id')
-        ->where('notas.status', 'proses')
-        ->select('notas.id as idnota', 'notas.waktu_transaksi as waktu_transaksi', 'notas.status', 'pemesanans.vendors_id as idvendor' , DB::raw('COUNT(pemesanans.id) as jumlah_pesanan'))
-        ->groupBy('notas.id', 'notas.waktu_transaksi', 'notas.status', 'pemesanans.vendors_id')
+        ->select('notas.id as idnota', 'notas.waktu_transaksi as waktu_transaksi', 'pemesanans.vendors_id as idvendor' , DB::raw('COUNT(pemesanans.id) as jumlah_pesanan'))
+        ->groupBy('notas.id', 'notas.waktu_transaksi', 'pemesanans.vendors_id')
+        ->orderBy('notas.waktu_transaksi')
         ->get();
+
+        $prioritas = [
+            'menunggu verifikasi', 
+            'proses', 
+            'menunggu diambil',  
+            'sedang diantar', 
+            'selesai'
+        ];
+
+        foreach ($notas as $n){
+            $vendor = DB::table('vendors')
+            ->where('id', $n->idvendor)
+            ->first();
+            $n->nama_vendor = $vendor->nama;
+            $n->foto_lokasi = $vendor->foto_lokasi;
+
+            $liststatus = DB::table('notas_progress')
+            ->where('notas_id','=', $n->idnota)
+            ->select('progress')
+            ->get();
+
+            
+    
+            $status = "selesai";
+    
+            $filtered_prioritas = $prioritas;
+            foreach ($liststatus as $ls) {
+                foreach ($filtered_prioritas as $key => $f) {
+                    if ($ls->progress == $f) {
+                        $filtered_prioritas = array_slice($filtered_prioritas, 0, $key);
+                        
+                        $status = $f;
+                        break; 
+                    }
+                }
+            }
+
+            $n->status = $status;
+    
+        }
 
         // dd($notas);
 
         return view('pesanan.vendors', compact('notas'));
+    }
+
+    public function convertProgressKePrioritas($array){
+        foreach($array as $a){
+            if($a->progress == 'menunggu verifikasi'){
+                $a->prioritas = 4;
+            }
+            else if($a->progress == 'proses'){
+                $a->prioritas = 3;
+            }     
+            else if($a->progress == 'sedang diantar'){
+                $a->prioritas = 2;
+            }
+            else if($a->progress == 'menunggu diambil'){
+                $a->prioritas = 1;
+            }
+            else if($a->progress == 'selesai'){
+                $a->prioritas = 0;
+            }
+
+        }
+        return $a;
+    }
+
+    public function convertPrioritasKeProgress($key){
+        $prioritas = [
+            'selesai', 
+            'sedang diantar', 
+            'menunggu diambil',  
+            'proses', 
+            'menunggu verifikasi'
+        ];
+
+        return $prioritas[$key];
+    }
+
+    public function showDetailPesanan($idnota){
+        // $info_nota = DB::table('notas_progress')
+        // ->where('notas_id', '=', $idnota)
+        // ->get();
+
+        // dd($info_nota);
+
+        $pemesanans = DB::table('pemesanans')
+        ->where('notas_id', '=', $idnota)
+        ->get();
+
+        
+        $maxPrioritas = 0;
+
+        foreach($pemesanans as $p){
+            $minPrioritasPemesanan = 4;
+
+            $info_nota_pemesanan = DB::table('notas_progress')
+            ->where('notas_id', '=', $idnota)
+            ->where('pemesanans_id', '=', $p->id)
+            ->get();
+
+            // dd($info_nota_pemesanan);
+
+            $this->convertProgressKePrioritas($info_nota_pemesanan);
+
+            foreach ($info_nota_pemesanan as $inp){
+                if($inp->prioritas < $minPrioritasPemesanan){
+                    //cari progress terjauh (prioritas terendah)
+                    $minPrioritasPemesanan = $inp->prioritas;
+                }
+            }
+            if($minPrioritasPemesanan < $maxPrioritas){
+                //cari prioritas tertinggi
+                $maxPrioritas = $minPrioritasPemesanan;
+            }
+        }
+
+
+
+        $progress = $this->convertPrioritasKeProgress($maxPrioritas);
+
+        dd($progress);
+
+
+        $pemesanans = DB::table('pemesanans')
+        ->where('notas_id', '=', $idnota)
+        ->get();
+
+        $arrPerbandingan = [];
+
+        foreach($pemesanans as $key=>$p) {
+            $progress = DB::table('notas_progress')
+            ->where('notas_id', '=', $idnota)
+            ->where('pemesanans_id', '=', $p->id)
+            ->orderBy('tanggal_progress', 'asc')
+            ->get();
+
+            $arrPerbandingan[$key] = $progress;
+        }
+
+        $result = [];
+
+        $key = [];
+        foreach($arrPerbandingan as $ap){
+            if($ap['progress'] == "menunggu verifikasi"){
+                array_push($result, $ap);
+            }
+            else{
+                
+            }
+        }
     }
 
     /**
@@ -101,7 +256,6 @@ class NotaController extends Controller
     {
         $request->validate([
             'waktu_transaksi' => 'required',
-            'status' => 'required',
             'opsi_pengambilan' => 'required',
             'alamat_pengambilan' => 'required',
             'tanggal_selesai' => 'required',
@@ -146,7 +300,6 @@ class NotaController extends Controller
     {
         $request->validate([
             'waktu_transaksi' => 'required',
-            'status' => 'required',
             'opsi_pengambilan' => 'required',
             'alamat_pengambilan' => 'required',
             'tanggal_selesai' => 'required',

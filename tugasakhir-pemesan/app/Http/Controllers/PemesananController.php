@@ -77,16 +77,25 @@ class PemesananController extends Controller
         $hargacetakcontroller = new HargaCetakController();
 
         $idhargacetak = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id, true);
+
+        $harga = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id);
+
+        $perlu_verifikasi = 0;
+        if($harga > 200000){
+            $perlu_verifikasi  = 1;
+        }
         
         $id = DB::table('pemesanans')->insertGetId([
             'penggunas_email' => 'email1@email.com', 
             'jumlah' => $request->input('jumlah'), 
             'url_file' => '', 
             'catatan' => $request->input('catatan'),
+            'perlu_verifikasi' => $perlu_verifikasi,
             'harga_cetaks_id' => $idhargacetak,
             'jenis_bahan_cetaks_id' => $request->input('jenis_bahan_cetaks_id'), 
             'vendors_id' => $request->input('vendors_id'), 
-            'created_at' => now()
+            
+            'created_at' => now(),
         ]);
 
         foreach($idopsidetail as $od){

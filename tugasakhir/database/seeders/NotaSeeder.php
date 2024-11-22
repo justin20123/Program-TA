@@ -21,9 +21,7 @@ class NotaSeeder extends Seeder
         for ($i = 0; $i < 30; $i++) {
             DB::table('notas')->insert([
                 'waktu_transaksi' => $faker->dateTimeThisYear,
-                'status' => $faker->randomElement(["proses", "sedang diantar", "menunggu diambil", "selesai", "dibatalkan", "menunggu pembayaran"]),
                 'opsi_pengambilan' => $faker->randomElement(["diambil", "diantar"]),
-                'tanggal_selesai' => $faker->date(),
                 'ulasan' => $faker->sentence,
             ]);
             

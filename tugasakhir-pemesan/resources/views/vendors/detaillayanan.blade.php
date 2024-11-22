@@ -364,10 +364,8 @@
                                 icon: 'success',
                                 confirmButtonText: 'OK'
                             }).then((result) => {
-                                console.log(result);
                                 if (result.isConfirmed) {
-                                    window.location.href = '/pesanan';
-                                }
+                                    window.location.href = '/vendor/' + vendors_id;                                }
                             });
 
                         },

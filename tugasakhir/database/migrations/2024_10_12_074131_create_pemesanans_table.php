@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('jumlah');
             $table->string('url_file', 100);
             $table->string('catatan', 200)->nullable();
+            $table->tinyInteger('perlu_verifikasi');
             $table->unsignedBigInteger('harga_cetaks_id');
             $table->unsignedBigInteger('jenis_bahan_cetaks_id');
             $table->unsignedBigInteger('vendors_id');
