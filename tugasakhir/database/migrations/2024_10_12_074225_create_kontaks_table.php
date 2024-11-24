@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('vendors_id');
             $table->string('platform', 45);
             $table->string('link', 225);
-            $table->string('username_kontak', 20);
+            $table->string('username_kontak', 30);
             $table->foreign('vendors_id')->references('id')->on('vendors');
             $table->timestamps();
         });

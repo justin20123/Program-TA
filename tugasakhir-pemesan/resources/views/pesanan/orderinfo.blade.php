@@ -6,72 +6,76 @@
     </ol>
 @endsection
 @section('menu')
-<div class="container my-4">
+<div class="container my-5">
     <div class="card">
         <div class="card-body">
             <!-- Header Section -->
-            <div class="d-flex justify-content-between">
-                <div>
-                    <p class="mb-1">2 Layanan • Pesanan dilakukan pada 17 April, 2024 at 16:00</p>
-                    <h4 class="font-weight-bold text-primary">Rp. 355.000</h4>
-                </div>
-                <div>
-                    <p class="mb-0 text-muted">Perkiraan sampai: 24 April 2024</p>
+            <div class="p-3" style="background-color: #fffbe6; border-radius: 5px;">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted">2 Barang • Pesanan dilakukan pada 17 April, 2024 at 16:00</span>
+                    </div>
+                    <div>
+                        <span class="font-weight-bold text-primary" style="font-size: 1.5rem;">Rp. 355.000</span>
+                    </div>
                 </div>
             </div>
-            <hr>
-
-            <!-- Progress Bar Section -->
-            <div class="progress mb-4">
-                <div class="progress-bar progress-bar-custom" style="width: 75%;" role="progressbar"></div>
-            </div>
-            <div class="d-flex justify-content-between">
-                <div class="step">
-                    <img src="https://via.placeholder.com/32" alt="step1">
-                    <span>Pesanan Dibuat</span>
-                </div>
-                <div class="step">
-                    <img src="https://via.placeholder.com/32" alt="step2">
-                    <span>Diproses</span>
-                </div>
-                <div class="step">
-                    <img src="https://via.placeholder.com/32" alt="step3">
-                    <span>Sedang Diantar</span>
-                </div>
-                <div class="step">
-                    <img src="https://via.placeholder.com/32" alt="step4">
-                    <span>Selesai</span>
-                </div>
+            <div>
+                <p class="mb-0 text-muted py-2">Perkiraan sampai: 24 April 2024</p>
             </div>
 
-            <!-- Order Activity Section -->
-            <div class="order-activity mt-4">
+
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-bar"></div>
+                <div class="progress-bar-filled"></div>
+    
+                <div class="progress-row">
+                    <!-- Step 1 -->
+                    <div class="step">
+                        <div class="step-circle active">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <p class="step-label active">Pesanan Dibuat</p>
+                    </div>
+    
+                    <!-- Step 2 -->
+                    <div class="step">
+                        <div class="step-circle active">
+                            <i class="fas fa-box"></i>
+                        </div>
+                        <p class="step-label active">Diproses</p>
+                    </div>
+    
+                    <!-- Step 3 -->
+                    <div class="step">
+                        <div class="step-circle">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <p class="step-label">Sedang Diantar</p>
+                    </div>
+    
+                    <!-- Step 4 -->
+                    <div class="step">
+                        <div class="step-circle">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <p class="step-label">Selesai</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Info -->
+            <div class="mt-4">
                 <h5 class="font-weight-bold">Order Activity</h5>
-                <ul class="list-unstyled">
-                    <li>
-                        <p class="mb-0">Pesanan sedang diantar</p>
-                        <small class="text-muted">22 April, 2024 14:00</small>
-                    </li>
-                    <li>
-                        <p class="mb-0">Pesanan selesai diproses</p>
-                        <small class="text-muted">21 April, 2024 19:32</small>
-                    </li>
-                    <li>
-                        <p class="mb-0">Menunggu Verifikasi Hasil</p>
-                        <small class="text-muted">21 April, 2024 19:32</small>
-                    </li>
-                    <li>
-                        <p class="mb-0">Pesanan sedang diproses</p>
-                        <small class="text-muted">20 April, 2024 19:32</small>
-                    </li>
-                    <li>
-                        <p class="mb-0">Pesanan berhasil diverifikasi</p>
-                        <small class="text-muted">20 April, 2024 17:30</small>
-                    </li>
-                    <li>
-                        <p class="mb-0">Pesanan berhasil dilakukan</p>
-                        <small class="text-muted">20 April, 2024 17:00</small>
-                    </li>
+                <ul class="list-group list-group-flush">
+                    
+                    @foreach ($arrSummaryReverse as $key=>$as)
+                        <li class="list-group-item">
+                            <div> {{$as['progress']}} </div>
+                            <small class="text-muted">{{$as['waktu_progress_format']}}</small>
+                        </li>
+                    @endforeach
                 </ul>
             </div>
         </div>

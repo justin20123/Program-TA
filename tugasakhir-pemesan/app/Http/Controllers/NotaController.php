@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Nota;
 use App\Models\Pemesanan;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -53,7 +54,7 @@ class NotaController extends Controller
                 'harga_total' => $request->harga_total,
                 'waktu_transaksi' => now(),
                 'opsi_pengambilan' => "diambil",
-                'waktu_menerima_pesanan' => null,
+                'waktu_menerima_pesanan' => now(),
                 'waktu_diantar' => null,
                 'waktu_tunggu_diambil' => null,
                 'waktu_selesai' => null,
@@ -73,9 +74,8 @@ class NotaController extends Controller
             $idnota = DB::table('notas')->insertGetid([
                 'harga_total' => $request->harga_total,
                 'waktu_transaksi' => now(),
-                'waktu_menerima_pesanan' => now(),
                 'opsi_pengambilan' => "diantar",
-                'waktu_menerima_pesanan' => null,
+                'waktu_menerima_pesanan' => now(),
                 'waktu_diantar' => null,
                 'waktu_tunggu_diambil' => null,
                 'waktu_selesai' => null,
@@ -139,30 +139,18 @@ class NotaController extends Controller
     public function convertProgressKePrioritas($array){
         foreach($array as $a){
             if($a->progress == 'menunggu verifikasi'){
-                $a->prioritas = 4;
-            }
-            else if($a->progress == 'proses'){
-                $a->prioritas = 3;
-            }     
-            else if($a->progress == 'sedang diantar'){
-                $a->prioritas = 2;
-            }
-            else if($a->progress == 'menunggu diambil'){
                 $a->prioritas = 1;
             }
-            else if($a->progress == 'selesai'){
+            else if($a->progress == 'proses'){
                 $a->prioritas = 0;
-            }
+            }     
 
         }
         return $a;
     }
 
     public function convertPrioritasKeProgress($key){
-        $prioritas = [
-            'selesai', 
-            'sedang diantar', 
-            'menunggu diambil',  
+        $prioritas = [  
             'proses', 
             'menunggu verifikasi'
         ];
@@ -170,78 +158,112 @@ class NotaController extends Controller
         return $prioritas[$key];
     }
 
+    public function formatDateTime($datetime){
+        $dateTime = new DateTime($datetime);
+        $formattedDate = $dateTime->format('d F, Y H:i');
+
+        return $formattedDate; 
+    }
+
     public function showDetailPesanan($idnota){
-        // $info_nota = DB::table('notas_progress')
-        // ->where('notas_id', '=', $idnota)
-        // ->get();
-
-        // dd($info_nota);
-
-        $pemesanans = DB::table('pemesanans')
-        ->where('notas_id', '=', $idnota)
-        ->get();
-
         
+
+        $jumlah_pesanan = DB::table('pemesanans')
+        ->where('notas_id', '=', $idnota)
+        ->count();
+
+        $arrSummary = [];
+        $arrProgress = [];
         $maxPrioritas = 0;
 
-        foreach($pemesanans as $p){
-            $minPrioritasPemesanan = 4;
+        $notas = DB::table('notas')
+        ->where('id', '=', $idnota)
+        ->first();
 
-            $info_nota_pemesanan = DB::table('notas_progress')
-            ->where('notas_id', '=', $idnota)
-            ->where('pemesanans_id', '=', $p->id)
-            ->get();
+        $status_antar = $notas->opsi_pengambilan;
 
-            // dd($info_nota_pemesanan);
+        $transaksi = [
+            'waktu_progress_format' => $this->formatDateTime($notas->waktu_transaksi),
+            'progress' => 'transaksi'
+        ];
 
-            $this->convertProgressKePrioritas($info_nota_pemesanan);
+        array_push($arrSummary, $transaksi);
 
-            foreach ($info_nota_pemesanan as $inp){
-                if($inp->prioritas < $minPrioritasPemesanan){
-                    //cari progress terjauh (prioritas terendah)
-                    $minPrioritasPemesanan = $inp->prioritas;
-                }
-            }
-            if($minPrioritasPemesanan < $maxPrioritas){
-                //cari prioritas tertinggi
-                $maxPrioritas = $minPrioritasPemesanan;
-            }
-        }
+        $terima = [
+            'waktu_progress_format' => $this->formatDateTime($notas->waktu_menerima_pesanan),
+            'progress' => 'Pesanan diterima'
+        ];
 
+        array_push($arrSummary, $terima);
 
+        $proses = [
+            'waktu_progress_format' => $this->formatDateTime($notas->waktu_menerima_pesanan),
+            'progress' => 'Pesanan diproses'
+        ];
 
-        $progress = $this->convertPrioritasKeProgress($maxPrioritas);
+        array_push($arrSummary, $proses);
 
-        dd($progress);
-
-
-        $pemesanans = DB::table('pemesanans')
+        $notas_progress = DB::table('notas_progress')
         ->where('notas_id', '=', $idnota)
+        ->orderBy('waktu_progress')
         ->get();
 
-        $arrPerbandingan = [];
-
-        foreach($pemesanans as $key=>$p) {
-            $progress = DB::table('notas_progress')
-            ->where('notas_id', '=', $idnota)
-            ->where('pemesanans_id', '=', $p->id)
-            ->orderBy('tanggal_progress', 'asc')
-            ->get();
-
-            $arrPerbandingan[$key] = $progress;
+        $jumlah_selesai = 0;
+        $npSelesai = [];
+        foreach($notas_progress as $key => $np){
+             if($key == 0){
+                 array_push($arrProgress, $np);
+             }
+             else if($np->progress == 'menunggu verifikasi' || $np->progress == 'memperbaiki'){
+                 array_push($arrProgress, $np);
+             }
+             else if($np->progress == 'selesai'){
+                array_push($arrProgress, $np);
+                $jumlah_selesai++;
+                $npSelesai = $np;
+             }
         }
-
-        $result = [];
-
-        $key = [];
-        foreach($arrPerbandingan as $ap){
-            if($ap['progress'] == "menunggu verifikasi"){
-                array_push($result, $ap);
-            }
-            else{
+        if($jumlah_selesai == $jumlah_pesanan){
+            $proses_seleseai = [
+                'waktu_progress_format' => $this->formatDateTime($np->waktu_progress),
+                'progress' => 'Pesanan selesai diproses'
+            ];
+            array_push($arrSummary, $proses_seleseai);
+            $arrProgress = null;
+            $array = [];
+            if($status_antar == 'diambil'){
+                $array = [
+                    'waktu_progress_format' => $this->formatDateTime($notas->waktu_tunggu_diambil),
+                    'progress' => 'Menunggu diambil'
+                ];
                 
             }
+            else if($status_antar == 'diantar'){
+                $array = [
+                    'waktu_progress_format' => $this->formatDateTime($notas->waktu_diantar),
+                    'progress' => 'Pesanan sedang diantar'
+                ];
+            }
+            array_push($arrSummary, $array);
+
+            if($notas->waktu_selesai){
+                $selesai = [
+                    'waktu_progress_format' => $this->formatDateTime($notas->waktu_selesai),
+                    'progress' => 'Pesanan sudah selesai'
+                ];
+                array_push($arrSummary, $selesai);
+            }
+            
+            $arrSummaryReverse = [];
+            
+            for($i = count($arrSummary) -1; $i>=0; $i--){
+                array_push($arrSummaryReverse, $arrSummary[$i]);
+            }
+
         }
+
+        return view('pesanan.orderinfo', compact('arrProgress', 'arrSummaryReverse'));
+        
     }
 
     /**

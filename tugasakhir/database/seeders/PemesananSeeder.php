@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use Carbon\Carbon;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Faker\Factory as Faker;
@@ -49,22 +50,29 @@ class PemesananSeeder extends Seeder
                         'notas_id' =>  $idnota,
                         'perlu_verifikasi' => 0,
                     ]);
-                    $numprogress = $faker->numberBetween(1,3);
-                    for($j=0; $j<(($numprogress*2) + 1); $j++){
+                    $numprogress = $faker->numberBetween(1,2);
+                    $startDate = Carbon::createFromFormat('Y-m-d',$faker->date());
+                    for($j=0; $j<(($numprogress*3) + 1); $j++){
                         $progress = "";
-                        if($j % 2 == 0 || $j != 7){
+                        
+                        if($j % 3 == 0 && $j != (($numprogress*3))){
                             $progress = "proses";
                         }
-                        else if($j % 2 == 0 || $j != 7){
-                            $progress = "menunggu diambil";
+                        else if($j % 3 == 1 && $j != (($numprogress*3))){
+                            $progress = "menunggu verifikasi";
+                        }
+                        else if($j % 3 == 2 && $j != (($numprogress*3))){
+                            $progress = "memperbaiki";
                         }
                         else{
                             $progress = "selesai";
                         }
+                        $updatedDate =  $startDate->copy()->addDays($faker->numberBetween(0,1))->addMinutes(30);
+                        $startDate = $updatedDate;
                         DB::table('notas_progress')->insert([
                             'pemesanans_id' => $idpemesanan,
                             'notas_id' => $idnota,
-                            'tanggal_progress' => $faker->date(),
+                            'waktu_progress' => $updatedDate,
                             'progress' => $progress,
                             'url_ubah_file' => null,
                             'terverifikasi' => null,

@@ -16,8 +16,8 @@ return new class extends Migration
         Schema::create('notas_progress', function (Blueprint $table) {
             $table->unsignedBigInteger('pemesanans_id');
             $table->unsignedBigInteger('notas_id');
-            $table->date('tanggal_progress')->nullable();
-            $table->enum('progress',['proses','menunggu verifikasi','selesai']);
+            $table->dateTime('waktu_progress')->nullable();
+            $table->enum('progress',['proses','menunggu verifikasi', 'memperbaiki', 'selesai']);
             $table->string('url_ubah_file',100)->nullable();
             $table->tinyInteger('terverifikasi')->nullable();
             $table->foreign('pemesanans_id')->references('id')->on('pemesanans');
