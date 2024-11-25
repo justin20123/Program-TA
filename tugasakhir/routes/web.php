@@ -60,6 +60,8 @@ Route::get('/pesanancetak/{id}', [PemesananController::class, 'index'])->name('p
 Route::get('/terimapesanan/{id}', [NotaController::class, 'terimaPesanan']);
 Route::get('/pesanancetak2/{id}', [PemesananController::class, 'show'])->name('pesanancetak.show');
 
+Route::post('/kirimcontoh', [NotaController::class, 'kirimcontoh']);
+
 //detailpesanan
 Route::get('/pesanancetak/{idvendor}/detail/{idnota}', [PemesananController::class, 'detailPesanan'])->name('pesanan.detailPesanan');
 

@@ -9,6 +9,19 @@
 
 @endsection
 @section('menu')
+
+<div id="modalKirimContoh" class="modal">
+  <div class="modal-content">
+      <span class="close">&times;</span>
+      <h2>Submit Data</h2>
+      <form action="kirimcontoh">
+          <input type="file" name="fileperubahan" id="fileperubahan">
+          <input type="hidden" name="idpemesanan" id="idpemesananhidden">
+          <button type="submit">Submit</button>
+      </form>
+  </div>
+</div>
+
 <div id="error-message" style="color: red; display: none;"></div>
 <h3 class="text-center p-4">Pesanan Vendor Anda</h1>
 <h5 class="text-center">{{$notaDetail[0]['nota']->nama}}</h2>
@@ -71,7 +84,7 @@
                     <a href="pesanan/perubahan/{{$p->id}}" class="btn btn-primary">Lihat Perubahan</a>
                 </li>
                 <li class="list-inline-item">
-                    <a href="editdetail/edit/option" class="btn btn-primary">Kirimkan Contoh</a>
+                    <button class="btn btn-primary kirimcontoh" data-idpemesanan="{{$p->id}}">Kirimkan Contoh</button>
                 </li>
                 <li class="list-inline-item">
                     <a href="editdetail/edit/option" class="btn btn-primary">Unmark Done</a>
@@ -125,6 +138,14 @@ $(document).ready(function() {
                 $('#error-message').text('There was a problem with the fetch operation: ' + error.message).show();
                 console.error('Fetch error:', error);
             });
+    });
+    
+    $(document).on('click', '.kirimcontoh', function() {
+      var button = $(this);
+      var idpemesanan = button.data('idpemesanan');
+      
+      $('#idpemesananhidden').val(idpemesanan);
+      $('#modalKirimContoh').modal('show');
     });
 });
   </script>

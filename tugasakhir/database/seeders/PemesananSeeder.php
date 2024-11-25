@@ -72,6 +72,7 @@ class PemesananSeeder extends Seeder
                         DB::table('notas_progress')->insert([
                             'pemesanans_id' => $idpemesanan,
                             'notas_id' => $idnota,
+                            'urutan_progress' => $j,
                             'waktu_progress' => $updatedDate,
                             'progress' => $progress,
                             'url_ubah_file' => null,

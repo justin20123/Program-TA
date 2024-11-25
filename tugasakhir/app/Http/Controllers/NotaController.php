@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Nota;
+use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class NotaController extends Controller
 {
@@ -19,6 +21,28 @@ class NotaController extends Controller
         $nota->save();
 
         return back()->with('message', 'Pesanan berhasil diterima');
+    }
+
+    public function kirimContoh(Request $request){
+        $request->validate([
+            'file' => 'required',   
+            'idpemesanan' => 'required',
+        ]);
+        $idnota = DB::table('pemesanans')
+        ->where('id','=', $request->idpemesanan)
+        ->select('notas_id')
+        ->first();
+
+        $id_nota = $idnota->notas_id;
+
+        $notas_progress_latest = DB::table('notas_progress')
+        ->where('pemesanans_id','=', $request->idpemesanan)
+        ->where('notas_id','=', $request->id_nota)
+        ->orderBy('urutan_progress', 'desc')
+        ->select('urutan_progress')
+        ->first();
+
+        $latest_progress = $notas_progress_latest->urutan_progress;
     }
 
     public function index()
