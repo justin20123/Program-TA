@@ -48,7 +48,7 @@ class PemesananSeeder extends Seeder
                         'jenis_bahan_cetaks_id' => $idjenisbahancetak,
                         'vendors_id' =>  $idvendor,
                         'notas_id' =>  $idnota,
-                        'perlu_verifikasi' => 0,
+                        'perlu_verifikasi' => $faker->numberBetween(0, 1),
                     ]);
                     $numprogress = $faker->numberBetween(1,2);
                     $startDate = Carbon::createFromFormat('Y-m-d',$faker->date());

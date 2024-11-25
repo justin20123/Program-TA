@@ -44,9 +44,9 @@
             @if (!$nd['nota']->waktu_menerima_pesanan)
             <a href="/terimapesanan/{{$nd['nota']->id}}" class="btn btn-primary">Terima Pesanan</a>
            
-            @else{
+            @else
               <a href="/pesanancetak/{{$nd['pemesanans'][0]->vendors_id}}/detail/{{$nd['nota']->id}}" class="btn btn-primary">Details</a>
-            }
+            
             @endif
             
         </div>

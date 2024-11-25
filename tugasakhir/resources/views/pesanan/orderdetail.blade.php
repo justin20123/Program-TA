@@ -10,19 +10,37 @@
 @endsection
 @section('menu')
 
-<div id="modalKirimContoh" class="modal">
-  <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2>Submit Data</h2>
-      <form action="kirimcontoh">
-          <input type="file" name="fileperubahan" id="fileperubahan">
+<div class="modal fade" id="modalKirimContoh" tabindex="-1" role="dialog" aria-labelledby="modalKirimContohLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalKirimContohLabel">Submit Data</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form action="/kirimcontoh" method="POST" enctype="multipart/form-data">
+          @csrf
+          <div class="form-group">
+            <label for="fileperubahan">Upload File</label>
+            <input type="file" class="form-control-file" name="fileperubahan" id="fileperubahan" accept=".pdf" required>
+          </div>
           <input type="hidden" name="idpemesanan" id="idpemesananhidden">
-          <button type="submit">Submit</button>
-      </form>
+          <input type="submit" value="Submit" class="btn btn-primary">
+        </form>
+      </div>
+    </div>
   </div>
-</div>
+ </div>
 
 <div id="error-message" style="color: red; display: none;"></div>
+@if(session('message'))
+        <div class="alert alert-success">
+            {{ session('message') }}
+        </div>
+    @endif
+
 <h3 class="text-center p-4">Pesanan Vendor Anda</h1>
 <h5 class="text-center">{{$notaDetail[0]['nota']->nama}}</h2>
 <div class="stepper">
@@ -83,11 +101,13 @@
                 <li class="list-inline-item">
                     <a href="pesanan/perubahan/{{$p->id}}" class="btn btn-primary">Lihat Perubahan</a>
                 </li>
+                @if($p->perlu_verifikasi == 1)
+                  <li class="list-inline-item">
+                      <button class="btn btn-primary kirimcontoh" data-idpemesanan="{{$p->id}}">Kirimkan Contoh</button>
+                  </li>
+                @endif
                 <li class="list-inline-item">
-                    <button class="btn btn-primary kirimcontoh" data-idpemesanan="{{$p->id}}">Kirimkan Contoh</button>
-                </li>
-                <li class="list-inline-item">
-                    <a href="editdetail/edit/option" class="btn btn-primary">Unmark Done</a>
+                    <a href="editdetail/edit/option" class="btn btn-primary">Mark as Done</a>
                 </li>
             </ul>
         </td>
@@ -141,11 +161,17 @@ $(document).ready(function() {
     });
     
     $(document).on('click', '.kirimcontoh', function() {
+      
+      
       var button = $(this);
       var idpemesanan = button.data('idpemesanan');
       
+
+      
       $('#idpemesananhidden').val(idpemesanan);
+      
       $('#modalKirimContoh').modal('show');
+      alert('Kirim');
     });
 });
   </script>

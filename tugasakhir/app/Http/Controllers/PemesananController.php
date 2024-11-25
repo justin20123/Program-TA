@@ -83,26 +83,38 @@ class PemesananController extends Controller
 
         $notaDetail = [];
 
-        $pemesanan = DB::table('pemesanans')
+        $pemesanans = DB::table('pemesanans')
             ->join('jenis_bahan_cetaks', 'jenis_bahan_cetaks.id', '=', 'pemesanans.jenis_bahan_cetaks_id')
             ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
             ->join('layanan_cetaks', 'layanan_cetaks.id', '=', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id')
-            ->where('pemesanans.id', '=', $notaData->idpemesanans)
+            ->where('pemesanans.notas_id', '=', $idnota)
             ->select('pemesanans.*', 'layanan_cetaks.satuan as satuan', 'layanan_cetaks.nama as layanan')
-            ->first();
+            ->get();
+            
+            // dd($pemesanans);
 
-        $harga_cetak = DB::table('harga_cetaks')
-            ->where('id', '=', $pemesanan->harga_cetaks_id)
-            ->select('harga_satuan')
-            ->first();
-        $pemesanan->harga_satuan = $harga_cetak->harga_satuan;
-        if (!isset($notaDetail[$notaData->id])) {
-            $notaDetail[$notaData->id] = [
-                'nota' => $notaData,
-                'pemesanans' => [],
-            ];
-        }
-        array_push($notaDetail[$notaData->id]['pemesanans'], $pemesanan);
+            foreach ($pemesanans as $p) {
+                // Fetch harga_cetak for each pemesanan
+                $harga_cetak = DB::table('harga_cetaks')
+                    ->where('id', '=', $p->harga_cetaks_id) // Assuming harga_cetak_id exists in pemesanan
+                    ->select('harga_satuan')
+                    ->first();
+            
+                if ($harga_cetak) {
+                    $p->harga_satuan = $harga_cetak->harga_satuan;
+                }
+            
+                if (!isset($notaDetail[$notaData->id])) {
+                    $notaDetail[$notaData->id] = [
+                        'nota' => $notaData,
+                        'pemesanans' => [],
+                    ];
+                }
+
+                array_push($notaDetail[$notaData->id]['pemesanans'], $p);
+            }
+            
+            
 
         $notaDetail = array_values($notaDetail);
         // dd($notaDetail);

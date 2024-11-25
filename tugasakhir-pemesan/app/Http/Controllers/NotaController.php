@@ -136,27 +136,7 @@ class NotaController extends Controller
         return view('pesanan.vendors', compact('notas'));
     }
 
-    public function convertProgressKePrioritas($array){
-        foreach($array as $a){
-            if($a->progress == 'menunggu verifikasi'){
-                $a->prioritas = 1;
-            }
-            else if($a->progress == 'proses'){
-                $a->prioritas = 0;
-            }     
-
-        }
-        return $a;
-    }
-
-    public function convertPrioritasKeProgress($key){
-        $prioritas = [  
-            'proses', 
-            'menunggu verifikasi'
-        ];
-
-        return $prioritas[$key];
-    }
+ 
 
     public function formatDateTime($datetime){
         $dateTime = new DateTime($datetime);

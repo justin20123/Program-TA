@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Nota;
+use App\Models\NotaProgress;
 use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -25,7 +26,7 @@ class NotaController extends Controller
 
     public function kirimContoh(Request $request){
         $request->validate([
-            'file' => 'required',   
+            'fileperubahan' => 'required|file|mimes:pdf|max:20480',   
             'idpemesanan' => 'required',
         ]);
         $idnota = DB::table('pemesanans')
@@ -42,7 +43,35 @@ class NotaController extends Controller
         ->select('urutan_progress')
         ->first();
 
-        $latest_progress = $notas_progress_latest->urutan_progress;
+        if (!$notas_progress_latest) {
+            $latest_progress = 0;
+        } else {
+            $latest_progress = $notas_progress_latest->urutan_progress + 1;
+        }
+
+        $file = $request->file('fileperubahan');
+        $fileName = $latest_progress . '.pdf';
+
+        $directory = base_path('../verifikasi_file/'. $request->idpemesanan);
+
+        if (!file_exists($directory)) {
+            mkdir($directory, 0755, true); //0755: pemilik = rwx; grup, lainnya = rx (tidak bisa write)
+        }
+        $file->move($directory, $fileName);
+
+        $relativePath = 'verifikasi_file/' . $request->idpemesanan . '/' . $fileName;
+
+        $nota_progress = new NotaProgress();
+        $nota_progress->pemesanans_id = $request->idpemesanan;
+        $nota_progress->notas_id = $id_nota;
+        $nota_progress->urutan_progress = $latest_progress;
+        $nota_progress->waktu_progress = now();
+        $nota_progress->progress = 'menunggu verifikasi';
+        $nota_progress->url_ubah_file = $relativePath;
+        
+        $nota_progress->save();
+
+        return back()->with('message', 'Contoh file berhasil dikirim');
     }
 
     public function index()
