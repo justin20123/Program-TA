@@ -24,8 +24,7 @@
           @csrf
           <div class="form-group">
             <label for="fileperubahan">Upload File</label>
-            <input type="file" class="form-control-file" name="fileperubahan" id="fileperubahan" accept=".pdf" required>
-          </div>
+            <input type="file" class="form-control-file" name="fileperubahan" id="fileperubahan" accept=".pdf, image/jpeg, image/jpg, image/png, image/gif" required>          </div>
           <input type="hidden" name="idpemesanan" id="idpemesananhidden">
           <input type="submit" value="Submit" class="btn btn-primary">
         </form>
@@ -166,12 +165,9 @@ $(document).ready(function() {
       var button = $(this);
       var idpemesanan = button.data('idpemesanan');
       
-
-      
       $('#idpemesananhidden').val(idpemesanan);
       
       $('#modalKirimContoh').modal('show');
-      alert('Kirim');
     });
 });
   </script>

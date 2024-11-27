@@ -78,7 +78,9 @@ class PemesananController extends Controller
 
         $idhargacetak = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id, true);
 
-        $harga = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id);
+        $hargasatuan = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id);
+
+        $harga = $hargasatuan * $request->input('jumlah');
 
         $perlu_verifikasi = 0;
         if($harga > 200000){

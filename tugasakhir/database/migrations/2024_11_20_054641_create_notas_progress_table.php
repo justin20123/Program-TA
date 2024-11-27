@@ -18,9 +18,10 @@ return new class extends Migration
             $table->unsignedBigInteger('notas_id');
             $table->unsignedBigInteger('urutan_progress');
             $table->dateTime('waktu_progress')->nullable();
-            $table->enum('progress',['proses','menunggu verifikasi', 'memperbaiki', 'selesai']);
+            $table->enum('progress',['proses','menunggu verifikasi', 'memperbaiki', 'terverifikasi']);
             $table->string('url_ubah_file',100)->nullable();
             $table->tinyInteger('terverifikasi')->nullable();
+            $table->string('perubahan', 250)->nullable();
             $table->foreign('pemesanans_id')->references('id')->on('pemesanans');
             $table->foreign('notas_id')->references('id')->on('notas');
             $table->timestamps();

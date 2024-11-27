@@ -26,7 +26,7 @@ class NotaController extends Controller
 
     public function kirimContoh(Request $request){
         $request->validate([
-            'fileperubahan' => 'required|file|mimes:pdf|max:20480',   
+            'fileperubahan' => 'required|file|mimes:pdf,jpg,jpeg,png,gif|max:20480',   
             'idpemesanan' => 'required',
         ]);
         $idnota = DB::table('pemesanans')

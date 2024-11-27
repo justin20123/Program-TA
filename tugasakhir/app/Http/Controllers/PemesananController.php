@@ -42,6 +42,8 @@ class PemesananController extends Controller
             ->select('notas.*', 'pemesanans.id as pemesanans_id', 'penggunas.nama as nama')
             ->get();
 
+            // dd($notaData);
+
         $notaDetail = [];
         foreach ($notaData as $n) {
             $n->status = $this->getStatus($n);

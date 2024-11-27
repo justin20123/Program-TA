@@ -67,3 +67,6 @@ Route::get('/pesanan', [NotaController::class, 'indexPesanan']);
 
 //info pesanan
 Route::get('/pesanan/{idnota}', [NotaController::class, 'showDetailPesanan']);
+
+//verifikasi
+Route::get('/verifikasi/{idpemesanan}/{idnota}', [NotaController::class, 'bukaverifikasi']);

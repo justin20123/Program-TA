@@ -92,7 +92,8 @@ class NotaController extends Controller
             DB::table('notas_progress')->insert([
                 'pemesanans_id' => $id,
                 'notas_id' => $idnota, 
-                'tanggal_progress' => now(),
+                'urutan_progress'=>0,
+                'waktu_progress' => now(),
                 'progress' => "proses",
             ]);
         }
@@ -164,7 +165,7 @@ class NotaController extends Controller
 
         $transaksi = [
             'waktu_progress_format' => $this->formatDateTime($notas->waktu_transaksi),
-            'progress' => 'transaksi'
+            'progress' => 'Transaksi berhasil'
         ];
 
         array_push($arrSummary, $transaksi);
@@ -189,42 +190,66 @@ class NotaController extends Controller
         ->get();
 
         $jumlah_selesai = 0;
-        $npSelesai = [];
         foreach($notas_progress as $key => $np){
              if($key == 0){
-                 array_push($arrProgress, $np);
+                continue;
              }
-             else if($np->progress == 'menunggu verifikasi' || $np->progress == 'memperbaiki'){
-                 array_push($arrProgress, $np);
+             else if($np->progress == 'menunggu verifikasi'){
+                $array = [
+                    'waktu_progress_format' => $this->formatDateTime($np->waktu_progress),
+                    'progress' => 'Menunggu verifikasi',
+                    'pemesanans_id' => $np->pemesanans_id,
+                    'notas_id' => $np->notas_id,
+                ];
+                 array_push($arrProgress, $array);
              }
-             else if($np->progress == 'selesai'){
-                array_push($arrProgress, $np);
+             else if($np->progress == 'memperbaiki'){
+                $array = [
+                    'waktu_progress_format' => $this->formatDateTime($np->waktu_progress),
+                    'progress' => 'Memperbaiki cetakan',
+                ];
+                 array_push($arrProgress, $array);
+             }
+             else if($np->progress == 'terverifikasi'){
+                $array = [
+                    'waktu_progress_format' => $this->formatDateTime($np->waktu_progress),
+                    'progress' => 'Verifikasi Pesanan Selesai',
+                ];
+                 array_push($arrProgress, $array);
                 $jumlah_selesai++;
-                $npSelesai = $np;
              }
         }
         if($jumlah_selesai == $jumlah_pesanan){
-            $proses_seleseai = [
+            $verifikasi_selesai = [
                 'waktu_progress_format' => $this->formatDateTime($np->waktu_progress),
-                'progress' => 'Pesanan selesai diproses'
+                'progress' => 'Pesanan selesai diverifikasi'
             ];
-            array_push($arrSummary, $proses_seleseai);
+            array_push($arrSummary, $verifikasi_selesai);
+            $proses = [
+                'waktu_progress_format' => $this->formatDateTime($np->waktu_progress),
+                'progress' => 'Pesanan sedang diselesaikan sesuai verifikasi'
+            ];
+            array_push($arrSummary, $proses);
             $arrProgress = null;
+            $arrProgressReverse = [];
             $array = [];
-            if($status_antar == 'diambil'){
-                $array = [
-                    'waktu_progress_format' => $this->formatDateTime($notas->waktu_tunggu_diambil),
-                    'progress' => 'Menunggu diambil'
-                ];
-                
+            if($notas->waktu_tunggu_diambil || $notas->waktu_diantar){
+                if($status_antar == 'diambil'){
+                    $array = [
+                        'waktu_progress_format' => $this->formatDateTime($notas->waktu_tunggu_diambil),
+                        'progress' => 'Menunggu diambil'
+                    ];
+                    
+                }
+                else if($status_antar == 'diantar'){
+                    $array = [
+                        'waktu_progress_format' => $this->formatDateTime($notas->waktu_diantar),
+                        'progress' => 'Pesanan sedang diantar'
+                    ];
+                }
+                array_push($arrSummary, $array);
             }
-            else if($status_antar == 'diantar'){
-                $array = [
-                    'waktu_progress_format' => $this->formatDateTime($notas->waktu_diantar),
-                    'progress' => 'Pesanan sedang diantar'
-                ];
-            }
-            array_push($arrSummary, $array);
+            
 
             if($notas->waktu_selesai){
                 $selesai = [
@@ -234,16 +259,29 @@ class NotaController extends Controller
                 array_push($arrSummary, $selesai);
             }
             
-            $arrSummaryReverse = [];
+            
+
+        }
+        else{
+            $arrProgressReverse = [];
+            
+            for($i = count($arrProgress) -1; $i>=0; $i--){
+                array_push($arrProgressReverse, $arrProgress[$i]);
+            }
+            
+        }
+        $arrSummaryReverse = [];
             
             for($i = count($arrSummary) -1; $i>=0; $i--){
                 array_push($arrSummaryReverse, $arrSummary[$i]);
             }
 
-        }
-
-        return view('pesanan.orderinfo', compact('arrProgress', 'arrSummaryReverse'));
+        return view('pesanan.orderinfo', compact('arrProgressReverse', 'arrSummaryReverse'));
         
+    }
+
+    public function bukaverifikasi($idpemesanan, $idnota){
+        return view('pesanan.verifikasi');
     }
 
     /**

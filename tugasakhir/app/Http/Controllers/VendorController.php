@@ -57,6 +57,7 @@ class VendorController extends Controller
         $vendors = DB::table('vendors')
         ->get();
 
+
         $pemesanans = DB::table('pemesanans')->get();
 
         $vendorpemesanan = [];
@@ -78,18 +79,43 @@ class VendorController extends Controller
         ->whereNotNull('pemesanans.notas_id')
         ->select('vendors_has_jenis_bahan_cetaks.vendors_id as idvendor', 'pemesanans.notas_id as idnota')
         ->groupBy('vendors_has_jenis_bahan_cetaks.vendors_id', 'pemesanans.notas_id')
+        ->orderBy('vendors_has_jenis_bahan_cetaks.vendors_id')
         ->get();
         
         // dd($pesanan);
 
-        foreach ($vendorpemesanan as $key=>$v) {
-            $jumlah_nota = DB::table('pemesanans')
-            ->where('vendors_id', '=', $pesanan[$key]->idvendor)
-            ->distinct('notas_id')
-            ->count('notas_id');
-            // $jumlah_nota = DB::raw("SELECT count('notas_id') from pemesanans where vendors_id = ? group by notas_id");
-            // dd($jumlah_nota);
-            $v->jumlah_pesanan = $jumlah_nota; 
+        $pesanan_count = [];
+        $vendor_id = null;
+        $i = 0;
+        $count = 0;
+        foreach ($pesanan as $p){
+            if(!$vendor_id){
+                $vendor_id = $p->idvendor;
+            }
+            if($p->idvendor == $vendor_id){
+                $count ++;
+                $pesanan_count[$i] = [
+                    'idvdendor' => $vendor_id,
+                    'count' => $count,
+                ];
+            }
+            else{
+                $i++;
+                $count = 1;
+                $vendor_id = $p->idvendor;
+                $pesanan_count[$i] = [
+                    'idvdendor' => $vendor_id,
+                    'count' => $count,
+                ];
+            }
+            
+            
+            
+        }
+        $idvendor = null;
+
+        foreach ($vendorpemesanan as $key =>$v) {
+            $v->jumlah_pesanan =  $pesanan_count[$key]['count'];    
         }   
 
         // dd($vendorpemesanan);

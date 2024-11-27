@@ -65,7 +65,7 @@ class PemesananSeeder extends Seeder
                             $progress = "memperbaiki";
                         }
                         else{
-                            $progress = "selesai";
+                            $progress = "terverifikasi";
                         }
                         $updatedDate =  $startDate->copy()->addDays($faker->numberBetween(0,1))->addMinutes(30);
                         $startDate = $updatedDate;

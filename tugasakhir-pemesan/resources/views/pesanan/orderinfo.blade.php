@@ -69,6 +69,16 @@
             <div class="mt-4">
                 <h5 class="font-weight-bold">Order Activity</h5>
                 <ul class="list-group list-group-flush">
+                    @foreach ($arrProgressReverse as $key=>$ap)
+                        <li class="list-group-item">
+                            <div> {{$ap['progress']}} </div>
+                            @if($ap['progress'] == 'Menunggu verifikasi')
+                            <a class="text text-primary" href="/verifikasi/{{ $ap['pemesanans_id'] }}/{{ $ap['notas_id'] }}">Verifikasi</a>
+                            <br>
+                            @endif
+                            <small class="text-muted">{{$ap['waktu_progress_format']}}</small>
+                        </li>
+                    @endforeach
                     
                     @foreach ($arrSummaryReverse as $key=>$as)
                         <li class="list-group-item">
