@@ -382,13 +382,7 @@
           <!-- Content wrapper -->
           <div class="content-wrapper">
             <div class="container-xxl flex-grow-1 container-p-y" >
-              <div class="text-end" style="margin-right: 25px;">
-                <span id="current-time">
-                    @php
-                        echo now()->format('d-M-Y H:i:s');
-                    @endphp
-                </span>
-              </div>
+
               <div class="card">
                     @yield('menu')
               </div>
@@ -435,24 +429,7 @@
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <script src="{{ asset('assets/DataTables/datatables.js') }}"></script>
-    <script>
-        function updateCurrentTime() {
-            var currentTimeElement = document.getElementById('current-time');
 
-            var options = {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: 'numeric',
-                second: 'numeric'
-            };
-            var currentTime = new Date().toLocaleString('id-ID', options);
-            currentTimeElement.innerText = currentTime;
-        }
-
-        setInterval(updateCurrentTime, 1000);
-    </script>
     <script src="{{ asset('../assets/js/select2.js') }}"></script>
     @yield('script')
   </body>

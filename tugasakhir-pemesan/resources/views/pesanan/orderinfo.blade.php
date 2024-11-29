@@ -73,7 +73,7 @@
                         <li class="list-group-item">
                             <div> {{$ap['progress']}} </div>
                             @if($ap['progress'] == 'Menunggu verifikasi')
-                            <a class="text text-primary" href="/verifikasi/{{ $ap['pemesanans_id'] }}/{{ $ap['notas_id'] }}">Verifikasi</a>
+                            <a class="text text-primary" href="/verifikasi/{{ $ap['pemesanans_id'] }}/{{ $ap['notas_id'] }}/{{ $ap['urutan_progress'] }}">Verifikasi</a>
                             <br>
                             @endif
                             <small class="text-muted">{{$ap['waktu_progress_format']}}</small>

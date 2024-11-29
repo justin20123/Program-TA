@@ -69,4 +69,17 @@ Route::get('/pesanan', [NotaController::class, 'indexPesanan']);
 Route::get('/pesanan/{idnota}', [NotaController::class, 'showDetailPesanan']);
 
 //verifikasi
-Route::get('/verifikasi/{idpemesanan}/{idnota}', [NotaController::class, 'bukaverifikasi']);
+Route::get('/verifikasi/{idpemesanan}/{idnota}/{urutanprogress}', [NotaController::class, 'bukaverifikasi']);
+Route::get('/verifikasi_file/{any}', function ($any) {
+    $path = base_path('../verifikasi_file/' . $any);
+
+    if (file_exists($path)) {
+        return response()->file($path);
+    }
+
+    abort(404);
+})->where('any', '.*'); // any nanti diganti semua (supaya bisa kasih /)
+
+Route::post('/verifikasipesanan', [NotaController::class, 'verifikasipesanan']);
+Route::post('/ajukanperubahan', [NotaController::class, 'ajukanperubahan']);
+

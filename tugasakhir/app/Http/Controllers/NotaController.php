@@ -24,7 +24,7 @@ class NotaController extends Controller
         return back()->with('message', 'Pesanan berhasil diterima');
     }
 
-    public function kirimContoh(Request $request){
+    public function kirimcontoh(Request $request){
         $request->validate([
             'fileperubahan' => 'required|file|mimes:pdf,jpg,jpeg,png,gif|max:20480',   
             'idpemesanan' => 'required',
@@ -38,15 +38,22 @@ class NotaController extends Controller
 
         $notas_progress_latest = DB::table('notas_progress')
         ->where('pemesanans_id','=', $request->idpemesanan)
-        ->where('notas_id','=', $request->id_nota)
+        ->where('notas_id','=', $id_nota)
+        ->where('progress', '!=', 'menunggu verifikasi')
         ->orderBy('urutan_progress', 'desc')
         ->select('urutan_progress')
         ->first();
 
-        if (!$notas_progress_latest) {
-            $latest_progress = 0;
-        } else {
-            $latest_progress = $notas_progress_latest->urutan_progress + 1;
+        $latest_progress = $notas_progress_latest->urutan_progress + 1;
+
+        $existing_progress = DB::table('notas_progress')
+            ->where('pemesanans_id', '=', $request->idpemesanan)
+            ->where('notas_id', '=', $request->idnota)
+            ->where('urutan_progress', '=', $latest_progress)
+            ->exists();
+
+        if ($existing_progress) {
+            return response()->json(['message' => 'Progress sudah ditangani'], 409); // Conflict status
         }
 
         $file = $request->file('fileperubahan');
@@ -72,6 +79,40 @@ class NotaController extends Controller
         $nota_progress->save();
 
         return back()->with('message', 'Contoh file berhasil dikirim');
+    }
+
+    public function lihatperubahan(Request $request){
+
+        $idnota = DB::table('pemesanans')
+        ->where('id','=', $request->idpemesanan)
+        ->select('notas_id')
+        ->first();
+
+        $id_nota = $idnota->notas_id;
+        
+
+        $notas_progress_latest = DB::table('notas_progress')
+        ->where('pemesanans_id','=', $request->idpemesanan)
+        ->where('notas_id','=', $id_nota)
+        ->where('progress', '=', 'memperbaiki')
+        ->orderBy('urutan_progress', 'desc')
+        ->select('urutan_progress')
+        ->first();
+
+        $perubahan_db = DB::table('notas_progress')
+        ->where('pemesanans_id','=', $request->idpemesanan)
+        ->where('notas_id','=', $id_nota)
+        ->where('urutan_progress', '=', $notas_progress_latest->urutan_progress)
+        ->select('perubahan')
+        ->first();
+
+        if (!$perubahan_db) {
+            return response()->json(['error' => 'No changes found'], 404);
+        }
+
+        $perubahan = $perubahan_db->perubahan;
+
+        return response()->json(['perubahan' => $perubahan]);
     }
 
     public function index()

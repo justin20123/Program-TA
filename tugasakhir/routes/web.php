@@ -61,6 +61,7 @@ Route::get('/terimapesanan/{id}', [NotaController::class, 'terimaPesanan']);
 Route::get('/pesanancetak2/{id}', [PemesananController::class, 'show'])->name('pesanancetak.show');
 
 Route::post('/kirimcontoh', [NotaController::class, 'kirimcontoh']);
+Route::post('/lihatperubahan', [NotaController::class, 'lihatperubahan']);
 
 //detailpesanan
 Route::get('/pesanancetak/{idvendor}/detail/{idnota}', [PemesananController::class, 'detailPesanan'])->name('pesanan.detailPesanan');
