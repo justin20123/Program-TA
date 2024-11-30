@@ -75,7 +75,7 @@ Route::get('file/{url_file}', function ($url_file) {
 })->name('file');
 
 //pilih pengantar
-Route::get('/pesanan/{idvendor}/pengantar/{idnota}', [PemesananController::class, 'pilihpengantar'])->name('pesanan.pilihpengantar');
+Route::post('/pilihpengantar', [PemesananController::class, 'pilihpengantar'])->name('pesanan.pilihpengantar');
 Route::get('/pengantar/{emailpengantar}/antar/{idnota}', [PemesananController::class, 'antarkan'])->name('pesanan.antarkan');
 
 //pegawai home

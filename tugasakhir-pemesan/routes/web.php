@@ -66,7 +66,7 @@ Route::post('/placeorder', [NotaController::class, 'placeorder']);
 Route::get('/pesanan', [NotaController::class, 'indexPesanan']);
 
 //info pesanan
-Route::get('/pesanan/{idnota}', [NotaController::class, 'showDetailPesanan']);
+Route::get('/pesanan/{idnota}', [NotaController::class, 'showDetailPesanan'])->name('detailPesanan');
 
 //verifikasi
 Route::get('/verifikasi/{idpemesanan}/{idnota}/{urutanprogress}', [NotaController::class, 'bukaverifikasi']);

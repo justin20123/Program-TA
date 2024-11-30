@@ -38,6 +38,27 @@
     </div>
 
     <div class="container my-5">
+        @if (session('message'))
+            <div class="alert alert-success">
+                {{ session('message') }}
+            </div>
+        @endif
+        @if (session('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
+        @if ($errors->any())
+    <div class="alert alert-danger">
+        <ul>
+            @foreach ($errors->all() as $error)
+                <li>{{ $error }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
+
         <div class="card">
             <div class="card-body">
                 <h5 class="font-weight-bold text-center">File Verification</h5>
@@ -67,14 +88,16 @@
                 </div>
 
                 <!-- Text Area for Changes -->
-                <form action="/ajukanperubahan" method="POST">
+                <form id="formajukanperubahan" action="/ajukanperubahan" method="POST">
                     @csrf
                     <div class="form-group">
                         <label for="changeRequest">Ajukan Perubahan</label>
-                        <textarea class="form-control" name="perubahan" id="perubahan" rows="3" placeholder="Enter your changes here..."></textarea>
+                        <textarea class="form-control" name="textperubahan" id="textperubahan" rows="3"
+                            placeholder="Enter your changes here..."></textarea>
                         <input type="hidden" name="idnota" value="{{ $notaProgress->notas_id }}">
                         <input type="hidden" name="idpemesanan" value=" {{ $notaProgress->pemesanans_id }} ">
-                        <input type="submit" value="Submit" class="btn btn-primary">
+                        <input type="hidden" name="perubahan" id="perubahan" value=" {{ $notaProgress->pemesanans_id }} ">
+                        <button type="button" class="btn btn-primary" id="btnSubmit">Submit</button>
 
                     </div>
                 </form>
@@ -116,7 +139,13 @@
 
             $('#cancel').click(function() {
                 $('#modalKonfirmasi').modal('hide');
+            });
 
+            $('#btnSubmit').click(function() {
+                console.log('aa')
+                var textperubahan = $("#textperubahan").val();
+                $('#perubahan').val(textperubahan);
+                $('#formajukanperubahan').submit();
             });
         });
     </script>

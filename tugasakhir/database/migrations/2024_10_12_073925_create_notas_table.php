@@ -15,6 +15,8 @@ return new class extends Migration
     {
         Schema::create('notas', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('idpengantar')->nullable();
+            $table->foreign('idpengantar')->references('id')->on('penggunas');
             $table->integer('harga_total')->nullable();
             $table->dateTime('waktu_transaksi');
             $table->enum('opsi_pengambilan', ["diambil", "diantar"]);

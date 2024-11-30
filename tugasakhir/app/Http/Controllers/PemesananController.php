@@ -95,15 +95,31 @@ class PemesananController extends Controller
             
             // dd($pemesanans);
 
+        $isVerifikasiSelesai = true;
+
             foreach ($pemesanans as $p) {
                 // Fetch harga_cetak for each pemesanan
                 $harga_cetak = DB::table('harga_cetaks')
                     ->where('id', '=', $p->harga_cetaks_id) // Assuming harga_cetak_id exists in pemesanan
                     ->select('harga_satuan')
                     ->first();
+
+                $notas_progress_latest = DB::table('notas_progress')
+                    ->where('pemesanans_id','=', $p->id)
+                    ->where('notas_id','=', $p->notas_id)
+                    ->orderBy('urutan_progress', 'desc')
+                    ->select('progress')
+                    ->first();
             
                 if ($harga_cetak) {
                     $p->harga_satuan = $harga_cetak->harga_satuan;
+                }
+
+                if ($notas_progress_latest) {
+                    $p->latest_progress = $notas_progress_latest->progress;
+                    if($notas_progress_latest->progress != 'terverifikasi'){
+                        $isVerifikasiSelesai = false;
+                    }
                 }
             
                 if (!isset($notaDetail[$notaData->id])) {
@@ -119,9 +135,10 @@ class PemesananController extends Controller
             
 
         $notaDetail = array_values($notaDetail);
+        
         // dd($notaDetail);
 
-        return view('pesanan.orderdetail', compact('notaDetail'));
+        return view('pesanan.orderdetail', compact('notaDetail', 'isVerifikasiSelesai'));
     }
 
     public function pilihpengantar($idvendor, $idnota)

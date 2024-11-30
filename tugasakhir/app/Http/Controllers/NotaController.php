@@ -107,7 +107,7 @@ class NotaController extends Controller
         ->first();
 
         if (!$perubahan_db) {
-            return response()->json(['error' => 'No changes found'], 404);
+            return response()->json(['perubahan' => 'Belum ada perubahan ditemukan']);
         }
 
         $perubahan = $perubahan_db->perubahan;

@@ -8,6 +8,7 @@ use App\Models\Pemesanan;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class NotaController extends Controller
 {
@@ -323,10 +324,15 @@ class NotaController extends Controller
     public function ajukanperubahan(Request $request)
     {
 
-        $request->validate([
-            'perubahan' => 'required|numeric|min:1|max:250',
-
+        $validator = Validator::make($request->all(), [
+            'perubahan' => 'required|string|min:1|max:250'
         ]);
+        if ($validator->fails()) {
+            // Handle the failure, for example:
+            return redirect()->back()
+                ->withErrors($validator) // Pass the error messages
+                ->withInput(); // Keep the old input
+        }
 
         $notas_progress_latest = DB::table('notas_progress')
             ->where('pemesanans_id', '=', $request->idpemesanan)
@@ -347,7 +353,7 @@ class NotaController extends Controller
             ->exists();
 
         if ($existing_progress) {
-            return response()->json(['message' => 'Progress sudah ditangani'], 409); // Conflict status
+            return redirect()->back()->with('error', 'Progress sudah ditangani');   
         }
 
         $nota_progress = new NotaProgress();
@@ -360,7 +366,7 @@ class NotaController extends Controller
 
         $nota_progress->save();
 
-        return $this->showDetailPesanan($request->idnota);
+        return redirect()->route('detailPesanan', $request->idnota);
     }
 
     /**

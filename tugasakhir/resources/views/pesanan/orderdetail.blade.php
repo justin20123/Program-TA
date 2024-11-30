@@ -26,6 +26,7 @@
                             <input type="file" class="form-control-file" name="fileperubahan" id="fileperubahan"
                                 accept=".pdf, image/jpeg, image/jpg, image/png, image/gif" required>
                         </div>
+                        <button class="btn btn-primary close">Batalkan</button>
                         <input type="hidden" name="idpemesanan" id="idpemesananhidden">
                         <input type="submit" value="Submit" class="btn btn-primary">
                     </form>
@@ -45,6 +46,23 @@
                     <div id="detail-perubahan">
 
                     </div>
+                    <button class="btn btn-primary close">Batalkan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalantar" tabindex="-1" role="dialog" aria-labelledby="modalKirimContohLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Perubahan</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Apakah anda sudah memastikan semua produk selesai?</p>
+                    <button class="btn btn-primary close">Batalkan</button>
+                    <button id="btnAntarModal" class="btn btn-primary" data-idnota="">Sudah</button>
                 </div>
             </div>
         </div>
@@ -96,7 +114,11 @@
                     <tr>
                         <th>Image</th>
                         <th>Item</th>
-                        <th>Action</th>
+                        @if (!$isVerifikasiSelesai)
+                            <th>Action</th>
+                        @endif
+
+
                     </tr>
                 </thead>
                 <tbody>
@@ -117,15 +139,22 @@
                             <td>
                                 <ul class="list-inline justify-content-between">
 
-                                    <li class="list-inline-item">
-                                        <button class="btn btn-primary lihatperubahan"
-                                            data-idpemesanan="{{ $p->id }}">Lihat Perubahan</button>
-                                    </li>
                                     @if ($p->perlu_verifikasi == 1)
-                                        <li class="list-inline-item">
-                                            <button class="btn btn-primary kirimcontoh"
-                                                data-idpemesanan="{{ $p->id }}">Kirimkan Contoh</button>
-                                        </li>
+                                        @if ($p->latest_progress != 'terverifikasi')
+                                            <li class="list-inline-item">
+                                                <button class="btn btn-primary lihatperubahan"
+                                                    data-idpemesanan="{{ $p->id }}">Lihat Perubahan</button>
+                                            </li>
+                                            <li class="list-inline-item">
+                                                <button class="btn btn-primary kirimcontoh"
+                                                    data-idpemesanan="{{ $p->id }}">Kirimkan Contoh</button>
+                                            </li>
+                                        @else
+                                            <li class="list-inline-item">
+                                                <div class="h6">Pesanan selesai terverifikasi, silahkan diselesaikan
+                                                </div>
+                                            </li>
+                                        @endif
                                     @endif
 
                                 </ul>
@@ -134,8 +163,14 @@
                     @endforeach
                 </tbody>
             </table>
-            <a class="btn btn-primary text-center my-5"
-                href="../../../pesanan/{{ $notaDetail[0]['pemesanans'][0]->vendors_id }}/pengantar/{{ $notaDetail[0]['nota']->id }}">Antar</a>
+            @if ($isVerifikasiSelesai)
+            <button class="btn btn-primary text-center my-5" id="btnAntar">Antar</button>
+            @else
+            <button class="btn btn-primary text-center my-5 disabled"
+                >Antar</button>
+                @endif
+            
+           
         @endsection
 
         @section('script')
@@ -182,8 +217,6 @@
                     });
 
                     $(document).on('click', '.kirimcontoh', function() {
-
-
                         var button = $(this);
                         var idpemesanan = button.data('idpemesanan');
 
@@ -192,8 +225,7 @@
                         $('#modalKirimContoh').modal('show');
                     });
                     $(document).on('click', '.lihatperubahan', function() {
-                        var button = $(this);
-                        var idpemesanan = button.data('idpemesanan');
+                        var idpemesanan = $(this).data('idpemesanan');
 
                         // Check if idpemesanan is valid
                         if (!idpemesanan) {
@@ -208,8 +240,8 @@
                             type: "POST",
                             url: "/lihatperubahan",
                             data: formData,
-                            processData: false, // Important for FormData
-                            contentType: false, // Important for FormData
+                            processData: false,
+                            contentType: false,
                             headers: {
                                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
                                     'content') // Ensure CSRF token is correctly set
@@ -228,6 +260,34 @@
                                     'Unknown error occurred');
                             }
                         });
+                    });
+
+                    $('#btnAntar').click(function () { 
+                        
+                        $('#modalantar').modal('show');
+                    });
+
+                    $('#btnAntarModal').click(function () { 
+                        var idnota = $(this).data('idnota');
+                        var formData = new FormData();
+                        formData.append('idnota', idnota);
+                        $.ajax({
+                            type: "POST",
+                            url: "/pilihpengantar",
+                            data: formData,
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}' // Include CSRF token for security
+                            },
+                            success: function (response) {
+                                
+                            }
+                        });
+                    });
+
+                    $(".close").click(function () { 
+                        $('#modalKirimContoh').modal('hide');
+                        $('#modalperubahan').modal('hide');
+                        $('#modalantar').modal('hide');
                     });
                 });
             </script>
