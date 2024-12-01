@@ -78,6 +78,13 @@ Route::get('file/{url_file}', function ($url_file) {
 Route::post('/pilihpengantar', [PemesananController::class, 'pilihpengantar'])->name('pesanan.pilihpengantar');
 Route::get('/pengantar/{emailpengantar}/antar/{idnota}', [PemesananController::class, 'antarkan'])->name('pesanan.antarkan');
 
+//status ambil
+Route::post('/requestambil', [PemesananController::class, 'requestambil']);
+
+//status selesai
+Route::post('/selesaikanpesanan', [PemesananController::class, 'selesaikanpesanan']);
+
+
 //pegawai home
 Route::get('/pegawai', [VendorController::class, 'indexPegawai'])->name('pegawai.index');
 

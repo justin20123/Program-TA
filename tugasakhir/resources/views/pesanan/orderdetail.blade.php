@@ -62,7 +62,44 @@
                 <div class="modal-body">
                     <p>Apakah anda sudah memastikan semua produk selesai?</p>
                     <button class="btn btn-primary close">Batalkan</button>
-                    <button id="btnAntarModal" class="btn btn-primary" data-idnota="">Sudah</button>
+                    <button id="btnAntarModal" class="btn btn-primary"
+                        data-idnota="{{ $notaDetail[0]['nota']->id }}">Sudah</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalambil" tabindex="-1" role="dialog" aria-labelledby="modalKirimContohLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Perubahan</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Apakah anda sudah memastikan semua produk selesai?</p>
+                    <button class="btn btn-primary close">Batalkan</button>
+                    <button id="btnAmbilModal" class="btn btn-primary"
+                        data-idnota="{{ $notaDetail[0]['nota']->id }}">Sudah</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalselesai" tabindex="-1" role="dialog" aria-labelledby="modalKirimContohLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Perubahan</h5>
+                </div>
+                <div class="modal-body">
+                    <p>Apakah anda sudah memastikan barang diterima pemesan?</p>
+                    <p class="text text-danger">Peringatan: Menyelesaikan pesanan tanpa memastikan sudah diambil pemesan
+                        dapat menurunkan rating vendor anda bahkan membuat vendor anda diblokir</p>
+                    <button class="btn btn-primary close">Batalkan</button>
+                    <button id="btnSelesaiModal" class="btn btn-primary"
+                        data-idnota="{{ $notaDetail[0]['nota']->id }}">Sudah</button>
                 </div>
             </div>
         </div>
@@ -90,22 +127,40 @@
                         <span class="step-title">Diproses</span>
                     </div>
                 </div>
-                <div class="step-item">
-                    <div class="step">
-                        <span class="step-number">3</span>
+                @if (!$notaDetail[0]['nota']->waktu_tunggu_diambil)
+                    <div class="step-item">
+                    @else
+                        <div class="step-item active">
+                @endif
+                <div class="step">
+                    <span class="step-number">3</span>
+                    @if ($notaDetail[0]['nota']->opsi_pengambilan == 'diantar')
                         <span class="step-title">Sedang Diantar</span>
-                    </div>
+                    @elseif ($notaDetail[0]['nota']->opsi_pengambilan == 'diambil')
+                        <span class="step-title">Menunggu Diambil</span>
+                    @endif
                 </div>
+            </div>
+            @if (!$notaDetail[0]['nota']->waktu_selesai)
                 <div class="step-item">
-                    <div class="step">
-                        <span class="step-number">4</span>
-                        <span class="step-title">Selesai</span>
-                    </div>
-                </div>
+                @else
+                    <div class="step-item active">
+            @endif
+            <div class="step">
+                <span class="step-number">4</span>
+                <span class="step-title">Selesai</span>
+            </div>
+            </div>
             </div>
             <div class="container-xxl pb-container" style="width: 85%">
                 <div class="progress" style="width: 100%">
-                    <div class="progress-bar" style="width: 35%"></div>
+                    @if (!$notaDetail[0]['nota']->waktu_tunggu_diambil)
+                        <div class="progress-bar" style="width: 35%"></div>
+                    @elseif (!$notaDetail[0]['nota']->waktu_selesai)
+                        <div class="progress-bar" style="width: 65.75%"></div>
+                    @else
+                        <div class="progress-bar" style="width: 100%"></div>
+                    @endif
                 </div>
             </div>
 
@@ -163,14 +218,24 @@
                     @endforeach
                 </tbody>
             </table>
-            @if ($isVerifikasiSelesai)
-            <button class="btn btn-primary text-center my-5" id="btnAntar">Antar</button>
+            @if ($isMenungguSelesai)
+                <button class="btn btn-primary text-center my-5" id="btnSelesai">Mark Selesai</button>
             @else
-            <button class="btn btn-primary text-center my-5 disabled"
-                >Antar</button>
+                @if ($notaDetail[0]['nota']->opsi_pengambilan == 'diantar')
+                    @if ($isVerifikasiSelesai)
+                        <button class="btn btn-primary text-center my-5" id="btnAntar">Antar</button>
+                    @else
+                        <button class="btn btn-primary text-center my-5 disabled">Antar</button>
+                    @endif
+                @else
+                    @if ($isVerifikasiSelesai)
+                        <button class="btn btn-primary text-center my-5" id="btnAmbil">Request Ambil</button>
+                    @else
+                        <button class="btn btn-primary text-center my-5 disabled">Request Ambil</button>
+                    @endif
                 @endif
-            
-           
+            @endif
+
         @endsection
 
         @section('script')
@@ -243,8 +308,7 @@
                             processData: false,
                             contentType: false,
                             headers: {
-                                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr(
-                                    'content') // Ensure CSRF token is correctly set
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}' 
                             },
                             success: function(response) {
                                 // Check if response is valid
@@ -262,32 +326,103 @@
                         });
                     });
 
-                    $('#btnAntar').click(function () { 
-                        
+                    $('#btnAntar').click(function() {
+
                         $('#modalantar').modal('show');
                     });
 
-                    $('#btnAntarModal').click(function () { 
-                        var idnota = $(this).data('idnota');
+                    $('#btnAntarModal').click(function() {
+                        var idnota = $(this).data('idnota'); 
                         var formData = new FormData();
                         formData.append('idnota', idnota);
+
                         $.ajax({
                             type: "POST",
                             url: "/pilihpengantar",
                             data: formData,
                             headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}' // Include CSRF token for security
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}' 
                             },
-                            success: function (response) {
-                                
+                            processData: false,
+                            contentType: false,
+                            success: function(response) {
+                                //redirect
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('AJAX Error:', error);
+                                console.error('Response:', xhr.responseText);
                             }
                         });
                     });
 
-                    $(".close").click(function () { 
+                    $('#btnAmbil').click(function() {
+
+                        $('#modalambil').modal('show');
+                    });
+
+                    $('#btnAmbilModal').click(function() {
+                        var idnota = $(this).data('idnota'); 
+                        var formData = new FormData();
+                        formData.append('idnota', idnota);
+
+                        $.ajax({
+                            type: "POST",
+                            url: "/requestambil",
+                            data: formData,
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}' 
+                            },
+                            processData: false,
+                            contentType: false,
+                            success: function() {
+                                $('#modalambil').modal('hide');
+                                window.location.reload();
+
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('AJAX Error:', error);
+                                console.error('Response:', xhr.responseText);
+                            }
+                        });
+                    });
+
+                    $('#btnSelesai').click(function() {
+
+                        $('#modalselesai').modal('show');
+                    });
+
+                    $('#btnSelesaiModal').click(function() {
+                        var idnota = $(this).data('idnota'); 
+                        var formData = new FormData();
+                        formData.append('idnota', idnota);
+
+                        $.ajax({
+                            type: "POST",
+                            url: "/selesaikanpesanan",
+                            data: formData,
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}' 
+                            },
+                            processData: false, 
+                            contentType: false, 
+                            success: function() {
+                                $('#modalselesai').modal('hide');
+                                window.location.reload();
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('AJAX Error:', error);
+                                console.error('Response:', xhr.responseText);
+                            }
+                        });
+                    });
+
+
+
+                    $(".close").click(function() {
                         $('#modalKirimContoh').modal('hide');
                         $('#modalperubahan').modal('hide');
                         $('#modalantar').modal('hide');
+                        $('#modalambil').modal('hide');
                     });
                 });
             </script>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Nota;
 use App\Models\Pemesanan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class PemesananController extends Controller
@@ -96,6 +97,11 @@ class PemesananController extends Controller
             // dd($pemesanans);
 
         $isVerifikasiSelesai = true;
+        $isMenungguSelesai = true; 
+
+        if(!$notaData->waktu_diantar && !$notaData->waktu_tunggu_diambil){
+            $isMenungguSelesai = false; 
+        }
 
             foreach ($pemesanans as $p) {
                 // Fetch harga_cetak for each pemesanan
@@ -121,6 +127,7 @@ class PemesananController extends Controller
                         $isVerifikasiSelesai = false;
                     }
                 }
+                
             
                 if (!isset($notaDetail[$notaData->id])) {
                     $notaDetail[$notaData->id] = [
@@ -138,26 +145,31 @@ class PemesananController extends Controller
         
         // dd($notaDetail);
 
-        return view('pesanan.orderdetail', compact('notaDetail', 'isVerifikasiSelesai'));
+        return view('pesanan.orderdetail', compact('notaDetail', 'isVerifikasiSelesai','isMenungguSelesai'));
     }
 
-    public function pilihpengantar($idvendor, $idnota)
+    public function pilihpengantar(Request $request)
     {
         $notaData = DB::table('notas')
-            ->where('id', '=', $idnota)
+            ->where('id', '=', $request->idnota)
             ->select()
             ->first();
 
+        $vendor = DB::table('pemesanans')
+        ->where('notas_id', '=', $request->idnota)
+        ->select('vendors_id')
+        ->first();
+
         $pengantar = DB::table('vendors_has_penggunas')
             ->join('penggunas', 'penggunas.email', '=', 'vendors_has_penggunas.penggunas_email')
-            ->where('vendors_has_penggunas.vendors_id', '=', $idvendor)
+            ->where('vendors_has_penggunas.vendors_id', '=', $vendor->vendors_id)
             ->where('penggunas.role', '=', 'pengantar')
             ->select('penggunas.nama as namapengantar', 'penggunas.email as email')
             ->get();
 
         $data_pemesan = DB::table('pemesanans')
             ->join('penggunas', 'penggunas.email', '=', 'pemesanans.penggunas_email')
-            ->where('pemesanans.notas_id', '=', $notaData->id)
+            ->where('pemesanans.notas_id', '=', $request->idnota)
             ->select('penggunas.nama', 'penggunas.email')
             ->first();
         $notaData->namaPemesan = $data_pemesan->nama;
@@ -171,7 +183,7 @@ class PemesananController extends Controller
     public function antarkan($emailpengantar, $idnota)
     {
         $nota = Nota::findOrFail($idnota);
-        $nota->waktu_diantar = now();
+        $nota->waktu_diantar = Carbon::now('Asia/Jakarta');
         $nota->save();
 
         $pemesanans = DB::table('pemesanans')
@@ -189,6 +201,26 @@ class PemesananController extends Controller
         $url = '/pesanancetak/' . $pemesanans[0]->vendors_id;
         return redirect($url);
         // return redirect()->route('pemesanans.index', [$pemesanans[0]->vendors_id]);
+    }
+
+    public function requestambil(Request $request){
+        $nota = Nota::findOrFail($request->idnota);
+        $nota->waktu_tunggu_diambil = Carbon::now('Asia/Jakarta');
+        $nota->save();
+
+        $_SESSION['message'] = 'Status pesanan saat ini berhasil diubah menjadi menunggu diambil';
+
+        return ['status'=>'done'];
+    }
+    
+    public function selesaikanpesanan(Request $request){
+        $nota = Nota::findOrFail($request->idnota);
+        $nota->waktu_selesai = Carbon::now('Asia/Jakarta');
+        $nota->save();
+
+        $_SESSION['message'] = 'Pesanan berhasil diselesaikan';
+
+        return ['status'=>'done'];
     }
 
     /**

@@ -11,8 +11,9 @@
 @section('menu')
 <h3 class="text-center p-4">Pesanan Vendor Anda</h1>
 <h5 class="text-center">{{$notaData->namaPemesan}}</h2>
-<p class="text-center">{{$notaData->alamat_pengambilan}}</p>
-<p></p>
+<p class="text-center">Lokasi:</p>
+<p><a href="https://www.openstreetmap.org/?mlat={{$latitude_pengambilan}}&mlon={{$longitude_pengambilan}}#map=15/{{$latitude_pengambilan}}/{{$longitude_pengambilan}}" target="_blank">Lihat di map</a></p>
+<br>
 <div class="stepper">
     <div class="step-item active">
       <div class="step">
