@@ -33,23 +33,6 @@
                 <h4 class="form-title">Billing Information</h4>
                 <form id="formBuatNota" method="POST">
                     @csrf
-                    <!-- User Name -->
-                    <div class="form-group">
-                        <label for="username" class="form-label">User Name</label>
-                        <input type="text" class="form-control form-input" id="username" placeholder="John Doe"
-                            required>
-                    </div>
-                    <!-- Phone Number -->
-                    <div class="form-group">
-                        <label for="phone" class="form-label">Phone Number</label>
-                        <input type="text" class="form-control form-input" id="phone" placeholder="Phone Number"
-                            required>
-                    </div>
-                    <!-- Email -->
-                    <div class="form-group">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control form-input" id="email" placeholder="Email">
-                    </div>
 
                     <div class="form-group form-check">
                         <input type="checkbox" class="form-check-input" id="statusantar">
@@ -89,26 +72,41 @@
                 <div class="order-summary-container border rounded p-3">
                     <h5 class="order-summary-title mb-3">Order Summary</h5>
                     <!-- Order Items -->
-                    @foreach ($pemesanans as $p)
-                        <div class="order-item d-flex justify-content-between align-items-center mb-2">
-                            <div>
-                                <iframe src="/{{ $p->url_file }}"
-                                    style="width: 50px; height: 50px; border: none; overflow: hidden;"></iframe>
-                                <br>
-                                <a class="btn btn-primary" href="/{{ $p->url_file }}" target="_blank">Preview</a>
-                            </div>
-                            <div class="item-details">
-                                <span class="item-name">{{ $p->layanan }}</span>
-                                <br>
-                                <span class="item-description">{{ $p->jumlah }} {{ $p->satuan }} x Rp.
-                                    {{ number_format($p->harga_satuan, 0, '.', ',') }}</span>
-                            </div>
-                            <span class="item-price">Rp.
-                                {{ number_format($p->jumlah * $p->harga_satuan, 0, '.', ',') }}</span>
-                        </div>
+                    <div class="accordion accordion-flush" id="accordionFlushExample">
+                        @foreach ($pemesanans as $p)
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="flush-heading-{{ $p->id }}">
+                                    <button class="accordion-button collapsed d-flex" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#flush-collapse-{{ $p->id }}"
+                                        aria-expanded="false" aria-controls="flush-collapse-{{ $p->id }}">
+                                        <span>{{ $p->layanan }}</span>
+                                        <span class="me-auto"></span>
+                                        <span class="me-auto"></span>
+                                        <span class="ms-auto">
+                                            <div>Jumlah: {{ $p->jumlah }} {{ $p->satuan }}</div>
+                                            <div>Harga Satuan: Rp. {{ number_format($p->harga_satuan, 0, '.', ',') }}</div>
+                                            <div>Total Harga: Rp.
+                                                {{ number_format($p->harga_satuan * $p->jumlah + $p->biaya_tambahan, 0, '.', ',') }}
+                                            </div>
+                                        </span>
+                                    </button>
+                                </h2>
+                                <div id="flush-collapse-{{ $p->id }}" class="accordion-collapse collapse"
+                                    aria-labelledby="flush-heading-{{ $p->id }}"
+                                    data-bs-parent="#accordionFlushExample">
+                                    <div class="accordion-body">
 
-                        <input type="hidden" name="idpemesanan-{{$p->id}}" id="idpemesanan-{{$p->id}}" value="{{$p->id}}">
-                    @endforeach
+                                        <div>Biaya Tambahan: Rp. {{ number_format($p->biaya_tambahan, 0, '.', ',') }}</div>
+
+
+                                    </div>
+                                </div>
+                            </div>
+
+                            <input type="hidden" name="idpemesanan-{{ $p->id }}"
+                                id="idpemesanan-{{ $p->id }}" value="{{ $p->id }}">
+                        @endforeach
+                    </div>
 
 
                     <hr>
@@ -144,8 +142,12 @@
 @endsection
 
 @section('script')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        let longitude;
+        let latitude;
+        let biayaAntar;
+        let totalBiaya;
         async function ambilLokasiUser() {
             return new Promise((resolve, reject) => {
                 if (navigator.geolocation) {
@@ -191,10 +193,11 @@
                 },
                 success: function(response) {
 
-                    console.log("Returned value:", response);
                     var jarak = response;
                     $('#lokasi').val(`Jarak anda dengan vendor: ${jarak} km`);
                     biayaAntar = jarak * 5000;
+
+
                     $('#biayaAntar').html(biayaAntar.toLocaleString());
                     var subtotal = $('#subtotal').html();
 
@@ -202,13 +205,13 @@
                     var subtotal = parseInt(subtotalString.replace(/\,/g, ''), 10);
 
                     if ($('#statusantar').is(':checked')) {
-                totalBiaya = subtotal + biayaAntar;
-            } else {
-                totalBiaya = subtotal;
-            }
-            $('#totalBiaya').html(totalBiaya.toLocaleString());
+                        totalBiaya = subtotal + biayaAntar;
+                    } else {
+                        totalBiaya = subtotal;
+                    }
+                    $('#totalBiaya').html(totalBiaya.toLocaleString());
 
-                    // Check the state of the checkbox with ID 'statusantar'
+
 
 
                 },
@@ -219,18 +222,15 @@
         }
 
         async function updateTotal(subtotal) {
-            
+
         }
 
         $(document).ready(function() {
-            let longitude;
-            let latitude;
-            let biayaAntar;
-            let totalBiaya;
+
 
             $(".delivery").hide();
             ambilLokasiSekarang();
-            
+
 
             // Open the map when the button is clicked
             $('#bukainputlatlong').click(function() {
@@ -250,42 +250,58 @@
             });
 
             $("#btnPlaceOrder").click(function() {
-              let idpemesanans =[];
-              let opsiantar;
 
-              const formData = new FormData();
+                let opsiantar;
 
-              var subtotalString = $('#subtotal').html();
-              var subtotal = parseInt(subtotalString.replace(/\,/g, ''), 10);
-
-              if ($('#statusantar').is(':checked')) {
-                totalBiaya = subtotal + biayaAntar;
-            } else {
-                totalBiaya = subtotal;
-            }
+                updateBiayaAntar();
 
 
-              formData.append('harga_total', totalBiaya);
+                const formData = new FormData();
 
-              $('[id^="idpemesanan-"]').each(function() {
-                var value = $(this).val();
-                idpemesanans.push(value);
-              });
+                var subtotalString = $('#subtotal').html();
+                var subtotal = parseInt(subtotalString.replace(/\,/g, ''), 10);
 
 
-              if ($('#statusantar').is(':checked')) {
-                opsiantar = "diantar";
-                formData.append('latitude', latitude);
-                formData.append('longitude', longitude);
-              } else {
-                opsiantar = "diambil";
-                latitude = null;
-                longitude = null;
-              }
+
+                // var biaya =
+
+
+                if ($('#statusantar').is(':checked')) {
+                    totalBiaya = subtotal + biayaAntar;
+                    console.log(biayaAntar);
+                } else {
+                    totalBiaya = subtotal;
+                }
+                // console.log(totalBiaya);
+
+
+                formData.append('harga_total', totalBiaya);
+                let idpemesanans = '';
+                $('[id^="idpemesanan-"]').each(function() {
+                    var value = $(this).val();
+                    idpemesanans += value + ',';
+                });
+                if (idpemesanans != '') {
+                    idpemesanans = idpemesanans.slice(0, -1);
+                }
+
+                // console.log(idpemesanans);
+
+
+                if ($('#statusantar').is(':checked')) {
+                    opsiantar = "diantar";
+                    formData.append('latitude', latitude);
+                    formData.append('longitude', longitude);
+                } else {
+                    opsiantar = "diambil";
+                    latitude = null;
+                    longitude = null;
+                }
                 formData.append('opsiantar', opsiantar);
 
-                formData.append('idpemesanans',idpemesanans);
+                formData.append('idpemesanans', idpemesanans);
                 formData.append('catatan_antar', $("#orderNotes").val());
+
 
                 $.ajax({
                     url: '/placeorder',
@@ -297,34 +313,34 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}' // Include CSRF token for security
                     },
                     success: function(response) {
-                      Swal.fire({
-                                title: 'Success!',
-                                text: response.message,
-                                icon: 'success',
-                                confirmButtonText: 'OK'
-                            }).then((result) => {
-                                console.log(result);
-                                if (result.isConfirmed) {
-                                    
-                                    // Redirect to the vendor page
-                                    window.location.href = '/vendor/1';
-                                }
-                            });
+                        Swal.fire({
+                            title: 'Success!',
+                            text: response.message,
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then((result) => {
+                            console.log(result);
+                            if (result.isConfirmed) {
+
+                                // Redirect to the vendor page
+                                window.location.href = '/vendor/1';
+                            }
+                        });
                     },
-                    error: function(xhr, status, error) {
-                        console.error("Error occurred:", xhr);
+                    error: function(xhr, status, error, message) {
+                        console.error("Error occurred:", message);
                     }
                 });
             });
 
             $("#statusantar").on('change', function() {
-            updateTotal(parseInt($('#subtotal').html().replace(/\,/g, ''), 10));
+                updateBiayaAntar(); //
                 if ($(this).is(':checked')) {
                     $('.delivery').show();
-                    
+
                 } else {
                     $('.delivery').hide();
-                    
+
                 }
             });
         });

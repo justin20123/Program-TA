@@ -76,6 +76,7 @@ Route::get('file/{url_file}', function ($url_file) {
 
 //pilih pengantar
 Route::post('/pilihpengantar', [PemesananController::class, 'pilihpengantar'])->name('pesanan.pilihpengantar');
+Route::post('/tugaskanpengantar', [PemesananController::class, 'tugaskanpengantar']);
 Route::get('/pengantar/{emailpengantar}/antar/{idnota}', [PemesananController::class, 'antarkan'])->name('pesanan.antarkan');
 
 //status ambil

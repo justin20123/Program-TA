@@ -62,8 +62,13 @@
                 <div class="modal-body">
                     <p>Apakah anda sudah memastikan semua produk selesai?</p>
                     <button class="btn btn-primary close">Batalkan</button>
-                    <button id="btnAntarModal" class="btn btn-primary"
-                        data-idnota="{{ $notaDetail[0]['nota']->id }}">Sudah</button>
+                    <form action="/pilihpengantar" method="POST">
+                        @csrf
+                        <input type="hidden" name="idnota" id="idnota" value="{{ $notaDetail[0]['nota']->id }}">
+
+                        <input type="submit" value="Submit" class="btn btn-primary">
+                    </form>
+
                 </div>
             </div>
         </div>
@@ -127,7 +132,7 @@
                         <span class="step-title">Diproses</span>
                     </div>
                 </div>
-                @if (!$notaDetail[0]['nota']->waktu_tunggu_diambil)
+                @if (!$notaDetail[0]['nota']->waktu_tunggu_diambil && !$notaDetail[0]['nota']->waktu_diantar)
                     <div class="step-item">
                     @else
                         <div class="step-item active">
@@ -141,7 +146,7 @@
                     @endif
                 </div>
             </div>
-            @if (!$notaDetail[0]['nota']->waktu_selesai)
+            @if (!$notaDetail[0]['nota']->waktu_selesai )
                 <div class="step-item">
                 @else
                     <div class="step-item active">
@@ -154,7 +159,7 @@
             </div>
             <div class="container-xxl pb-container" style="width: 85%">
                 <div class="progress" style="width: 100%">
-                    @if (!$notaDetail[0]['nota']->waktu_tunggu_diambil)
+                    @if (!$notaDetail[0]['nota']->waktu_tunggu_diambil && !$notaDetail[0]['nota']->waktu_diantar)
                         <div class="progress-bar" style="width: 35%"></div>
                     @elseif (!$notaDetail[0]['nota']->waktu_selesai)
                         <div class="progress-bar" style="width: 65.75%"></div>

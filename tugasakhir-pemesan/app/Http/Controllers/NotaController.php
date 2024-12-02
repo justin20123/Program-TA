@@ -40,12 +40,14 @@ class NotaController extends Controller
     public function placeorder(Request $request)
     {
         $idnota = 0;
+        $idpemesanansstring = $request->idpemesanans;
+        $idpemesanans = explode(",", $idpemesanansstring);
+
+        // return response()->json(['message' => 'idpemesanans : '. $idpemesanans], 400);
         if ($request->opsiantar == "diambil") {
             $request->validate([
                 'idpemesanans' => 'required',
             ]);
-
-            $idpemesanans = explode(",", $request->idpemesanans);
 
             $idnota = DB::table('notas')->insertGetid([
                 'harga_total' => $request->harga_total,
@@ -75,7 +77,8 @@ class NotaController extends Controller
                 'waktu_selesai' => null,
                 'longitude_pengambilan' => $request->longitude,
                 'latitude_pengambilan' => $request->latitude,
-                'ulasan' => $request->catatan_antar,
+                'ulasan' => "",
+                'catatan_antar' => $request->catatan_antar,
             ]);
         }
         foreach ($idpemesanans as $id) {
@@ -108,7 +111,7 @@ class NotaController extends Controller
             ->join('pemesanans', 'notas.id', '=', 'pemesanans.notas_id')
             ->select('notas.id as idnota', 'notas.waktu_transaksi as waktu_transaksi', 'pemesanans.vendors_id as idvendor', 'notas.waktu_menerima_pesanan', 'notas.waktu_diantar', 'notas.waktu_tunggu_diambil', 'notas.waktu_selesai', DB::raw('COUNT(pemesanans.id) as jumlah_pesanan'))
             ->groupBy('notas.id', 'notas.waktu_transaksi', 'pemesanans.vendors_id', 'notas.waktu_menerima_pesanan', 'notas.waktu_diantar', 'notas.waktu_tunggu_diambil', 'notas.waktu_selesai')
-            ->orderBy('notas.waktu_transaksi')
+            ->orderBy('notas.waktu_transaksi', 'desc')
             ->get();
 
         foreach ($notas as $n) {

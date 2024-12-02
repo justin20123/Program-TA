@@ -12,7 +12,7 @@
 <h3 class="text-center p-4">Pesanan Vendor Anda</h1>
 <h5 class="text-center">{{$notaData->namaPemesan}}</h2>
 <p class="text-center">Lokasi:</p>
-<p><a href="https://www.openstreetmap.org/?mlat={{$latitude_pengambilan}}&mlon={{$longitude_pengambilan}}#map=15/{{$latitude_pengambilan}}/{{$longitude_pengambilan}}" target="_blank">Lihat di map</a></p>
+<p><a href="https://www.openstreetmap.org/?mlat={{$notaData->latitude_pengambilan}}&mlon={{$notaData->longitude_pengambilan}}#map=15/{{$notaData->latitude_pengambilan}}/{{$notaData->longitude_pengambilan}}" target="_blank">Lihat di map</a></p>
 <br>
 <div class="stepper">
     <div class="step-item active">
@@ -69,7 +69,12 @@
 
                 
                 <li class="list-inline-item">
-                    <a href="../../../pengantar/{{$p->email}}/antar/{{$notaData->id}}" class="btn btn-primary">Pilih Pengantar</a>
+                  <form action="/tugaskanpengantar" method="POST">
+                    @csrf
+                    <input type="hidden" name="idpengantar" value="{{$p->id}}">
+                    <input type="hidden" name="idnota" value="{{$notaData->id}}">
+                    <input type="submit" value="Pilih Pengantar" class="btn btn-primary">
+                  </form>
                 </li>
             </ul>
         </td>

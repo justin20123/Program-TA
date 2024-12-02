@@ -28,26 +28,40 @@ class PemesananController extends Controller
 
         $subtotal = 0;
         foreach($pemesanans as $p){
+
+            $subtotal_pemesanan = 0;
             $biaya_tambahan = 0;
 
             $tambahan_opsi = DB::table('pemesanans_has_opsi_details')
             ->join('opsi_details', 'opsi_details.id','=','pemesanans_has_opsi_details.opsi_details_id')
             ->where('pemesanans_has_opsi_details.pemesanans_id','=',$p->id)
-            ->select('opsi_details.biaya_tambahan')
+            ->select('opsi_details.biaya_tambahan','opsi_details.opsi')
             ->get();
 
-            foreach($tambahan_opsi as $t){
-                $biaya_tambahan += $t->biaya_tambahan;
-            }
+            $biayaOpsiDetails = [];
 
-            $p->biaya_tambahan = $biaya_tambahan;
+            
 
             $harga_cetaks = DB::table('harga_cetaks')
             ->where('id','=',$p->harga_cetaks_id)
             ->first();
             $p->harga_satuan = $harga_cetaks->harga_satuan;
 
-            $subtotal += $p->harga_satuan * $p->jumlah;
+            $subtotal_pemesanan += $p->harga_satuan * $p->jumlah;
+
+            $biaya_tambahan = 0;
+            foreach($tambahan_opsi as $t){
+                $array = [
+                    'biaya_tambahan' => $t->biaya_tambahan,
+                    'opsi'=> $t->opsi
+                ];
+                array_push($biayaOpsiDetails,$array);
+                $subtotal_pemesanan += $t->biaya_tambahan;
+                $biaya_tambahan += $t->biaya_tambahan;
+            }
+            $p->biaya_tambahan = $biaya_tambahan;
+            $p->opsi_detail = $biayaOpsiDetails;
+            $p->subtotal = $subtotal_pemesanan;
 
             $layanan = DB::table('vendors_has_jenis_bahan_cetaks')
             ->join('layanan_cetaks','vendors_has_jenis_bahan_cetaks.layanan_cetaks_id','=', 'layanan_cetaks.id')
@@ -56,6 +70,8 @@ class PemesananController extends Controller
             ->first();
             $p->layanan = $layanan->namalayanan;
             $p->satuan = $layanan->satuanlayanan;
+
+            $subtotal += $subtotal_pemesanan;
         }
         // dd($pemesanans);
         
@@ -75,12 +91,16 @@ class PemesananController extends Controller
         $idopsidetail = explode(",", $request->idopsidetail);
 
         $hargacetakcontroller = new HargaCetakController();
-
         $idhargacetak = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id, true);
-
         $hargasatuan = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id);
-
         $harga = $hargasatuan * $request->input('jumlah');
+        
+        foreach ($idopsidetail as $id){
+            $p = DB::table('opsi_details')
+            ->where('id', '=', $id)
+            ->first();
+            $harga += $p->biaya_tambahan;
+        }
 
         $perlu_verifikasi = 0;
         if($harga > 200000){
@@ -129,9 +149,13 @@ class PemesananController extends Controller
             'idpemesanans' => 'required|array',
             'subtotal' => 'required|gt:0',
         ]);
+
+        // dd($request);
         $idpemesanans = $request->input('idpemesanans');
+        $biaya_tambahan = $request->input('biaya_tambahan');
         $pemesanans = [];
-        foreach($idpemesanans as $id){
+        $subtotal = $request->subtotal;
+        foreach($idpemesanans as $key=>$id){
             $p = DB::table('pemesanans')
             ->where('id','=',$id) 
             ->first();
@@ -141,7 +165,9 @@ class PemesananController extends Controller
             ->first();
             $p->harga_satuan = $harga_cetaks->harga_satuan;
 
-            $subtotal = $request->subtotal;
+            $p->biaya_tambahan = $biaya_tambahan[$key];
+
+            
 
             $layanan = DB::table('vendors_has_jenis_bahan_cetaks')
             ->join('layanan_cetaks','vendors_has_jenis_bahan_cetaks.layanan_cetaks_id','=', 'layanan_cetaks.id')

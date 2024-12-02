@@ -121,12 +121,18 @@ class PemesananController extends Controller
                     $p->harga_satuan = $harga_cetak->harga_satuan;
                 }
 
-                if ($notas_progress_latest) {
-                    $p->latest_progress = $notas_progress_latest->progress;
-                    if($notas_progress_latest->progress != 'terverifikasi'){
-                        $isVerifikasiSelesai = false;
+                if($p->perlu_verifikasi == 1){
+                    if ($notas_progress_latest) {
+                        $p->latest_progress = $notas_progress_latest->progress;
+                        if($notas_progress_latest->progress != 'terverifikasi'){
+                            $isVerifikasiSelesai = false;
+                        }
                     }
                 }
+
+                
+
+                
                 
             
                 if (!isset($notaDetail[$notaData->id])) {
@@ -143,6 +149,8 @@ class PemesananController extends Controller
 
         $notaDetail = array_values($notaDetail);
         
+            
+        // dd($isVerifikasiSelesai);
         // dd($notaDetail);
 
         return view('pesanan.orderdetail', compact('notaDetail', 'isVerifikasiSelesai','isMenungguSelesai'));
@@ -164,7 +172,7 @@ class PemesananController extends Controller
             ->join('penggunas', 'penggunas.email', '=', 'vendors_has_penggunas.penggunas_email')
             ->where('vendors_has_penggunas.vendors_id', '=', $vendor->vendors_id)
             ->where('penggunas.role', '=', 'pengantar')
-            ->select('penggunas.nama as namapengantar', 'penggunas.email as email')
+            ->select('penggunas.nama as namapengantar', 'penggunas.id as id')
             ->get();
 
         $data_pemesan = DB::table('pemesanans')
@@ -180,14 +188,15 @@ class PemesananController extends Controller
         return view('pesanan.pilihpengantar', compact('notaData', 'pengantar'));
     }
 
-    public function antarkan($emailpengantar, $idnota)
+    public function tugaskanpengantar(Request $request)
     {
-        $nota = Nota::findOrFail($idnota);
+        $nota = Nota::findOrFail($request->idnota);
         $nota->waktu_diantar = Carbon::now('Asia/Jakarta');
+        $nota->idpengantar = $request->idpengantar;
         $nota->save();
 
         $pemesanans = DB::table('pemesanans')
-            ->where('notas_id', '=', $idnota)
+            ->where('notas_id', '=', $request->idnota)
             ->select('id', 'vendors_id')
             ->get();
 

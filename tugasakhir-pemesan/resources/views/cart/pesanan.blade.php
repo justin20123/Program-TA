@@ -17,6 +17,7 @@
                     <th>Products</th>
                     <th>Price (IDR)</th>
                     <th>Quantity</th>
+                    <th>Additional Fee</th>
                     <th>Sub-total (IDR)</th>
                 </tr>
             </thead>
@@ -43,14 +44,30 @@
                                 </div>
                             </div>
                         </td>
-                        <td>{{ number_format(($p->harga_satuan + $p->biaya_tambahan), 0, '.', ',') }}</td>
+                        <td>{{ number_format($p->harga_satuan, 0, '.', ',') }}</td>
+                        
                         <td>{{ number_format($p->jumlah, 0, '.', ',') }} {{ $p->satuan }}</td>
+                        @if ($p->opsi_detail)
+                            <td>
+                                @foreach ($p->opsi_detail as $od)
+                                    <div>{{ $od['opsi'] }}: Rp.{{ number_format($od['biaya_tambahan'], 0, '.', ',') }}</div>
+                                @endforeach
+                            </td>
+                            <td class="font-weight-bold">
+                                <div id='hargaitem-{{ $p->id }}'>
+                                    {{ number_format($p->subtotal, 0, '.', ',') }}
+                                </div>
+    
+                            </td>
+                        @else
                         <td class="font-weight-bold">
                             <div id='hargaitem-{{ $p->id }}'>
-                                {{ number_format($p->harga_satuan * $p->jumlah, 0, '.', ',') }}
+                                {{ number_format($p->subtotal, 0, '.', ',') }}
                             </div>
 
                         </td>
+                        @endif
+                        
                     </tr>
                     <input type="hidden" name="biaya_tambahan-{{$p->id}}" id="biaya_tambahan-{{$p->id}}" value="{{$p->biaya_tambahan}}">
                     <input type="hidden" name="jumlah-{{$p->id}}" id="jumlah-{{$p->id}}" value="{{$p->jumlah}}">
@@ -119,7 +136,11 @@
                         subtotal += price;
 
                         const itemId = $(this).val();
+
+                        var biayaTambahan = $('#biaya_tambahan-' + itemId).val();
+
                         $('#hiddens').append(`<input type="hidden" name="idpemesanans[]" value="${itemId}">`);
+                        $('#hiddens').append(`<input type="hidden" name="biaya_tambahan[]" value="${biayaTambahan}">`);
                     }
                 });
                 $('#subtotal').text('Rp. ' + subtotal.toLocaleString());
