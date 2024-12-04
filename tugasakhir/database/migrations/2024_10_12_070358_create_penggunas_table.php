@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('email', 30)->unique();
             $table->string('password', 225);
-            $table->string('nama', 30);
+            $table->string('nama', 50);
             $table->enum('role', ['admin', 'pemesan', 'manajer','pegawai','pengantar']); 
             $table->decimal('saldo', 10, 2);
             $table->string('nomor_telepon', 20)->nullable();

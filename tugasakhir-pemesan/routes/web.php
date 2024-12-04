@@ -1,10 +1,13 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\LayananController;
 use App\Http\Controllers\NotaController;
 use App\Http\Controllers\PemesananController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\VendorController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -18,14 +21,33 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-//home
+//home & login
+
 Route::get('/', [VendorController::class, 'index'])->name('home');
+Route::get('login', [LoginController::class, 'bukalogin'])->name('login');
+Route::post('login', [LoginController::class, 'login']);
+Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+Route::get('/', function () {
+    $user = Auth::user();
+    if ($user && $user->hasRole('pemesan')) {
+        return redirect()->route('home');
+    } 
+    else if ($user) {
+        Auth::logout();
+        return redirect()->route('login')->with('message', 'User  ini tidak tercatat sebagai pemesan, silahkan login menggunakan aplikasi yang sesuai.');
+    } 
+    return redirect()->route('login');
+}); //  
 Route::post('/location', [VendorController::class, 'loadVendorsTerdekat']);
 Route::get('/vendor/rating/{idvendor}', [VendorController::class, 'getRating']);
 Route::get('/vendor/harga/{idlayanan}', [VendorController::class, 'getHarga']);
 Route::post('/untukanda', [VendorController::class, 'loadUntukAnda']);
 Route::post('/layananterdekat', [VendorController::class, 'loadLayananTerdekat']);
 Route::post('/getLayanan', [VendorController::class, 'loadLayanans']);
+
+//register
+Route::get('register', [RegisterController::class, 'bukaregister'])->name('register');
+Route::post('register', [RegisterController::class, 'register']);
 
 //semua vendor (belum ada)
 Route::get('/vendor', [VendorController::class,'indexVendors']);

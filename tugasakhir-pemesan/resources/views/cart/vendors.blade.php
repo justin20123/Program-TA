@@ -6,7 +6,7 @@
     </ol>
 @endsection
 @section('menu')
-    <div class="text-center h2 pt-4">Pesanan</div>
+    <div class="text-center h2 pt-4">Cart</div>
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="d-flex align-items-center">
             <label class="p-5 mb-0">Sort by:</label>

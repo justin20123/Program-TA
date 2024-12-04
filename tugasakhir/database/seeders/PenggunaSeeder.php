@@ -24,7 +24,7 @@ class PenggunaSeeder extends Seeder
             DB::table('penggunas')->insert([
 
                 'email' => "email$i@email.com",
-                'password' => bcrypt('password'),
+                'password' => md5("user$i"),
                 'nama' => $faker->name,
                 'role' => $role,
                 'saldo' => $faker->numberBetween(1000, 100000),
