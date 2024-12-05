@@ -23,6 +23,7 @@ class PemesananController extends Controller
     public function indexOrder($idvendors)
     {
         $pemesanans = DB::table('pemesanans')
+        ->where('penggunas_email', '=', Auth::user()->email)
         ->where('pemesanans.notas_id','=',null)
         ->where('pemesanans.vendors_id','=',$idvendors)
         ->get();

@@ -2,8 +2,10 @@
 
 namespace App\Console;
 
+use App\Http\Middleware\EncryptCookies;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Session\Middleware\StartSession;
 
 class Kernel extends ConsoleKernel
 {
@@ -29,4 +31,13 @@ class Kernel extends ConsoleKernel
 
         require base_path('routes/console.php');
     }
+
+    protected $middlewareGroups = [
+        'web' => [
+
+            EncryptCookies::class,
+            StartSession::class,
+
+        ],
+    ];
 }

@@ -7,6 +7,7 @@ use App\Models\NotaProgress;
 use App\Models\Pemesanan;
 use DateTime;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
@@ -24,7 +25,7 @@ class NotaController extends Controller
             $status_nota = "Menunggu diterima vendor";
         } elseif (!$nota->waktu_diantar && !$nota->waktu_tunggu_diambil) {
             $status_nota = "Pesanan diterima";
-        } else if ($nota->waktu_diantar || $nota->waktu_tunggu_diambil) {
+        } else if (($nota->waktu_diantar || $nota->waktu_tunggu_diambil) && !$nota->waktu_selesai) {
             if ($nota->waktu_diantar) {
                 $status_nota = "Diantar";
             } else {
@@ -109,6 +110,7 @@ class NotaController extends Controller
 
         $notas = DB::table('notas')
             ->join('pemesanans', 'notas.id', '=', 'pemesanans.notas_id')
+            ->where('penggunas_email', '=', Auth::user()->email) 
             ->select('notas.id as idnota', 'notas.waktu_transaksi as waktu_transaksi', 'pemesanans.vendors_id as idvendor', 'notas.waktu_menerima_pesanan', 'notas.waktu_diantar', 'notas.waktu_tunggu_diambil', 'notas.waktu_selesai', DB::raw('COUNT(pemesanans.id) as jumlah_pesanan'))
             ->groupBy('notas.id', 'notas.waktu_transaksi', 'pemesanans.vendors_id', 'notas.waktu_menerima_pesanan', 'notas.waktu_diantar', 'notas.waktu_tunggu_diambil', 'notas.waktu_selesai')
             ->orderBy('notas.waktu_transaksi', 'desc')

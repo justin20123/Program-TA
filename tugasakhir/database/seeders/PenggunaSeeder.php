@@ -6,6 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Faker\Factory as Faker;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class PenggunaSeeder extends Seeder
 {
@@ -24,9 +25,9 @@ class PenggunaSeeder extends Seeder
             DB::table('penggunas')->insert([
 
                 'email' => "email$i@email.com",
-                'password' => md5("user$i"),
-                'nama' => $faker->name,
-                'role' => $role,
+                'password' => Hash::make("user$i"),
+
+       'role' => $role,
                 'saldo' => $faker->numberBetween(1000, 100000),
                 'nomor_telepon' => $faker->phoneNumber,
                 

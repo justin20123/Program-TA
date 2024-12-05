@@ -62,7 +62,11 @@
                 <p class="mt-3"><a href="{{ route('register') }}">Don't have an account? Register here</a></p>
             </div>
         </form>
+        @if (session('error'))
+    <p class="text text-danger">{{ session('error') }}</p>
+    @endif
     </div>
+    
 </div>
 
 </body>

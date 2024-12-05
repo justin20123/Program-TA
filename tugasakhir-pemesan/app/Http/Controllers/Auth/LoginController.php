@@ -40,15 +40,10 @@ class LoginController extends Controller
 
 
         if ($user) {
-            if(Hash::check($password, $user->password)){
+            if (Hash::check($password, $user->password)) {
                 Auth::login($user);
                 $request->session()->regenerate();
-                if (Auth::check()) {
-                    return redirect()->route('home');
-                }
-                else{
-                    dd('error');
-                }
+                return redirect()->route('home'); // Ensure this is the correct route
             }
         }
 
