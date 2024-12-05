@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Nota;
 use App\Models\Pemesanan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class PemesananController extends Controller
@@ -108,7 +109,7 @@ class PemesananController extends Controller
         }
         
         $id = DB::table('pemesanans')->insertGetId([
-            'penggunas_email' => 'email1@email.com', 
+            'penggunas_email' => Auth::user()->email, 
             'jumlah' => $request->input('jumlah'), 
             'url_file' => '', 
             'catatan' => $request->input('catatan'),

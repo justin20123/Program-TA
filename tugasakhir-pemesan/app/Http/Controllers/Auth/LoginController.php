@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Pengguna;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
@@ -17,27 +20,39 @@ class LoginController extends Controller
     // Handle login request
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|min:6',
-        ]);
+        try {
+            $request->validate([
+                'email' => 'required|email',
+                'password' => 'required|min:4',
+            ]);
+        } catch (Exception) {
+            return back()->with('error', 'Password minimal 4 karakter')->withInput($request->all());
+        }
 
         $email = $request->email;
         $password = $request->password;
 
-        $user = DB::table('penggunas')->where('email', $email)->first();
+        $user = Pengguna::where('email', '=',$email)->first();
+
+        if($user->role != 'pemesan'){
+            return back()->with('error', 'Anda bukan pemesan, silahkan login menggunakan akun pemesan')->withInput($request->all());
+        }
+
 
         if ($user) {
-            if($user->password == md5($password)){
+            if(Hash::check($password, $user->password)){
                 Auth::login($user);
-
-                return redirect()->view('home');
+                $request->session()->regenerate();
+                if (Auth::check()) {
+                    return redirect()->route('home');
+                }
+                else{
+                    dd('error');
+                }
             }
         }
 
-        return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
-        ])->withInput($request->only('email', 'remember'));
+        return back()->with('error', 'Email atau password salah')->withInput($request->all());
     }
 
     // Handle logout request

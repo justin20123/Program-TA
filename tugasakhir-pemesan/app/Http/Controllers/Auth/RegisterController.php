@@ -31,7 +31,7 @@ class RegisterController extends Controller
         $pemesan = Pengguna::create([
             'nama' => $request->nama,
             'email' => $request->email,
-            'password' => md5($request->password),
+            'password' => Hash::make($request->password),
             'role' => 'pemesan',
             'nomor_telepon' => $request->nomor_telepon,
             'saldo' => 0
