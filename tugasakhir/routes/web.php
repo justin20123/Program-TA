@@ -57,7 +57,7 @@ Route::middleware(['web'])->group(function () {
 
     //home
     Route::get('/home', [VendorController::class, 'index'])->name('home');
-    Route::get('/layanans/{vendor_id}', [LayananController::class, 'index'])->name('layanan.index');
+    Route::get('/layanans/{vendor_id}', [LayananController::class, 'index'])->name('layananindex');
     Route::get('/layanans/{vendor_id}/details/{idlayanan}', [LayananController::class, 'detail_layanan'])->name('layanan.detail_layanan');
     //opsi detail
     Route::get('/layanans/{vendor_id}/details/{idlayanan}/{idjenisbahan}', [LayananController::class, 'detail_layanan_load'])->name('layanan.detail_layanan_load');

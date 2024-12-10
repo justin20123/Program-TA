@@ -25,7 +25,7 @@
             </p>
             <form method="POST" action="/dosetup">
                 @csrf
-
+                <input type="hidden" name="idvendor" value="{{$idvendor}}">
                 <div class="row">
                     <div class="col-6">
                         @foreach ($arr1 as $a1)
