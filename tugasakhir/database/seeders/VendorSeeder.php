@@ -31,7 +31,6 @@ class VendorSeeder extends Seeder
         for ($i = 0; $i < 11; $i++) {
             $vendor = DB::table('vendors')->insertGetId([
                 'nama' => $faker->company,
-                'lokasi' => $faker->city,
                 'status' => $faker->randomElement(['active', 'inactive']),
                 'foto_lokasi' => "https://picsum.photos/id/". $faker->numberBetween(1, 300) . "/200/300",
                 'longitude' => $faker->longitude(112.7, 112.8),
@@ -43,7 +42,6 @@ class VendorSeeder extends Seeder
                     
                     $jenis_bahan = DB::table('jenis_bahan_cetaks')->insertGetId([
                         'nama' => $faker->word,
-                        'ukuran' => $faker->randomElement(['A4', 'A3', 'A2']),
                         'gambar' => $faker->imageUrl(640, 480),
                         'deskripsi' => substr($deskripsi, 0, 250),
                     ]);
@@ -62,6 +60,7 @@ class VendorSeeder extends Seeder
                         for ($l = 0; $l < $faker->numberBetween(1, 5); $l++) {
                             DB::table('opsi_details')->insert([
                                 'opsi' => $faker->word,
+                                'tipe' => $faker->randomElement(['satuan','tambahan']),
                                 'biaya_tambahan' => $faker->numberBetween(500, 5000),
                                 'detail_cetaks_id' => $detail_cetak,
                             ]);

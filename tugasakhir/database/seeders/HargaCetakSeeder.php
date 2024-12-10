@@ -29,7 +29,6 @@ class HargaCetakSeeder extends Seeder
                     'harga_satuan' => $faker->numberBetween(1000, 10000),
                     'jumlah_cetak_maksimum' => $max,
                     'jumlah_cetak_minimum' => $min,
-                    'status_warna' => $faker->randomElement(['blackwhite', 'color']),
 
                 ]);
                 $min = $max + 1;

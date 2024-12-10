@@ -64,7 +64,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => Pengguna::class, // Update this line
+            'model' => Pengguna::class, 
         ],
 
         // 'users' => [

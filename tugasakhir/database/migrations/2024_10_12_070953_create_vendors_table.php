@@ -16,7 +16,6 @@ return new class extends Migration
         Schema::create('vendors', function (Blueprint $table) {
             $table->id();
             $table->string('nama', 50);
-            $table->string('lokasi', 45);
             $table->enum('status', ['active', 'inactive']);
             $table->string('foto_lokasi', 100);
             $table->decimal('longitude', 10, 6);

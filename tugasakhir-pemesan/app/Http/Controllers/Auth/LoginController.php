@@ -7,7 +7,6 @@ use App\Models\Pengguna;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
@@ -43,7 +42,7 @@ class LoginController extends Controller
             if (Hash::check($password, $user->password)) {
                 Auth::login($user);
                 $request->session()->regenerate();
-                return redirect()->route('home'); // Ensure this is the correct route
+                return redirect()->route('home');
             }
         }
 

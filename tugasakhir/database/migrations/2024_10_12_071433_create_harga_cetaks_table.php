@@ -17,9 +17,8 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('id_bahan_cetaks');
             $table->integer('harga_satuan');
-            $table->integer('jumlah_cetak_maksimum');
+            $table->integer('jumlah_cetak_maksimum')->nullable();
             $table->integer('jumlah_cetak_minimum');
-            $table->enum('status_warna', ['blackwhite', 'color']);
 
             $table->foreign('id_bahan_cetaks')->references('id')->on('jenis_bahan_cetaks');
             $table->timestamps();

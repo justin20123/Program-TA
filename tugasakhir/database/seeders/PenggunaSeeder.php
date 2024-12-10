@@ -26,8 +26,8 @@ class PenggunaSeeder extends Seeder
 
                 'email' => "email$i@email.com",
                 'password' => Hash::make("user$i"),
-
-       'role' => $role,
+                'nama' => $faker->name,
+                'role' => $role,
                 'saldo' => $faker->numberBetween(1000, 100000),
                 'nomor_telepon' => $faker->phoneNumber,
                 

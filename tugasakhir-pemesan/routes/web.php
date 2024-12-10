@@ -30,14 +30,14 @@ Route::get('/', function () {
     if ($user && $user->hasRole('pemesan')) {
         return redirect()->route('home');
     } else if ($user && ($user->hasRole('admin') || $user->hasRole('manajer') || $user->hasRole('pengantar') || $user->hasRole('pegawai'))){
-        // Auth::logout();
+        Auth::logout();
         return redirect()->route('login')->with('error', 'User  ini tidak tercatat sebagai pemesan, silahkan login menggunakan aplikasi yang sesuai.');
     }
     else if (!$user) {
         return redirect()->route('login');
     }
     
-}); //
+}); 
 //register
 
 Route::get('register', [RegisterController::class, 'bukaregister'])->name('register');
