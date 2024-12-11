@@ -32,12 +32,6 @@
                     <input type="password" name="confirmpassword" class="form-control" placeholder="Confirm Password" 
                         required>
                 </div>
-                {{-- <div class="form-check mb-3">
-                    <input type="checkbox" class="form-check-input" id="terms" required>
-                    <label class="form-check-label" for="terms">
-                        I have read and accept the <a href="#" class="text-primary">Terms and Conditions</a>.
-                    </label>
-                </div> --}}
                 <button typ e="submit" class="btn btn-primary w-100">Create an Account</button>
             </form>
             @if (session('error'))

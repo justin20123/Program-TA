@@ -60,7 +60,7 @@ class VendorSeeder extends Seeder
                         for ($l = 0; $l < $faker->numberBetween(1, 5); $l++) {
                             DB::table('opsi_details')->insert([
                                 'opsi' => $faker->word,
-                                'tipe' => $faker->randomElement(['satuan','tambahan']),
+                                'tipe' => $faker->randomElement(['satuan','tambahan','jumlah']),
                                 'biaya_tambahan' => $faker->numberBetween(500, 5000),
                                 'detail_cetaks_id' => $detail_cetak,
                             ]);

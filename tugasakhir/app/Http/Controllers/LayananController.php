@@ -632,7 +632,7 @@ class LayananController extends Controller
         ];
         $this->addjenisbahansetup(4, $idvendor, $arrdefaultjenisbahan);
     }
-    public function setupakaian($idvendor){
+    public function setuppakaian($idvendor){
         $arrdefaultjenisbahan = [
             [
                 'nama' => 'Kaos Pria Sablon (Basic)',
@@ -1169,9 +1169,7 @@ class LayananController extends Controller
         
         
         $this->addjenisbahansetup(13, $idvendor, $arrdefaultjenisbahan);
-    }
-
-    
+    }  
 
     public function dosetup(Request $request){
         try{

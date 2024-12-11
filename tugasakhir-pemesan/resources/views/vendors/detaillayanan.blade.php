@@ -8,14 +8,11 @@
 @section('menu')
     <div class="container py-5">
         <div id="error-message"></div>
-        <!-- Main Row Layout -->
         <div class="row">
             <div class="col-md-4">
-                <!-- Image Gallery -->
                 <div class="mb-4">
                     <img src="https://picsum.photos/300/200" alt="Main Product" class="img-fluid rounded">
                 </div>
-                <!-- Thumbnails -->
                 <div class="d-flex mb-4">
                     <img src="https://picsum.photos/300/200" class="img-thumbnail px-2" style="width: 75px; height: 75px;"
                         alt="Thumbnail 1">
@@ -25,13 +22,18 @@
                         alt="Thumbnail 3">
                 </div>
 
-                <!-- Price List Section -->
 
                 <h2 class="h4 font-weight-bold">Harga (1 {{ $layanan->satuan }} = {{ $layanan->kesetaraan_pcs }} pcs)</h2>
-                <ul class="list-unstyled text-muted mb-0">
+                <ul class="list-unstyled text-muted mb-0" id='listharga'>
                     @foreach ($hargacetaks as $h)
-                        <li>{{ $h->jumlah_cetak_minimum }}–{{ $h->jumlah_cetak_maksimum }} {{ $layanan->satuan }} = Rp.
-                            {{ $h->harga_satuan }}/{{ $layanan->satuan }}</li>
+                    @if($h->jumlah_cetak_maksimum == null)
+                    <li>&gt;{{ $h->jumlah_cetak_minimum-1 }} {{ $layanan->satuan }} = Rp.
+                        {{ $h->harga_satuan }}/{{ $layanan->satuan }}</li>
+                    @else
+                    <li>{{ $h->jumlah_cetak_minimum }}–{{ $h->jumlah_cetak_maksimum }} {{ $layanan->satuan }} = Rp.
+                        {{ $h->harga_satuan }}/{{ $layanan->satuan }}</li>
+                    @endif
+                        
                     @endforeach
                 </ul>
                 <input type="hidden" id="idvendor" value="{{ $jenisbahan[0]->idvendor }}">
@@ -39,12 +41,10 @@
 
             </div>
 
-            <!-- Right Side: Product Details -->
             <div class="col-md-8">
                 <h1 class="display-4">{{ $layanan->nama }}</h1>
                 <div class="d-flex align-items-center mb-3">
                     <div class="text-warning">
-                        <!-- 5 Star Rating Display -->
                         ★★★★★
                     </div>
                     <span class="ml-2 text-muted">(5 Customer Review)</span>
@@ -83,24 +83,22 @@
                         @endforeach
                     </div>
 
-                    <!-- Quantity Selector -->
                     <div class="form-group">
                         <label id="labelQuantity" class="font-weight-bold mr-3">Jumlah (upload file terlebih
                             dahulu!)</label>
 
-                        <input type="number" id="quantity" class="form-control w-25" min="1" value="1"
+                        <input type="number" id="jumlahcopy" class="form-control w-25" min="1" value="1"
                             required disabled>
                     </div>
                     <br>
 
-                    <!-- Add to Cart and Cart Buttons -->
                     <div class="form-group d-flex">
 
                         <button class="btn btn-outline-secondary">Cart</button>
                     </div>
                     <br>
                     <hr>
-                    <!-- Notes and File Upload -->
+
                     <div class="form-group mt-4">
                         <label for="catatan" class="font-weight-bold">Catatan</label>
                         <textarea id="catatan" class="form-control" rows="3" placeholder="Catatan"></textarea>
@@ -135,10 +133,10 @@
 
                     </div>
                     <br>
+                    <div class="h5" id="displayharga">Display Harga: Rp.xxx.xxx</div>
                     <button type="submit" class="btn btn-primary mr-3 mt-2">Add To Cart</button>
                 </form>
 
-                <!-- Dropdowns for Paper Type and Lamination -->
 
             </div>
             <hr class="mx-auto my-5" style="width: 90%">
@@ -159,51 +157,53 @@
                 type: 'GET',
                 dataType: 'json',
                 success: function(response) {
-                    $('#listOpsi').html(''); // Clear the existing options
+                    $('#listOpsi').html('');
                     let html = '';
+                    
 
-                    if (response.result === 'success' && Array.isArray(response.data)) {
-                        let opsiDetail = {};
+                    if (response.result == 'success') {
+                        $('#listdetail').html('Tidak ada opsi yang perlu ditambahkan');
+                        if (response.data.opsidetail > 0) {
+                            let opsiDetail = {};
+                            response.data.opsidetail.forEach(function(item) {
+                                const detailid = item.detail.id;
 
-                        response.data.forEach(function(item) {
-                            const detailid = item.detail.id;
+                                if (!opsiDetail[detailid]) {
+                                    opsiDetail[detailid] = {
+                                        id: detailid,
+                                        value: item.detail.value,
+                                        opsi: []
+                                    };
+                                }
 
-                            if (!opsiDetail[detailid]) {
-                                opsiDetail[detailid] = {
-                                    id: detailid,
-                                    value: item.detail.value,
-                                    opsi: []
-                                };
-                            }
-
-                            item.opsi.forEach(function(opsi) {
-                                opsiDetail[detailid].opsi.push({
-                                    idopsi: opsi.id,
-                                    opsi: opsi.opsi,
-                                    biaya_tambahan: opsi.biaya_tambahan
+                                item.opsi.forEach(function(opsi) {
+                                    opsiDetail[detailid].opsi.push({
+                                        idopsi: opsi.id,
+                                        opsi: opsi.opsi,
+                                        biaya_tambahan: opsi.biaya_tambahan
+                                    });
                                 });
                             });
-                        });
 
-                        // Construct the HTML for each detail and its options
-                        for (let key in opsiDetail) {
-                            const detail = opsiDetail[key];
-                            html += `
+                            // Construct the HTML for each detail and its options
+                            for (let key in opsiDetail) {
+                                const detail = opsiDetail[key];
+                                html += `
                                      <div class="form-group">
                                         <label class="font-weight-bold" id="detail-${key}">${detail.value}</label>                                         
                                              `;
-                            if (detail.opsi.length > 0) {
-                                html +=
-                                    `<div class="select-container">
+                                if (detail.opsi.length > 0) {
+                                    html +=
+                                        `<div class="select-container">
                                              <select class="form-control custom-select px-4" name="opsidetail-${key}"
                                                  id="opsidetail-{{ $key }}">`
-                                detail.opsi.forEach(function(option) {
-                                    html += `
+                                    detail.opsi.forEach(function(option) {
+                                        html += `
                                                 <option value="${option.idopsi}">${option.opsi}(+Rp. 
                                                 ${option.biaya_tambahan})</option>
                                             `;
-                                });
-                                html += `
+                                    });
+                                    html += `
                                             </select>
                                         <span class="caret-down-icon"><i class="fas fa-caret-down"></i></span>
                                     </div>
@@ -211,13 +211,33 @@
                                 <br>
                             `;
 
-                            } else {
-                                html = '<p>No Options required.</p>';
-                            }
+                                } else {
+                                    html = '<p>No Options required.</p>';
+                                }
 
-                            $('#listdetail').html(html);
+                                $('#listdetail').html(html);
+                            }
                         }
+
+                        $('#listharga').html('');
+                        $html = '';
+                        // console.table(response.data.listharga);
+                        response.data.listharga.forEach(function(item) {
+                            if(item.jumlah_cetak_maksimum == null){
+                                $html +=
+                                `<li>&gt;${item.jumlah_cetak_minimum - 1} ${item.satuan} = Rp. ${item.harga_satuan}/${item.satuan}</li>`;
+                            }
+                            else{
+                                $html +=
+                                `<li>${item.jumlah_cetak_minimum}–${item.jumlah_cetak_maksimum} ${item.satuan} = Rp. ${item.harga_satuan}/${item.satuan}</li>`;
+                            }
+                            
+                        });
+                        $('#listharga').html($html);
                     }
+                },
+                error: function(xhr, status, error) {
+                    console.log(xhr.responseText);
                 }
             });
         }
@@ -225,7 +245,7 @@
         function toggleUploadFile(isFileUploadHide) {
 
             if (isFileUploadHide == false) {
-                console.log(file);
+
                 $('#upload').show();
                 $('#file-detail').hide();
             } else {
@@ -241,6 +261,7 @@
         let jumlHalaman;
         let totalLembar;
         $(document).ready(function() {
+            $("#displayharga").hide();
             if (!file) {
                 toggleUploadFile(false);
             }
@@ -283,7 +304,7 @@
                             $('#file-name').text(
                                 `Selected file: ${file.name} (${jumlHalaman} halaman)`
                             );
-                            totalLembar = $("#quantity").val() * jumlHalaman;
+                            totalLembar = $("#jumlahcopy").val() * jumlHalaman;
                             $("#labelQuantity").text(
                                 `Jumlah (total: ${totalLembar} lembar)`);
                         }).catch(function(error) {
@@ -291,7 +312,7 @@
                         });
                     };
                     fileReader.readAsArrayBuffer(file);
-                    $('#quantity').prop('disabled', false);
+                    $('#jumlahcopy').prop('disabled', false);
 
                     toggleUploadFile(true);
                 } else {
@@ -307,9 +328,9 @@
                 }
             });
 
-            $('#quantity').on('change', function() {
-                if (Number.isInteger(parseInt($("#quantity").val())) && jumlHalaman != null) {
-                    let value = $("#quantity").val();
+            $('#jumlahcopy').on('change', function() {
+                if (Number.isInteger(parseInt($("#jumlahcopy").val())) && jumlHalaman != null) {
+                    let value = $("#jumlahcopy").val();
                     totalLembar = value * jumlHalaman;
                     $("#labelQuantity").text(`Jumlah (total: ${totalLembar} lembar)`);
 
@@ -319,6 +340,7 @@
                 idvendor = $('#idvendor').val();
                 idlayanan = $('#idlayanan').val();
                 idjenisbahan = $('#jenisbahan').val();
+                console.log('aa');
                 updateOpsiDetails(idvendor, idlayanan, idjenisbahan);
             });
 
@@ -333,6 +355,7 @@
                     for (let i = 0; i < opsidetailElements.length; i++) {
                         idopsidetail.push($(opsidetailElements[i]).val());
                     }
+                    const jumlahCopy = $("#jumlahcopy").val();;
                     const totalQuantity = totalLembar;
                     const catatan = $("#catatan").val();
                     const jenis_bahan_cetaks_id = $('#jenisbahan').val();
@@ -340,6 +363,7 @@
 
                     const formData = new FormData();
                     formData.append('file', file);
+                    formData.append('jumlahcopy', jumlahCopy);
                     formData.append('jumlah', totalQuantity);
                     formData.append('jenis_bahan_cetaks_id', jenis_bahan_cetaks_id);
                     formData.append('vendors_id', vendors_id);
@@ -365,7 +389,8 @@
                                 confirmButtonText: 'OK'
                             }).then((result) => {
                                 if (result.isConfirmed) {
-                                    window.location.href = '/vendor/' + vendors_id;                                }
+                                    window.location.href = '/vendor/' + vendors_id;
+                                }
                             });
 
                         },

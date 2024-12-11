@@ -71,6 +71,8 @@
 
 
 </ul>
+<a href="/setup/{{$vendor->id}}" class="btn btn-primary m-12">Tambah Layanan</a>
+
 </section>
 
 @endsection

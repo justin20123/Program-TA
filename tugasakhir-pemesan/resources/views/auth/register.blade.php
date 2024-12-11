@@ -38,15 +38,7 @@
     </style>
 </head>
 <body>
-    @if ($errors->any())
-    <div class="alert alert-danger">
-        <ul>
-            @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
-        </ul>
-    </div>
-@endif
+   
 
     <div class="register-container">
         <div class="register-form">
@@ -55,12 +47,16 @@
             <form method="POST" action="{{ route('register') }}">
                 @csrf
                 <div class="form-group">
-                    <label for="name">Full Name</label>
-                    <input type="text" class="form-control" id="name" name="name" required>
+                    <label for="nama">Full Name</label>
+                    <input type="text" class="form-control" id="nama" name="nama" value="{{ old('nama') }}" required>
+                </div>
+                <div class="form-group">
+                    <label>Nomor Telepon</label>
+                    <input type="tel" name="nomor_telepon" class="form-control" value="{{ old('nomor_telepon') }}"  required  pattern="[0-9]*" inputmode="numeric">
                 </div>
                 <div class="form-group">
                     <label>Email Address</label>
-                    <input type="email" class="form-control" id="email" name="email" required>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" required>
                 </div>
                 <div class="form-group">
                     <label>Password</label>
@@ -79,6 +75,9 @@
                     Already have an account? <a href="{{ route('login') }}">Log in</a>
                 </p>
             </form>
+            @if (session('error'))
+                <p class="text text-danger">{{ session('error') }}</p>
+            @endif
         </div>
         <div class="register-image"></div>
     </div>

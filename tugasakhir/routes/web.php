@@ -100,12 +100,14 @@ Route::middleware(['web'])->group(function () {
     Route::get('/pesanancetak/{idvendor}/detail/{idnota}', [PemesananController::class, 'detailPesanan'])->name('pesanan.detailPesanan');
 
     //download
-    Route::get('file/{url_file}', function ($url_file) {
-        if (file_exists($url_file)) {
-            return response()->download($url_file);
+    Route::get('downloadfile/{url_file}', function ($url_file) {
+        $filePath = base_path('../pemesanans/' . $url_file);
+        
+        if (file_exists($filePath)) {
+            return response()->download($filePath);
         }
         return abort(404);
-    })->name('file');
+    })->name('downloadfile');
 
     //pilih pengantar
     Route::post('/pilihpengantar', [PemesananController::class, 'pilihpengantar'])->name('pesanan.pilihpengantar');

@@ -143,9 +143,23 @@ class LayananController extends Controller
 
         $opsiDetail = array_values($opsiDetail);
 
-        // dd($opsiDetail);
+        $listharga = DB::table('harga_cetaks')
+        ->where('id_bahan_cetaks','=',$idjenisbahan)
+        ->get();
 
-            return json_encode(['result'=>'success', 'data'=>$opsiDetail]);
+        $layanan = DB::table('vendors_has_jenis_bahan_cetaks')
+        ->join('layanan_cetaks','layanan_cetaks.id','=','vendors_has_jenis_bahan_cetaks.layanan_cetaks_id')
+        ->where('jenis_bahan_cetaks_id','=',$idjenisbahan)
+        ->select('layanan_cetaks.satuan')
+        ->first();
+
+        foreach($listharga as $l){
+            $l->satuan = $layanan->satuan;
+        }
+
+       
+
+        return json_encode(['result'=>'success', 'data'=>['opsidetail'=>$opsiDetail , 'listharga'=>$listharga]]);
     }
 
     

@@ -10,7 +10,12 @@
         <a class="navbar-link">&ensp;</a>
         <a href="/pegawai" class="navbar-link">Pegawai</a>
     </div>
-    <div class="navbar-brand">Hak Akses: Manajer</div>
+    <div class="navbar-brand">Hak Akses: 
+      @if(Auth::check())
+      {{ Auth::user()->role }}
+  
+      @endif
+    </div>
     <div class="navbar-brand">Saldo: Rp 500.000</div>
     <form class="form-inline">
         <div class="dropdown">

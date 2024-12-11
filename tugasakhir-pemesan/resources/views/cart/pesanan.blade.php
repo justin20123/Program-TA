@@ -47,27 +47,13 @@
                         <td>{{ number_format($p->harga_satuan, 0, '.', ',') }}</td>
                         
                         <td>{{ number_format($p->jumlah, 0, '.', ',') }} {{ $p->satuan }}</td>
-                        @if ($p->opsi_detail)
-                            <td>
-                                @foreach ($p->opsi_detail as $od)
-                                    <div>{{ $od['opsi'] }}: Rp.{{ number_format($od['biaya_tambahan'], 0, '.', ',') }}</div>
-                                @endforeach
-                            </td>
-                            <td class="font-weight-bold">
-                                <div id='hargaitem-{{ $p->id }}'>
-                                    {{ number_format($p->subtotal, 0, '.', ',') }}
-                                </div>
-    
-                            </td>
-                        @else
+                        <td>Rp.{{ number_format($p->biaya_tambahan, 0, '.', ',') }}</td>
                         <td class="font-weight-bold">
                             <div id='hargaitem-{{ $p->id }}'>
-                                {{ number_format($p->subtotal, 0, '.', ',') }}
+                                {{ number_format($p->subtotal_pesanan, 0, '.', ',') }}
                             </div>
 
                         </td>
-                        @endif
-                        
                     </tr>
                     <input type="hidden" name="biaya_tambahan-{{$p->id}}" id="biaya_tambahan-{{$p->id}}" value="{{$p->biaya_tambahan}}">
                     <input type="hidden" name="jumlah-{{$p->id}}" id="jumlah-{{$p->id}}" value="{{$p->jumlah}}">

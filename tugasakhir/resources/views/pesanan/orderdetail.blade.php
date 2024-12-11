@@ -193,8 +193,7 @@
                                 <div>{{ $p->layanan }}</div>
                                 <div>{{ $p->jumlah . ' ' . $p->satuan }}</div>
                                 <div>Rp. {{ number_format($p->harga_satuan * $p->jumlah, 0, ',', '.') }}</div>
-                                <a href="{{ route('file', ['url_file' => $p->url_file]) }}" class="btn btn-primary py-2"
-                                    target="_blank">Download File</a>
+                                <a href="{{ route('file', ['url_file' => $p->url_file]) }}" class="btn btn-primary py-2" target="_blank">Download File</a>
                             </td>
                             <td>
                                 <ul class="list-inline justify-content-between">

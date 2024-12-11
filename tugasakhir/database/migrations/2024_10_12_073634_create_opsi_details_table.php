@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('opsi', 45);
             $table->string('biaya_tambahan', 45);
-            $table->enum('tipe',['satuan','tambahan']);
+            $table->enum('tipe',['satuan','tambahan','jumlah']);
             $table->unsignedBigInteger('detail_cetaks_id');
             $table->foreign('detail_cetaks_id')->references('id')->on('detail_cetaks');
             $table->timestamps();

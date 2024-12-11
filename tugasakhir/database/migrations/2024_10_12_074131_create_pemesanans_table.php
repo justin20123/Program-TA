@@ -17,6 +17,8 @@ return new class extends Migration
             $table->id();
             $table->string('penggunas_email', 30);
             $table->integer('jumlah');
+            $table->integer('subtotal_pesanan')->default(0);
+            $table->integer('biaya_tambahan')->default(0);
             $table->string('url_file', 100);
             $table->string('catatan', 200)->nullable();
             $table->tinyInteger('perlu_verifikasi');

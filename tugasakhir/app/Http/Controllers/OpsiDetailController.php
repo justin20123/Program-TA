@@ -31,6 +31,7 @@ class OpsiDetailController extends Controller
             $opsiDetail->deskripsi = $request->input('deskripsi');
         }
         $opsiDetail->biaya_tambahan = $request->input('biaya_tambahan');
+        $opsiDetail->tipe = $request->input('tipe');
         $opsiDetail->detail_cetaks_id = $detailid;
 
         $opsiDetail->save();

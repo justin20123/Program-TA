@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Pengguna;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -17,15 +18,20 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
-        $validasi = $request->validate([
-            'nama' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'nomor_telepon' => 'required|string|regex:/^08[0-9]{6,}$/',
-        ]);
+        try {
+            $request->validate([
+                'nama' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:4',
+                'confirm_password' => 'required|string|min:4',
+                'nomor_telepon' => 'required|string|regex:/^08[0-9]{6,}$/',
+            ]);
+        } catch (Exception $e) {
+            return redirect()->back()->withInput()->with('error', $e->getMessage());
+        }
 
-        if($request->password != $request->confirm_password){
-            return back()->with('error', 'Password tidak sama');
+        if ($request->password != $request->confirm_password) {
+            return back()->withInput()->with('error', 'Password tidak sama');
         }
 
         $pemesan = Pengguna::create([
@@ -39,6 +45,6 @@ class RegisterController extends Controller
 
         Auth::login($pemesan);
 
-        return redirect()->route('home'); 
+        return redirect()->route('home');
     }
 }

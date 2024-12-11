@@ -27,12 +27,15 @@ Route::post('login', [LoginController::class, 'login']);
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('/', function () {
     $user = Auth::user();
-    if ($user && $user->hasRole('pemesan')) {
-        return redirect()->route('home');
-    } else if ($user && ($user->hasRole('admin') || $user->hasRole('manajer') || $user->hasRole('pengantar') || $user->hasRole('pegawai'))){
-        Auth::logout();
-        return redirect()->route('login')->with('error', 'User  ini tidak tercatat sebagai pemesan, silahkan login menggunakan aplikasi yang sesuai.');
+    if($user){
+        if ($user->hasRole('pemesan')) {
+            return redirect()->route('home');
+        } else if (($user->hasRole('admin') || $user->hasRole('manajer') || $user->hasRole('pengantar') || $user->hasRole('pegawai'))){
+            Auth::logout();
+            return redirect()->route('login')->with('error', 'User  ini tidak tercatat sebagai pemesan, silahkan login menggunakan aplikasi yang sesuai.');
+        }
     }
+    
     else if (!$user) {
         return redirect()->route('login');
     }
