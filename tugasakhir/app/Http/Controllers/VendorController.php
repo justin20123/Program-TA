@@ -64,6 +64,8 @@ class VendorController extends Controller
     public function indexOrders()
     {
         $vendors = DB::table('vendors')
+            ->join('vendors_has_penggunas', 'vendors_has_penggunas.vendors_id', '=', 'vendors.id')
+            ->where('vendors_has_penggunas.penggunas_id', '=', Auth::user()->id)
             ->get();
 
 
@@ -131,7 +133,8 @@ class VendorController extends Controller
     public function indexPegawai()
     {
         $vendors = DB::table('vendors')
-            ->select('*')
+            ->join('vendors_has_penggunas', 'vendors_has_penggunas.vendors_id', '=', 'vendors.id')
+            ->where('vendors_has_penggunas.penggunas_id', '=', Auth::user()->id)
             ->get();
 
         // dd($vendors);
@@ -152,8 +155,10 @@ class VendorController extends Controller
 
     public function indexPengantar()
     {
+        ;
         $vendors = DB::table('vendors')
-            ->select('*')
+            ->join('vendors_has_penggunas', 'vendors_has_penggunas.vendors_id', '=', 'vendors.id')
+            ->where('vendors_has_penggunas.penggunas_id', '=', Auth::user()->id)
             ->get();
 
         // dd($vendors);

@@ -48,7 +48,7 @@ Route::get('/', function () {
         return redirect()->route('login');
     }
 });
-Route::middleware(['web'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     //tambah vendor
     Route::post('/tambahvendor', [VendorController::class, 'tambahvendor'])->name('tambahvendor');
     Route::get('/setup/{vendorid}', [VendorController::class, 'opensetup'])->name('opensetup');
@@ -100,14 +100,16 @@ Route::middleware(['web'])->group(function () {
     Route::get('/pesanancetak/{idvendor}/detail/{idnota}', [PemesananController::class, 'detailPesanan'])->name('pesanan.detailPesanan');
 
     //download
-    Route::get('downloadfile/{url_file}', function ($url_file) {
-        $filePath = base_path('../pemesanans/' . $url_file);
-        
-        if (file_exists($filePath)) {
-            return response()->download($filePath);
+    Route::get('/pemesanan/{filename}', function ($filename) {
+        $path = base_path('../pemesanan/' . $filename);
+
+        if (file_exists($path)) {
+            //ambil lokasi file pemesanan
+            return response()->download($path);
         }
-        return abort(404);
-    })->name('downloadfile');
+
+        abort(404);
+    });
 
     //pilih pengantar
     Route::post('/pilihpengantar', [PemesananController::class, 'pilihpengantar'])->name('pesanan.pilihpengantar');
