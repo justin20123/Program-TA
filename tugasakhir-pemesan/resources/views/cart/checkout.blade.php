@@ -32,14 +32,14 @@
             <div class="col-md-8">
                 <h4 class="form-title">Billing Information</h4>
                 <form id="formBuatNota" method="POST">
-                    @csrf
+                    @csrf        
 
+                    <!-- Delivery Option -->
+                    @if($adapengantar)
                     <div class="form-group form-check">
                         <input type="checkbox" class="form-check-input" id="statusantar">
                         <label class="form-check-label custom-radio-label" for="statusantar">Pengantaran</label>
                     </div>
-
-                    <!-- Delivery Option -->
                     <div class="form-group delivery">
                         <label for="deliveryOption" class="form-label">Lokasi pengambilan (Diperlukan untuk layanan
                             pengantaran)</label>
@@ -52,7 +52,10 @@
                                 Anda</button>
                         </div>
                     </div>
-
+                    @else
+                    <p>Saat ini vendor belum menyediakan layanan antar</p>
+                    @endif
+                    
                     <!-- Additional Notes -->
                     <div class="form-group">
                         <label for="orderNotes" class="form-label">Informasi Tambahan</label>
@@ -65,6 +68,9 @@
                     <input type="hidden" name="idvendor" id="idvendor" value="{{ $pemesanans[0]->vendors_id }}">
                     <input type="hidden" name="diantar" id="diantar" value="{{ $pemesanans[0]->vendors_id }}">
                 </form>
+                @if (session('error'))
+                <p class="text text-danger">{{ session('error') }}</p>
+            @endif
             </div>
 
             <!-- Order Summary Section -->

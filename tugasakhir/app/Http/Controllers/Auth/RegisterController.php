@@ -30,9 +30,23 @@ class RegisterController extends Controller
         } catch (Exception $e) {
             return back()->withInput()->with('error', $e->getMessage());
         }
+        
 
         if ($request->password != $request->confirmpassword) {
             return back()->withInput()->with('error', 'Password tidak sama');
+        }
+
+        $user = Pengguna::where('email', '=',$request->input('email'))->first();
+        if($user){
+            if($user->role == 'manajer'){
+                return redirect()->back()->withInput()->with('error', 'Email sudah terdaftar, silahkan login dengan email ini');
+            }
+            if($user->role == 'pegawai'){
+                return redirect()->back()->withInput()->with('error', 'Email sudah terdaftar sebagai pegawai, silahkan login dengan email ini');
+            }
+            else{
+                return redirect()->back()->withInput()->with('error', 'Email sudah terdaftar dengan hak akses lain, silahkan gunakan email lain atau login menggunakan aplikasi lainnya');
+            }
         }
 
         $manajer = Pengguna::create([

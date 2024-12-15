@@ -33,6 +33,11 @@ class LoginController extends Controller
 
         $user = Pengguna::where('email', '=',$email)->first();
 
+        if(!$user){
+            return back()->with('error', 'Akun anda belum terdaftar')->withInput();
+        }
+
+
         if($user->role != 'pegawai' && $user->role != 'manajer'){
             return back()->with('error', 'Anda bukan pegawai maupun manajer, silahkan login menggunakan akun yang bersangkutan')->withInput($request->all());
         }
@@ -56,6 +61,6 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect()->route('home');
     }
 }

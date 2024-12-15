@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pengguna;
 use App\Models\Vendor;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\View;
 
 class VendorController extends Controller
 {
@@ -17,43 +22,15 @@ class VendorController extends Controller
      */
     public function index()
     {
-        $vendors = DB::table('vendors')
-            ->join('vendors_has_penggunas', 'vendors_has_penggunas.vendors_id', '=', 'vendors.id')
-            ->where('vendors_has_penggunas.penggunas_id', '=', Auth::user()->id)
-            ->get();
-
-        if (count($vendors)>0) {
-            foreach ($vendors as $key => $v) {
-
-                $ratings = DB::table('notas')
-                    ->join('pemesanans', 'pemesanans.notas_id', '=', 'notas.id')
-                    ->join('ratings', 'ratings.notas_id', '=', 'notas.id')
-                    ->where('pemesanans.vendors_id', '=', $v->id)
-                    ->whereNotNull('ratings.nilai')
-                    ->select(
-                        'notas.id',
-                        DB::raw('avg(ratings.nilai) as average_rating'),
-                    )
-                    ->groupBy('notas.id')
-                    ->get();
-                if ($ratings->isNotEmpty()) {
-                    $totalRating = 0;
-                    $totalNota = DB::table('notas')
-                        ->join('pemesanans', 'pemesanans.notas_id', '=', 'notas.id')
-                        ->where('pemesanans.vendors_id', $v->id)
-                        ->count();
-
-                    foreach ($ratings as $r) {
-                        $totalRating += $r->average_rating;
-                    }
-                    $vendor_rating = $totalRating / $totalNota;
-                    $v->vendor_rating = $vendor_rating;
-                    $v->total_nota = $totalNota;
-                } else {
-                    $v->vendor_rating = null;
-                    $v->total_nota = 0;
-                }
-            }
+        if (!Auth::user()) {
+            return redirect()->route('login');
+        }
+        if (Auth::user()->role == "manajer" && Auth::user()->vendors_id) {
+            $layananController = new LayananController();
+            return $layananController->index();
+        } elseif (Auth::user()->role != "manajer" && Auth::user()->role != "pegawai") {
+            Auth::logout();
+            return redirect()->route('login')->with('error', 'Anda bukan manajer maupun pegawai, silahkan login menggunakan akun yang bersangkutan.');
         } else {
             return view('tambahvendor.tambah');
         }
@@ -154,8 +131,7 @@ class VendorController extends Controller
     }
 
     public function indexPengantar()
-    {
-        ;
+    {;
         $vendors = DB::table('vendors')
             ->join('vendors_has_penggunas', 'vendors_has_penggunas.vendors_id', '=', 'vendors.id')
             ->where('vendors_has_penggunas.penggunas_id', '=', Auth::user()->id)
@@ -215,75 +191,33 @@ class VendorController extends Controller
         $vendor->foto_lokasi = $relativePath;
         $vendor->save();
 
-        DB::table('vendors_has_penggunas')->insert([
-            'vendors_id' => $idvendor,
-            'penggunas_email' => Auth::user()->email,
-            'penggunas_id' => Auth::user()->id
-        ]);
+        $pengguna = Pengguna::findOrFail(Auth::user()->id);
+        $pengguna->vendors_id = $idvendor;
+        $pengguna->save();
 
-        return redirect()->route('opensetup', ['vendorid' => $idvendor]); 
-        ;
+        return redirect()->route('opensetup', ['vendorid' => $idvendor]);;
     }
 
-    public function opensetup($idvendor){
+    public function opensetup($idvendor)
+    {
         $layananvendor = DB::table('vendors_has_jenis_bahan_cetaks')
-        ->where('vendors_id', '=', $idvendor)
-        ->select('layanan_cetaks_id')
-        ->get();
+            ->where('vendors_id', '=', $idvendor)
+            ->select('layanan_cetaks_id')
+            ->get();
         $layananvendorid = [];
-        foreach($layananvendor as $lv){
+        foreach ($layananvendor as $lv) {
             array_push($layananvendorid, $lv->layanan_cetaks_id);
         }
         $layanans = DB::table('layanan_cetaks')
-        ->get();
+            ->get();
         $setup_layanans = [];
         foreach ($layanans as $l) {
             if (!in_array($l->id, $layananvendorid)) {
-                array_push($setup_layanans, $l); 
+                array_push($setup_layanans, $l);
             }
         }
 
-        return view('tambahvendor.setup', compact('setup_layanans','idvendor'));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        return view('vendors.create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'nama_vendor' => 'required',
-            'alamat_vendor' => 'required',
-            'kontak_vendor' => 'required',
-        ]);
-
-        Vendor::create($request->all());
-
-        return redirect()->route('vendors.index');
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Vendor $vendor)
-    {
-        return view('vendors.show', compact('vendor'));
+        return view('tambahvendor.setup', compact('setup_layanans', 'idvendor'));
     }
 
     /**
@@ -292,9 +226,10 @@ class VendorController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Vendor $vendor)
+    public function edit($id)
     {
-        return view('vendors.edit', compact('vendor'));
+        $vendor = Vendor::findOrFail($id);
+        return view('vendor.edit', compact('vendor'));
     }
 
     /**
@@ -304,17 +239,38 @@ class VendorController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Vendor $vendor)
+    public function update(Request $request)
     {
-        $request->validate([
-            'nama_vendor' => 'required',
-            'alamat_vendor' => 'required',
-            'kontak_vendor' => 'required',
-        ]);
+        try {
+            $request->validate([
+                'nama' => 'required|string|max: 50',
+                'fotopercetakan' => 'file|mimes:jpeg,jpg,png,gif,|max:20480',
+                'longitude' => 'required',
+                'latitude' => 'required',
+            ]);
+        } catch (Exception $e) {
+            return back()->withInput()->with('error', 'Gagal menambah vendor. ' . $e->getMessage());
+        }
 
-        $vendor->update($request->all());
+        $idvendor = $request->input('vendorid');
 
-        return redirect()->route('vendors.index');
+        $vendor = Vendor::findOrFail($idvendor);
+        $vendor->nama = $request->input('nama');
+        if ($request->file('fotopercetakan')) {
+            $file = $request->file('fotopercetakan');
+            $fileExtension = $file->getClientOriginalExtension();
+            $fileName = "$idvendor.$fileExtension";
+
+            $directory = base_path('../vendors');
+            $file->move($directory, $fileName);
+            Cache::flush(); 
+            Artisan::call('view:clear');
+        }
+        $vendor->longitude = $request->input('longitude');
+        $vendor->latitude = $request->input('latitude');
+        $vendor->save();
+
+        return redirect()->route('home');
     }
 
     /**

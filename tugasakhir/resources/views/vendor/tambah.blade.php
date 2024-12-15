@@ -29,11 +29,11 @@
 
                     <!-- Lokasi Percetakan -->
                     <div class="mb-3">
-                        <label for="latitude" class="form-label">Latitude</label>
+                        <label for="latitude" class="form-label">Lintang</label>
                         <input type="text" class="form-control" id="latitude" name="latitude" placeholder="Latitude" required>
                     </div>
                     <div class="mb-3">
-                        <label for="longitude" class="form-label">Longitude</label>
+                        <label for="longitude" class="form-label">Bujur</label>
                         <input type="text" class="form-control" id="longitude" name="longitude" placeholder="Longitude" required>
                     </div>
                     <button type="button" class="btn btn-primary w-100 mb-3" onclick="getCurrentLocation()">Gunakan Lokasi Anda</button>

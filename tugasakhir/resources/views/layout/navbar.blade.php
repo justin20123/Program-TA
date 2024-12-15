@@ -2,7 +2,7 @@
     <a class="navbar-link">&ensp;</a>
     <a class="navbar-brand">Logo</a>
     <div class="navbar-item justify-content-between">
-        <a href="/" class="navbar-link">Vendors</a>
+        <a href="/" class="navbar-link">Layanan</a>
         <a class="navbar-link">&ensp;</a>
         <a href="/pesanancetak" class="navbar-link">Pesanan</a>
         <a class="navbar-link">&ensp;</a>

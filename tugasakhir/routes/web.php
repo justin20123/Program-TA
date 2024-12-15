@@ -37,27 +37,30 @@ Route::get('register', [RegisterController::class, 'bukaregister'])->name('regis
 Route::post('register', [RegisterController::class, 'register']);
 
 //buka app
-Route::get('/', function () {
-    $user = Auth::user();
-    if ($user && ($user->hasRole('manajer') || $user->hasRole('pegawai'))) {
-        return redirect()->route('home');
-    } else if ($user && ($user->hasRole('pemesan') || $user->hasRole('pengantar'))) {
-        Auth::logout();
-        return redirect()->route('login')->with('error', 'User  ini tidak tercatat sebagai pemesan, silahkan login menggunakan aplikasi yang sesuai.');
-    } else if (!$user) {
-        return redirect()->route('login');
-    }
-});
+Route::get('/', [VendorController::class, 'index']);
 Route::middleware(['auth'])->group(function () {
     //tambah vendor
     Route::post('/tambahvendor', [VendorController::class, 'tambahvendor'])->name('tambahvendor');
     Route::get('/setup/{vendorid}', [VendorController::class, 'opensetup'])->name('opensetup');
     Route::post('/dosetup', [LayananController::class, 'dosetup']);
 
+    //edit vendor
+    Route::get('/editvendor/{vendorid}', [VendorController::class, 'edit'])->name('vendor.edit');
+    Route::post('/editvendor', [VendorController::class, 'update'])->name('vendor.update');
+    Route::get('/vendors/{filename}', function ($filename) {
+        $path = base_path('../vendors/' . $filename);
+
+        if (file_exists($path)) {
+            return response()->file($path);
+        }
+
+        abort(404);
+    });
+
 
     //home
     Route::get('/home', [VendorController::class, 'index'])->name('home');
-    Route::get('/layanans/{vendor_id}', [LayananController::class, 'index'])->name('layananindex');
+    Route::get('/layanans', [LayananController::class, 'index'])->name('layananindex');
     Route::get('/layanans/{vendor_id}/details/{idlayanan}', [LayananController::class, 'detail_layanan'])->name('layanan.detail_layanan');
     //opsi detail
     Route::get('/layanans/{vendor_id}/details/{idlayanan}/{idjenisbahan}', [LayananController::class, 'detail_layanan_load'])->name('layanan.detail_layanan_load');
@@ -106,6 +109,17 @@ Route::middleware(['auth'])->group(function () {
         if (file_exists($path)) {
             //ambil lokasi file pemesanan
             return response()->download($path);
+        }
+
+        abort(404);
+    });
+
+    //fotolayanan
+    Route::get('/imagelayanan/{filename}', function ($filename) {
+        $path = base_path('../imagelayanan/' . $filename);
+
+        if (file_exists($path)) {
+            return response()->file($path);
         }
 
         abort(404);

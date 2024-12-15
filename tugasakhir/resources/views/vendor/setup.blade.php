@@ -21,7 +21,7 @@
             <h3 class="text-center mb-3">Pengaturan singkat</h3>
             <p class="text-center text-muted mb-4">
                 Pilih jasa yang ingin ditawarkan percetakan anda<br>
-                <small>Pengaturan detail keperluan cetak akan disesuaikan dengan standar yang ada di sistem</small>
+                <small>Pengaturan detil keperluan cetak akan disesuaikan dengan standar yang ada di sistem</small>
             </p>
             <form method="POST" action="/dosetup">
                 @csrf

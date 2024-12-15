@@ -30,16 +30,9 @@ class PenggunaSeeder extends Seeder
                 'role' => $role,
                 'saldo' => $faker->numberBetween(1000, 100000),
                 'nomor_telepon' => $faker->phoneNumber,
+                'vendors_id' => null,
                 
             ]);
-            if($role == "manager"){
-                DB::table('vendors_has_penggunas')->insert([
-                    'vendors_id' => $faker->numberBetween(1, 10),
-                    'penggunas_email' => "email$i@email.com",
-                    'penggunas_id' => $i,
-                    'role' => $faker->randomElement(['manajer', 'pegawai']),
-                ]);
-            }
         }
     }
 }

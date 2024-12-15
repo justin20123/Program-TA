@@ -17,17 +17,9 @@ class VendorSeeder extends Seeder
     public function run()
     {
         $faker = Faker::create('id_ID');
-        $layanan = array("Fotokopi","Stiker","Buku","Spanduk/Banner","Pakaian","Paper Bag","Aksesoris","Undangan","Kalender","Kartu Nama","Brosur","Amplop","Case HP");
-        $satuan = array("pcs", "lot", "pcs", "pcs", "pcs", "pcs", "pcs", "lot", "pcs", "pcs", "pcs", "pcs", "pcs");
-        $kesetaraan = array(1, 50, 1, 1, 1, 1, 1, 100, 1, 1, 500, 250, 1);
-        foreach ($layanan as $key=>$value) {
-            DB::table('layanan_cetaks')->insert([
-                'nama' => $value,
-                'satuan' => $satuan[$key],
-                'kesetaraan_pcs'=>$kesetaraan[$key],
-                'url_image' => "https://picsum.photos/id/". $faker->numberBetween(1, 300) . "/200/300",
-            ]);
-        }
+        
+        $layanan = DB::table('layanan_cetaks')
+        ->get();
         for ($i = 0; $i < 11; $i++) {
             $vendor = DB::table('vendors')->insertGetId([
                 'nama' => $faker->company,

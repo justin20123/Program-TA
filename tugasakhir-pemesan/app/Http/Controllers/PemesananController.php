@@ -142,6 +142,25 @@ class PemesananController extends Controller
         $biaya_tambahan = $request->input('biaya_tambahan');
         $pemesanans = [];
         $subtotal = $request->subtotal;
+
+        $idvendor = DB::table('pemesanans')
+        ->where('id', '=', $idpemesanans)
+        ->select('vendors_id')
+        ->first();
+
+        $pengantars = DB::table('penggunas')
+            ->join('vendors_has_penggunas', 'penggunas.id', '=', 'vendors_has_penggunas.penggunas_id')
+            ->where('vendors_has_penggunas.vendors_id', '=',$idvendor->vendors_id)
+            ->where('penggunas.role','=','pengantar')
+            ->count();
+        
+            
+        $adapengantar = true;
+
+            if($pengantars == 0){
+                $adapengantar = false;
+            }
+
         foreach($idpemesanans as $key=>$id){
             $p = DB::table('pemesanans')
             ->where('id','=',$id) 
@@ -168,7 +187,7 @@ class PemesananController extends Controller
 
         // dd($pemesanans);
         // return ['subtotal'=>$subtotal, 'pemesanans'=>$pemesanans];
-        return view('cart.checkout', compact('pemesanans','subtotal'));
+        return view('cart.checkout', compact('pemesanans','subtotal','adapengantar'));
     }
 
 

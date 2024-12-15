@@ -32,7 +32,7 @@
   <li class="list-inline-item p-3">
     <a href="{{ asset('/layanans/'. $vendor->id . '/details/' . $l->id) }}">
         <div class="card" style="width: 20rem;">
-        <img class="card-img-top" style="height: 13rem;" src="{{ $l->url_image }}" alt="Card image cap">
+        <img class="card-img-top" style="height: 13rem;" src="{{ $l->url_image }}" alt="{{asset('assets/images/noimg.jpg')}}">
             <div class="card-body">
                 
             <h5 class="card-title">{{ $l->nama }}</h5>
@@ -71,8 +71,10 @@
 
 
 </ul>
-<a href="/setup/{{$vendor->id}}" class="btn btn-primary m-12">Tambah Layanan</a>
-
+<div class="text-center">
+  <a href="/setup/{{$vendor->id}}" class="btn btn-primary m-2">Tambah Layanan</a><br>
+  <a href="/editvendor/{{$vendor->id}}" class="btn btn-primary m-2">Edit Vendor</a>
+</div>
 </section>
 
 @endsection

@@ -33,6 +33,10 @@ class LoginController extends Controller
 
         $user = Pengguna::where('email', '=',$email)->first();
 
+        if(!$user){
+            return back()->with('error', 'Akun anda belum terdaftar')->withInput();
+        }
+
         if($user->role != 'pemesan'){
             return back()->with('error', 'Anda bukan pemesan, silahkan login menggunakan akun pemesan')->withInput($request->all());
         }

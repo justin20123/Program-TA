@@ -196,7 +196,7 @@
                                     html +=
                                         `<div class="select-container">
                                              <select class="form-control custom-select px-4" name="opsidetail-${key}"
-                                                 id="opsidetail-{{ $key }}">`
+                                                 id="opsidetail-${key}">`
                                     detail.opsi.forEach(function(option) {
                                         html += `
                                                 <option value="${option.idopsi}">${option.opsi}(+Rp. 

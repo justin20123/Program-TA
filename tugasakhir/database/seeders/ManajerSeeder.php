@@ -31,6 +31,7 @@ class ManajerSeeder extends Seeder
                 'role' => 'manajer',
                 'saldo' => $faker->numberBetween(1000, 100000),
                 'nomor_telepon' => $faker->phoneNumber,
+                'vendors_id' => $v->id,
                 
             ]);
             $maxId += 1;

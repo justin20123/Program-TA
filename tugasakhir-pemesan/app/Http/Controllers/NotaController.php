@@ -44,11 +44,12 @@ class NotaController extends Controller
         $idpemesanansstring = $request->idpemesanans;
         $idpemesanans = explode(",", $idpemesanansstring);
 
-        // return response()->json(['message' => 'idpemesanans : '. $idpemesanans], 400);
         if ($request->opsiantar == "diambil") {
             $request->validate([
                 'idpemesanans' => 'required',
             ]);
+
+            
 
             $idnota = DB::table('notas')->insertGetid([
                 'harga_total' => $request->harga_total,
@@ -59,7 +60,7 @@ class NotaController extends Controller
                 'waktu_tunggu_diambil' => null,
                 'waktu_selesai' => null,
                 'ulasan' => "",
-                'catatan_antar' => $request->catatan_antar,
+                'catatan_antar' => $request->input('catatan_antar'),
             ]);
         } else {
             $request->validate([
@@ -67,6 +68,18 @@ class NotaController extends Controller
                 'latitude' => 'required|',
                 'longitude' => 'required|'
             ]);
+
+            $vendorid = $request->input('idvendor');
+
+            $pengantars = DB::table('penggunas')
+            ->join('vendors_has_penggunas', 'penggunas.id', '=', 'vendors_has_penggunas.penggunas_id')
+            ->where('vendors_has_penggunas.vendors_id', '=',$vendorid)
+            ->where('penggunas.role','=','pengantar')
+            ->count();
+
+            if($pengantars == 0){
+                return back()->withInput()->with('error', 'Vendor ini belum menyediakan fitur pengantaran.');
+            }
 
             $idnota = DB::table('notas')->insertGetid([
                 'harga_total' => $request->harga_total,

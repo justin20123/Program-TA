@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Layanan;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class LayananController extends Controller
@@ -41,23 +42,23 @@ class LayananController extends Controller
     }
     //ambil totap nota setiap layanan dalam 1 vendor
 
-    public function index($vendor_id)
+    public function index()
     {
         $layanans = DB::table('layanan_cetaks')
             ->join('vendors_has_jenis_bahan_cetaks', 'layanan_cetaks.id', '=', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id')
-            ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
+            ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', Auth::user()->vendors_id)
             ->select('layanan_cetaks.*')->distinct()
             ->get();
         if(count($layanans) == 0){
-            return redirect()->route('opensetup', ['vendorid' => $vendor_id]); 
+            return redirect()->route('opensetup', ['vendorid' => Auth::user()->vendors_id]); 
         }
         foreach ($layanans as $l) {
-            $ratings = $this->getRating($vendor_id, $l->id);
+            $ratings = $this->getRating(Auth::user()->vendors_id, $l->id);
             $l->layanan_rating = $ratings;
-            $l->total_nota =  $this->getTotalNota($vendor_id, $l->id);
+            $l->total_nota =  $this->getTotalNota(Auth::user()->vendors_id, $l->id);
         }
         $vendor = DB::table('vendors')
-            ->where('vendors.id', '=', $vendor_id)
+            ->where('vendors.id', '=', Auth::user()->vendors_id)
             ->first();
 
         return view('layanan.layanancetak', compact('layanans', 'vendor'));

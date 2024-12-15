@@ -21,6 +21,8 @@ return new class extends Migration
             $table->enum('role', ['admin', 'pemesan', 'manajer','pegawai','pengantar']); 
             $table->decimal('saldo', 10, 2);
             $table->string('nomor_telepon', 20)->nullable();
+            $table->unsignedBigInteger('vendors_id')->nullable();
+            $table->foreign('vendors_id')->references('id')->on('vendors');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -33,6 +35,9 @@ return new class extends Migration
      */
     public function down()
     {
+        Schema::table('penggunas', function (Blueprint $table) {
+            $table->dropForeign(['vendors_id']);
+        });
         Schema::dropIfExists('penggunas');
     }
 };

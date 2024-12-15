@@ -30,7 +30,17 @@ class RegisterController extends Controller
             return redirect()->back()->withInput()->with('error', $e->getMessage());
         }
 
-        if ($request->password != $request->confirm_password) {
+        $user = Pengguna::where('email', '=',$request->input('email'))->first();
+        if($user){
+            if($user->role == 'pemesan'){
+                return redirect()->back()->withInput()->with('error', 'Email sudah terdaftar, silahkan login dengan email ini');
+            }
+            else{
+                return redirect()->back()->withInput()->with('error', 'Email sudah terdaftar dengan hak akses lain, silahkan gunakan email lain atau login menggunakan aplikasi lainnya');
+            }
+        }
+
+        if ($request->input('password') != $request->input('confirm_password')) {
             return back()->withInput()->with('error', 'Password tidak sama');
         }
 

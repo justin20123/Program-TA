@@ -31,7 +31,7 @@ class PegawaiSeeder extends Seeder
                     'role' => 'pegawai',
                     'saldo' => $faker->numberBetween(1000, 100000),
                     'nomor_telepon' => $faker->phoneNumber,
-                    
+                    'vendors_id' => $v->id,
                 ]);
                 $maxId += 1;
             }

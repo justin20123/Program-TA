@@ -110,7 +110,7 @@ Route::middleware(['web'])->group(function () {
         }
 
         abort(404);
-    })->where('any', '.*'); // any nanti diganti semua (supaya bisa kasih /)
+    })->where('any', '.*'); 
 
     Route::post('/verifikasipesanan', [NotaController::class, 'verifikasipesanan']);
     Route::post('/ajukanperubahan', [NotaController::class, 'ajukanperubahan']);
