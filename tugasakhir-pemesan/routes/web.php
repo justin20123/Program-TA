@@ -55,6 +55,19 @@ Route::middleware(['web'])->group(function () {
     Route::post('/untukanda', [VendorController::class, 'loadUntukAnda']);
     Route::post('/layananterdekat', [VendorController::class, 'loadLayananTerdekat']);
     Route::post('/getLayanan', [VendorController::class, 'loadLayanans']);
+    Route::get('/vendors/{filename}', function ($filename) {
+        // Construct the path to the vendors directory
+        $path = base_path('../vendors/' . $filename); // Adjust this if necessary
+    
+        // Check if the file exists
+        if (file_exists($path)) {
+            return response()->file($path); // Serve the file if it exists
+        }
+    
+        // Return a 404 error if the file does not exist
+        abort(404);
+    });
+    
 
 
 

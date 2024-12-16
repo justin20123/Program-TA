@@ -41,8 +41,8 @@ class VendorController extends Controller
     public function indexOrders()
     {
         $vendors = DB::table('vendors')
-            ->join('vendors_has_penggunas', 'vendors_has_penggunas.vendors_id', '=', 'vendors.id')
-            ->where('vendors_has_penggunas.penggunas_id', '=', Auth::user()->id)
+            ->join('penggunas', 'penggunas.vendors_id', '=', 'vendors.id')
+            ->where('penggunas.id', '=', Auth::user()->id)
             ->get();
 
 

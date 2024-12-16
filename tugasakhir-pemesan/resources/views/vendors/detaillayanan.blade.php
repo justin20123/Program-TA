@@ -65,6 +65,7 @@
                     </div>
                     <br>
                     <div id="listdetail">
+                        @if(count($opsidetail) > 0)
                         @foreach ($opsidetail as $key => $od)
                             <div class="form-group">
                                 <label class="font-weight-bold">{{ $od['detail']->value }}</label>
@@ -81,6 +82,9 @@
                             </div>
                             <br>
                         @endforeach
+                        @else
+                        <p>Tidak ada opsi yang perlu ditambahkan</p>
+                        @endif
                     </div>
 
                     <div class="form-group">
@@ -162,7 +166,7 @@
                     
 
                     if (response.result == 'success') {
-                        $('#listdetail').html('Tidak ada opsi yang perlu ditambahkan');
+                        $('#listdetail').html('<p>Tidak ada opsi yang perlu ditambahkan</p>');
                         if (response.data.opsidetail > 0) {
                             let opsiDetail = {};
                             response.data.opsidetail.forEach(function(item) {
@@ -340,7 +344,6 @@
                 idvendor = $('#idvendor').val();
                 idlayanan = $('#idlayanan').val();
                 idjenisbahan = $('#jenisbahan').val();
-                console.log('aa');
                 updateOpsiDetails(idvendor, idlayanan, idjenisbahan);
             });
 

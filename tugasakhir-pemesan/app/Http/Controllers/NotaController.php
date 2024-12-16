@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Nota;
 use App\Models\NotaProgress;
 use App\Models\Pemesanan;
+use Carbon\Carbon;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -49,7 +50,7 @@ class NotaController extends Controller
                 'idpemesanans' => 'required',
             ]);
 
-            
+
 
             $idnota = DB::table('notas')->insertGetid([
                 'harga_total' => $request->harga_total,
@@ -72,12 +73,12 @@ class NotaController extends Controller
             $vendorid = $request->input('idvendor');
 
             $pengantars = DB::table('penggunas')
-            ->join('vendors_has_penggunas', 'penggunas.id', '=', 'vendors_has_penggunas.penggunas_id')
-            ->where('vendors_has_penggunas.vendors_id', '=',$vendorid)
-            ->where('penggunas.role','=','pengantar')
-            ->count();
+                ->join('vendors_has_penggunas', 'penggunas.id', '=', 'vendors_has_penggunas.penggunas_id')
+                ->where('vendors_has_penggunas.vendors_id', '=', $vendorid)
+                ->where('penggunas.role', '=', 'pengantar')
+                ->count();
 
-            if($pengantars == 0){
+            if ($pengantars == 0) {
                 return back()->withInput()->with('error', 'Vendor ini belum menyediakan fitur pengantaran.');
             }
 
@@ -123,7 +124,7 @@ class NotaController extends Controller
 
         $notas = DB::table('notas')
             ->join('pemesanans', 'notas.id', '=', 'pemesanans.notas_id')
-            ->where('penggunas_email', '=', Auth::user()->email) 
+            ->where('penggunas_email', '=', Auth::user()->email)
             ->select('notas.id as idnota', 'notas.waktu_transaksi as waktu_transaksi', 'pemesanans.vendors_id as idvendor', 'notas.waktu_menerima_pesanan', 'notas.waktu_diantar', 'notas.waktu_tunggu_diambil', 'notas.waktu_selesai', DB::raw('COUNT(pemesanans.id) as jumlah_pesanan'))
             ->groupBy('notas.id', 'notas.waktu_transaksi', 'pemesanans.vendors_id', 'notas.waktu_menerima_pesanan', 'notas.waktu_diantar', 'notas.waktu_tunggu_diambil', 'notas.waktu_selesai')
             ->orderBy('notas.waktu_transaksi', 'desc')
@@ -158,6 +159,13 @@ class NotaController extends Controller
 
         return $formattedDate;
     }
+    public function formatDateTime2($datetime)
+    {
+        $dateTime = new DateTime($datetime);
+        $formattedDate = $dateTime->format('d F, Y');
+
+        return $formattedDate;
+    }
 
     public function showDetailPesanan($idnota)
     {
@@ -171,28 +179,81 @@ class NotaController extends Controller
         $arrProgress = [];
         $maxPrioritas = 0;
 
-        $notas = DB::table('notas')
-            ->where('id', '=', $idnota)
+        $nota = DB::table('notas')
+            ->join('pemesanans', 'notas.id', '=', 'pemesanans.notas_id')
+            ->where('notas.id', '=', $idnota)
+            ->select('notas.*', 'pemesanans.vendors_id')
             ->first();
 
-        $status_antar = $notas->opsi_pengambilan;
+        $status_antar = $nota->opsi_pengambilan;
+
+        $notas_time = null;
+        
+        if($status_antar == 'diambil'){
+            $notas_time = DB::table('pemesanans')
+            ->join('notas', 'notas.id', '=', 'pemesanans.notas_id')
+            ->where('pemesanans.vendors_id', '=', $nota->vendors_id)
+            ->where('notas.waktu_tunggu_diambil', '!=', null)
+            ->where('notas.opsi_pengambilan', '=', 'diambil')
+            ->select('notas.waktu_transaksi', 'notas.waktu_tunggu_diambil as waktu_selesai')
+            ->get();
+            //jika diambil, maka hanya dihitung waktu pengerjaan (hingga tunggu diambil)
+        }
+        else{
+            $notas_time = DB::table('pemesanans')
+            ->join('notas', 'notas.id', '=', 'pemesanans.notas_id')
+            ->where('pemesanans.vendors_id', '=', $nota->vendors_id)
+            ->where('notas.selesai', '!=', null)
+            ->where('notas.opsi_pengambilan', '=', 'diantar')
+            ->select('notas.waktu_transaksi', 'notas.waktu_selesai')
+            ->get();
+            //jika diantar, maka dihitung waktu pengerjaan dan waktu pengantaran (hingga selesai)
+        }
+
+        
+
+        $prediksi_selesai = null;
+
+        if (count($notas_time)>0) {
+            $totaldiff = 0;
+            $count = 0;
+
+            foreach ($notas_time as $n) {
+                if ($n->waktu_transaksi && $n->waktu_selesai) {
+                    $waktutransaksi = Carbon::parse($n->waktu_transaksi);
+                    $waktuselesai = Carbon::parse($n->waktu_selesai);
+
+                    $diff = $waktutransaksi->diff($waktuselesai);
+
+                    $totaldiff += $diff->h;
+                    $count++;
+                }
+            }
+            $avgdiff = round($totaldiff/$count);
+            $waktutransaksinota = Carbon::parse($nota->waktu_transaksi);
+            $waktuprediksi = $waktutransaksinota->addHours($avgdiff);
+            $datetimeprediksi = new DateTime($waktuprediksi->toDateTimeString());
+            $prediksi_selesai = $datetimeprediksi->format('d F, Y');
+        }
+
+        
 
         $transaksi = [
-            'waktu_progress_format' => $this->formatDateTime($notas->waktu_transaksi),
+            'waktu_progress_format' => $this->formatDateTime($nota->waktu_transaksi),
             'progress' => 'Transaksi berhasil'
         ];
 
         array_push($arrSummary, $transaksi);
 
         $terima = [
-            'waktu_progress_format' => $this->formatDateTime($notas->waktu_menerima_pesanan),
+            'waktu_progress_format' => $this->formatDateTime($nota->waktu_menerima_pesanan),
             'progress' => 'Pesanan diterima'
         ];
 
         array_push($arrSummary, $terima);
 
         $proses = [
-            'waktu_progress_format' => $this->formatDateTime($notas->waktu_menerima_pesanan),
+            'waktu_progress_format' => $this->formatDateTime($nota->waktu_menerima_pesanan),
             'progress' => 'Pesanan diproses'
         ];
 
@@ -245,29 +306,6 @@ class NotaController extends Controller
             $arrProgress = null;
             $arrProgressReverse = [];
             $array = [];
-            if ($notas->waktu_tunggu_diambil || $notas->waktu_diantar) {
-                if ($status_antar == 'diambil') {
-                    $array = [
-                        'waktu_progress_format' => $this->formatDateTime($notas->waktu_tunggu_diambil),
-                        'progress' => 'Menunggu diambil'
-                    ];
-                } else if ($status_antar == 'diantar') {
-                    $array = [
-                        'waktu_progress_format' => $this->formatDateTime($notas->waktu_diantar),
-                        'progress' => 'Pesanan sedang diantar'
-                    ];
-                }
-                array_push($arrSummary, $array);
-            }
-
-
-            if ($notas->waktu_selesai) {
-                $selesai = [
-                    'waktu_progress_format' => $this->formatDateTime($notas->waktu_selesai),
-                    'progress' => 'Pesanan sudah selesai'
-                ];
-                array_push($arrSummary, $selesai);
-            }
         } else {
             $arrProgressReverse = [];
 
@@ -277,11 +315,46 @@ class NotaController extends Controller
         }
         $arrSummaryReverse = [];
 
+        if ($nota->waktu_tunggu_diambil || $nota->waktu_diantar) {
+            if ($status_antar == 'diambil') {
+                $array = [
+                    'waktu_progress_format' => $this->formatDateTime($nota->waktu_tunggu_diambil),
+                    'progress' => 'Menunggu diambil'
+                ];
+            } else if ($status_antar == 'diantar') {
+                $array = [
+                    'waktu_progress_format' => $this->formatDateTime($nota->waktu_diantar),
+                    'progress' => 'Pesanan sedang diantar'
+                ];
+            }
+            array_push($arrSummary, $array);
+        }
+
+
+        if ($nota->waktu_selesai) {
+            $selesai = [
+                'waktu_progress_format' => $this->formatDateTime($nota->waktu_selesai),
+                'tanggal_selesai' => $this->formatDateTime2($nota->waktu_selesai),
+                'progress' => 'Pesanan sudah selesai'
+            ];
+            array_push($arrSummary, $selesai);
+        }
+
         for ($i = count($arrSummary) - 1; $i >= 0; $i--) {
             array_push($arrSummaryReverse, $arrSummary[$i]);
         }
 
-        return view('pesanan.orderinfo', compact('arrProgressReverse', 'arrSummaryReverse'));
+        $harga_total = $nota->harga_total;
+
+        $jumlah_pesanan = DB::table('pemesanans')
+            ->where('notas_id', '=', $nota->id)
+            ->count();
+
+
+        $waktustart = $arrSummary[0]["waktu_progress_format"];
+        // dd($waktustart);
+        // dd($arrSummaryReverse);
+        return view('pesanan.orderinfo', compact('arrProgressReverse', 'arrSummaryReverse', 'harga_total', 'jumlah_pesanan', 'waktustart', 'prediksi_selesai', 'status_antar'));
     }
 
     public function bukaverifikasi($idpemesanan, $idnota, $urutanprogress)
@@ -371,7 +444,7 @@ class NotaController extends Controller
             ->exists();
 
         if ($existing_progress) {
-            return redirect()->back()->with('error', 'Progress sudah ditangani');   
+            return redirect()->back()->with('error', 'Progress sudah ditangani');
         }
 
         $nota_progress = new NotaProgress();

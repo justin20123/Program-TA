@@ -6,6 +6,7 @@ use App\Models\Nota;
 use App\Models\Pemesanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class PemesananController extends Controller
@@ -34,12 +35,20 @@ class PemesananController extends Controller
     }
 
 
-    public function index($vendor_id)
+    public function index()
     {
+        $vendor = DB::table('vendors')
+            ->join('penggunas', 'penggunas.vendors_id', '=', 'vendors.id')
+            ->where('penggunas.id', '=', Auth::user()->id)
+            ->select('vendors.id as idvendor')
+            ->first();
+
+            $vendorid = $vendor->idvendor;
+            
         $notaData = DB::table('notas')
             ->join('pemesanans', 'pemesanans.notas_id', '=', 'notas.id')
             ->join('penggunas', 'penggunas.email', '=', 'pemesanans.penggunas_email')
-            ->where('pemesanans.vendors_id', '=', $vendor_id)
+            ->where('pemesanans.vendors_id', '=', $vendorid)
             ->select('notas.*', 'pemesanans.id as pemesanans_id', 'penggunas.nama as nama')
             ->get();
 

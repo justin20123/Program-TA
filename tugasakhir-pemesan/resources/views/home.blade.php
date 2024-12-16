@@ -245,40 +245,46 @@
                 // console.log(response);
                 data = response['data']
                 let layanan = data['layanan'];
-                let satuan = data['satuan'];
-                let vendors = data['vendors'];
-                let html = `<div class="h5 p-4 pb-2">Untuk Anda</div>
-                     <hr>`
-                let items = ['Terdekat', 'Termurah', 'Direkomendasikan']
-                for (let i = 0; i < items.length; i++) {
-                    console.table(vendors);
-                    html += `
-                    <button class="btn-card border-0" onclick="toVendorData(`+ vendors[i].id +`)">
-                    <div class="h6 p-2 mb-2">${items[i]}</div>
-                     <div class="card mb-3" style="max-width: 540px;">
-                        <div class="row no-gutters">
-                          <div class="col-md-4">
-                            <img src="${vendors[i].foto_lokasi}" class="card-img" alt="Image" style="width: 100%; height: 100%; object-fit: cover;">
-                          </div>
-                          <div class="col-md-8">
-                            <div class="card-body">
-                              <h6 class="card-title">${vendors[i].nama}</h6>
-                              <p class="card-text text-muted">
-                                ${vendors[i].jarak} km dari lokasi anda<br>
-                              </p>
-                              <div class="d-flex align-items-center mb-2">
-                                <span class="mr-2">${vendors[i].rating}</span>
-                                <i class="fas fa-star text-warning"></i>
-                                <span class="ml-2 text-muted">(${vendors[i].total_nota})</span>
-                              </div>
-                              <p class="card-text font-weight-bold">Rp. ${vendors[i].hargamin}-${vendors[i].hargamaks} <small>/${satuan} - ${layanan}</small></p>
-                            <a href="https://www.openstreetmap.org/?mlat=${vendors[i].latitude}&mlon=${vendors[i].longitude}#map=15/${vendors[i].latitude}/${vendors[i].longitude}" target="_blank">Lihat di map</a>                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      </button>
-                      <br>`;
-                }
+let satuan = data['satuan'];
+let vendors = data['vendors'];
+let html = `<div class="h5 p-4 pb-2">Untuk Anda</div>
+             <hr>
+             <div style="width: 100%; max-width: 800px; margin: auto;">`; // Center the container
+let items = ['Terdekat', 'Termurah', 'Direkomendasikan'];
+
+for (let i = 0; i < items.length; i++) {
+    html += `
+    <button class="border-0 mb-3" onclick="toVendorData(${vendors[i].id})" style="width: 100%; text-align: left; transition: background-color 0.3s;">
+      <div class="h6 p-2 mb-2" style="font-weight: bold;">${items[i]}</div>
+      <div class="card mb-3" style="max-width: 100%; height: 200px border: 1px solid #ddd; border-radius: 8px;"> <!-- Set max-width to 100% to fit the parent -->
+        <div class="row no-gutters">
+          <div class="col-md-4">
+            <img src="${vendors[i].foto_lokasi}" class="card-img" alt="Image" style="width: 15rem; height: 20rem; object-fit: cover; border-top-left-radius: 8px; border-bottom-left-radius: 8px;">
+          </div>
+          <div class="col-md-8">
+            <div class="card-body">
+              <h6 class="card-title" style="font-size: 1.1rem; font-weight: bold;">${vendors[i].nama}</h6>
+              <p class="card-text text-muted" style="margin-bottom: 0;">
+                ${vendors[i].jarak} km dari lokasi anda<br>
+              </p>
+              <div class="d-flex align-items-center mb-2">
+                <span class="mr-2">${vendors[i].rating}</span>
+                <i class="fas fa-star text-warning"></i>
+                <span class="ml-2 text-muted">(${vendors[i].total_nota})</span>
+              </div>
+              <p class="card-text font-weight-bold">Rp. ${vendors[i].hargamin}-${vendors[i].hargamaks} <small>/${satuan} - ${layanan}</small></p>
+              <a href="https://www.openstreetmap.org/?mlat=${vendors[i].latitude}&mlon=${vendors[i].longitude}#map=15/${vendors[i].latitude}/${vendors[i].longitude}" target="_blank" style="text-decoration: none; color: #007bff;">Lihat di map</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </button>
+    <br>
+    `;
+}
+
+html += `</div>`;
+
                 $('#untuk-anda').html(html);
                 return "done";
             } catch (error) {

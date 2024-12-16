@@ -47,7 +47,7 @@ Route::middleware(['auth'])->group(function () {
     //edit vendor
     Route::get('/editvendor/{vendorid}', [VendorController::class, 'edit'])->name('vendor.edit');
     Route::post('/editvendor', [VendorController::class, 'update'])->name('vendor.update');
-    Route::get('/vendors/{filename}', function ($filename) {
+    Route::get('/vendor/{filename}', function ($filename) {
         $path = base_path('../vendors/' . $filename);
 
         if (file_exists($path)) {
@@ -91,8 +91,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('opsiharga/destroy', [HargaCetakController::class, 'destroy'])->name('harga.destroy');
 
     //pesanan
-    Route::get('/pesanancetak', [VendorController::class, 'indexOrders'])->name('pesanan');
-    Route::get('/pesanancetak/{id}', [PemesananController::class, 'index'])->name('pesanan.index');
+    Route::get('/pesanancetak', [PemesananController::class, 'index'])->name('pesanan.index');
     Route::get('/terimapesanan/{id}', [NotaController::class, 'terimaPesanan']);
     Route::get('/pesanancetak2/{id}', [PemesananController::class, 'show'])->name('pesanancetak.show');
 
