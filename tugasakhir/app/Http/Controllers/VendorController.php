@@ -217,7 +217,7 @@ class VendorController extends Controller
             }
         }
 
-        return view('tambahvendor.setup', compact('setup_layanans', 'idvendor'));
+        return view('vendor.setup', compact('setup_layanans', 'idvendor'));
     }
 
     /**

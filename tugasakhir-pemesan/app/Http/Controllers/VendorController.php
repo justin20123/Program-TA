@@ -500,10 +500,27 @@ class VendorController extends Controller
         return $layanans;
     }
 
-    public function index()
+    public function index($idlayanan = 1)
     {
         $vendors = Vendor::all();
+        $layananvendor = DB::table('layanan_cetaks')
+        ->where('layanan_cetaks.id','=',$idlayanan)
+        ->first();
+
+
         foreach($vendors as $key=>$v){
+
+            $pengantars = DB::table('penggunas')
+            ->where('vendors_id','=',$v->id)
+            ->where('role','=','pengantar')
+            ->count();
+
+            if($pengantars>0){
+                $v->statusantar = "Tersedia pengantaran";
+            }
+            else{
+                $v->statusantar = "";
+            }
 
             $ratings = DB::table('notas')
             ->join('pemesanans','pemesanans.notas_id','=','notas.id')
@@ -534,10 +551,15 @@ class VendorController extends Controller
                 $v->vendor_rating = null;
                 $v->total_nota = 0;
             }
+            $hargaCetakController = new HargaCetakController();
+            $v->hargamin = $hargaCetakController->getMinValue($v->id,$idlayanan);
+            $v->hargamaks = $hargaCetakController->getMaxValue($v->id,$idlayanan);
+
+             
             
         }
         
-        return view('home', compact('vendors'));
+        return view('vendors.vendors', compact('vendors', 'layananvendor'));
     }
 
     public function indexCart()

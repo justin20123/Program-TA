@@ -84,7 +84,7 @@
             $('#vendors-terdekat').html(`
             <div class="d-flex justify-content-between align-items-center px-4 pt-3">
                 <div class="h5 p-2">List Vendor</div>
-                <a href="#" class="text-danger h5 p-2">Lihat Semua</a></div>
+                <a href="/vendor" class="text-danger h5 p-2">Lihat Semua</a></div>
                 <div class="container mt-5">
                 <div class="row" id="vendorsJarak">
                 </div>
@@ -115,7 +115,7 @@
             $('#layanan-terdekat').html(`
             <div class="d-flex justify-content-between align-items-center px-4 pt-3">
                 <div class="h5 p-2">Jenis Layanan</div>
-                <a href="#" class="text-danger h5 p-2">Lihat Semua</a></div>
+                <a href="/vendor" class="text-danger h5 p-2">Lihat Semua</a></div>
                 <div class="container mt-5">
                 <div class="row" id="layananJarak">
                 </div>

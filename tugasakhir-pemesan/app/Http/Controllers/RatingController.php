@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Nota;
+use App\Models\Rating;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -12,9 +15,55 @@ class RatingController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
-        //
+    public function doreview(Request $request){
+        $statusantar = $request->input('statusantar');
+        try{
+            $komentar = $request->input('komentar');
+            if(!$komentar){
+                return back()->with('error' , 'Semua rating dan komentar harus diisi');
+            }
+            if (strlen($komentar) > 200) {
+                return back()->with('error', 'Komentar tidak boleh lebih dari 200 karakter');
+            }
+            if($statusantar == 'diantar'){
+                $request->validate([
+                    'ratingkualitas' => 'required|integer|min:1|max:5',
+                    'ratingpelayanan' => 'required|integer|min:1|max:5',
+                    'ratingfasilitas' => 'required|integer|min:1|max:5',
+                    'ratingpengantaran' => 'required|integer|min:1|max:5',
+                ]);
+            }
+            else{
+                $request->validate([
+                    'ratingkualitas' => 'required|integer|min:1|max:5',
+                    'ratingpelayanan' => 'required|integer|min:1|max:5',
+                    'ratingfasilitas' => 'required|integer|min:1|max:5',
+                ]);
+            }
+            $namaratingarr = ["kualitas", "pelayanan", "fasilitas"];
+        if($statusantar == 'diantar'){
+            array_push($namaratingarr, "pengantaran");
+        }
+
+        foreach($namaratingarr as $n){
+            $rating = new Rating();
+            $rating->notas_id = $request->input('idnota');
+            $rating->nama = $n;
+            $rating->nilai = $request->input('rating'. $n);
+            $rating->save();
+        }
+        
+
+        $nota = Nota::findOrFail($request->input('idnota'));
+        $nota->ulasan = $request->input('komentar');
+        $nota->save();
+
+        return back()->with('message', 'Rating berhasil ditambahkan');
+        }
+        catch(Exception $e){
+            return back()->with('error' , 'Semua rating harus diisi' . $e->getMessage());
+        }
+        
     }
 
     public function getRating($idvendor, $data='average'){
@@ -50,7 +99,7 @@ class RatingController extends Controller
             }
             else{
                 return [
-                    'vendor_rating' => 3, //data netral u/ memberi peluang vendor baru
+                    'vendor_rating' => 0, //data netral u/ memberi peluang vendor baru
                     'total_nota' => 0
                 ];
             }
@@ -81,7 +130,7 @@ class RatingController extends Controller
             }
             else{
                 return [
-                    'vendor_rating' => 3, //data netral u/ memberi peluang vendor baru
+                    'vendor_rating' => 0, //data netral u/ memberi peluang vendor baru
                     'total_nota' => 0
                 ]; 
             }

@@ -8,4 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Rating extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'notas_id',
+        'nama',
+        'nilai',
+    ];
 }

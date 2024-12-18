@@ -39,16 +39,13 @@
         
             <ul class="list-inline">
               <li class="list-inline-item">
-                  <div class="rating-images ">
-                    @for ($i = 0; $i < 5; $i++)
-                    @if ($i < round($l->layanan_rating))    
-                        <img class="img-fluid" src="{{ asset('../assets/images/rating.png') }}" alt="">
-                    @else
-                    <img style="opacity: 0.5;" class="img-fluid" src="{{ asset('../assets/images/rating.png') }}" alt="">
-                    @endif
-                    
-                    @endfor
-                  </div>
+                @for ($i = 0; $i < 5; $i++)
+                @if ($i < round($l->layanan_rating))    
+                &#9733;
+                @else
+                &#9734;
+                @endif
+            @endfor
                   </li>
                   <li class="list-inline-item h6">({{ $l->total_nota }})</li>
                   <li class="list-inline-item h6">Menerima Pesanan</li>
@@ -74,7 +71,7 @@
 <div class="text-center">
   <a href="/setup/{{$vendor->id}}" class="btn btn-primary m-2">Tambah Layanan</a><br>
   <a href="/editvendor/{{$vendor->id}}" class="btn btn-primary m-2">Edit Vendor</a>
-</div>
+</div>    
 </section>
 
 @endsection

@@ -40,6 +40,21 @@ class LayananController extends Controller
             ->count();
         return $total_nota;
     }
+
+    public function getTotalNotaRating($vendors_id, $layanans_id)
+    {
+        $notas = DB::table('notas')
+        ->join('pemesanans', 'pemesanans.notas_id', '=', 'notas.id')
+        ->join('jenis_bahan_cetaks', 'pemesanans.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
+        ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
+        ->where('pemesanans.vendors_id', '=', $vendors_id)
+        ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $layanans_id)
+        ->select('notas.id')
+        ->distinct()
+        ->get();
+
+        return count($notas);
+    }
     //ambil totap nota setiap layanan dalam 1 vendor
 
     public function index()
@@ -55,7 +70,7 @@ class LayananController extends Controller
         foreach ($layanans as $l) {
             $ratings = $this->getRating(Auth::user()->vendors_id, $l->id);
             $l->layanan_rating = $ratings;
-            $l->total_nota =  $this->getTotalNota(Auth::user()->vendors_id, $l->id);
+            $l->total_nota =  $this->getTotalNotaRating(Auth::user()->vendors_id, $l->id);
         }
         $vendor = DB::table('vendors')
             ->where('vendors.id', '=', Auth::user()->vendors_id)

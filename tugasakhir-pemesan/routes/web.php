@@ -48,7 +48,9 @@ Route::post('register', [RegisterController::class, 'register']);
 
 
 Route::middleware(['web'])->group(function () {
-    Route::get('/home', [VendorController::class, 'index'])->name('home');
+    Route::get('/home', function () {
+        return view('home'); 
+    })->name('home');
     Route::post('/location', [VendorController::class, 'loadVendorsTerdekat']);
     Route::get('/vendor/rating/{idvendor}', [VendorController::class, 'getRating']);
     Route::get('/vendor/harga/{idlayanan}', [VendorController::class, 'getHarga']);
@@ -68,12 +70,8 @@ Route::middleware(['web'])->group(function () {
         abort(404);
     });
     
-
-
-
-
-    //semua vendor (belum ada)
-    Route::get('/vendor', [VendorController::class, 'indexVendors']);;
+    //semua vendor
+    Route::get('/vendor', [VendorController::class, 'index']);;
 
     //vendor semua layanan
     Route::get('/vendor/{idvendor}', [LayananController::class, 'index']);;
@@ -109,6 +107,7 @@ Route::middleware(['web'])->group(function () {
 
     //pesanan
     Route::get('/pesanan', [NotaController::class, 'indexPesanan']);
+    Route::post('/doreview', [RatingController::class, 'doreview'])->name('doreview');
 
     //info pesanan
     Route::get('/pesanan/{idnota}', [NotaController::class, 'showDetailPesanan'])->name('detailPesanan');

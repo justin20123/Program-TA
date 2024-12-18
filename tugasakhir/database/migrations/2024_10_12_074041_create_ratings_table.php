@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('notas_id');
             $table->enum('nama',['kualitas','pelayanan','fasilitas','pengantaran']);
-            $table->integer('nilai');
+            $table->integer('nilai')->nullable();
             $table->foreign('notas_id')->references('id')->on('notas');
             $table->timestamps();
         });

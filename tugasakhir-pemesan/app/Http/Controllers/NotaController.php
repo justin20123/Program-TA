@@ -352,9 +352,18 @@ class NotaController extends Controller
 
 
         $waktustart = $arrSummary[0]["waktu_progress_format"];
+
+        $ratingcount = DB::table('ratings')
+        ->where('notas_id', '=', $nota->id)
+        ->count();
+
+        $israted = false;
+        if($ratingcount > 0){
+            $israted = true;
+        }
         // dd($waktustart);
         // dd($arrSummaryReverse);
-        return view('pesanan.orderinfo', compact('arrProgressReverse', 'arrSummaryReverse', 'harga_total', 'jumlah_pesanan', 'waktustart', 'prediksi_selesai', 'status_antar'));
+        return view('pesanan.orderinfo', compact('arrProgressReverse', 'arrSummaryReverse', 'harga_total', 'jumlah_pesanan', 'waktustart', 'prediksi_selesai', 'status_antar', 'nota', 'israted'));
     }
 
     public function bukaverifikasi($idpemesanan, $idnota, $urutanprogress)

@@ -298,6 +298,14 @@
             justify-content: space-between;
             align-items: center;
         }
+        .star {
+            font-size: 50px;
+            cursor: pointer;
+            color: #ccc; /* Unselected color */
+        }
+        .star.selected {
+            color: gold; /* Selected color */
+        }
 
     </style>
     

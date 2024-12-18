@@ -6,6 +6,91 @@
     </ol>
 @endsection
 @section('menu')
+
+<!-- modal -->
+<div class="modal fade" id="modalreview" tabindex="-1" aria-labelledby="modalreviewLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalreviewLabel">Review</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <!-- Star Ratings Section -->
+                <form method="POST" action="{{ route('doreview') }}">
+                    @csrf
+                    <div class="mb-3">
+                        <label>Kualitas Hasil dan Kesesuaian Dengan Keinginan</label><br />
+                        <div class="star-rating" data-input-id="ratingkualitas">
+                            <span class="star" data-value="1">&#9734;</span>
+                            <span class="star" data-value="2">&#9734;</span>
+                            <span class="star" data-value="3">&#9734;</span>
+                            <span class="star" data-value="4">&#9734;</span>
+                            <span class="star" data-value="5">&#9734;</span>
+                        </div>
+                        <input type="hidden" name="ratingkualitas" id="ratingkualitas" value="0" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Pelayanan Pelanggan</label><br />
+                        <div class="star-rating" data-input-id="ratingpelayanan">
+                            <span class="star" data-value="1">&#9734;</span>
+                            <span class="star" data-value="2">&#9734;</span>
+                            <span class="star" data-value="3">&#9734;</span>
+                            <span class="star" data-value="4">&#9734;</span>
+                            <span class="star" data-value="5">&#9734;</span>
+                        </div>
+                        <input type="hidden" name="ratingpelayanan" id="ratingpelayanan" value="0" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Fasilitas yang Disediakan</label><br />
+                        <div class="star-rating" data-input-id="ratingfasilitas">
+                            <span class="star" data-value="1">&#9734;</span>
+                            <span class="star" data-value="2">&#9734;</span>
+                            <span class="star" data-value="3">&#9734;</span>
+                            <span class="star" data-value="4">&#9734;</span>
+                            <span class="star" data-value="5">&#9734;</span>
+                        </div>
+                        <input type="hidden" name="ratingfasilitas" id="ratingfasilitas" value="0" />
+                    </div>
+
+                    @if($status_antar =="diantar")
+                    <div class="mb-3">
+                        <label>Pengantaran</label><br />
+                        <div class="star-rating" data-input-id="ratingpengantaran">
+                            <span class="star" data-value="1">&#9734;</span>
+                            <span class="star" data-value="2">&#9734;</span>
+                            <span class="star" data-value="3">&#9734;</span>
+                            <span class="star" data-value="4">&#9734;</span>
+                            <span class="star" data-value="5">&#9734;</span>
+                        </div>
+                        <input type="hidden" name="ratingpengantaran" id="ratingpengantaran" value="0" />
+                    </div>
+                    @endif
+
+                    <input type="hidden" name="idnota" value="{{$nota->id}}" />
+                    <input type="hidden" name="statusantar" value="{{$status_antar}}" />
+
+                    <div class="mb-3">
+                        <label>Komentar</label>
+                        <textarea class="form-control" name="komentar" rows="4" placeholder="Write here.."></textarea>
+                    </div>
+
+                    <!-- Save Button -->
+                    <div class="text-end">
+                        <input type="submit" class="btn btn-primary" value="Save Details">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <div class="container my-5">
     <div class="card">
         <div class="card-body">
@@ -111,11 +196,55 @@
                 </ul>
             </div>
 
+            @if (session('error'))
+                <p class="text text-danger">{{ session('error') }}</p>
+            @endif
+            @if (session('message'))
+            <div class="alert alert-success">
+                {{ session('message') }}
+            </div>
+        @endif
             @if(count($arrSummaryReverse) == 5)
-            <button class="btn btn-primary">Review</button>
+                @if(!$israted)
+                <div style="display: flex; justify-content: center;">
+                    <button class="btn btn-primary" id="btnopenreview">Review</button>
+                </div>
+                @else
+                <p class="text text-success">Anda sudah melakukan rating pada pesanan ini</p>
+                @endif
             @endif
         </div>
     </div>
 </div>
 
+@endsection
+
+@section('script')
+<script>
+$(document).ready(function() {
+
+    $('#btnopenreview').click(function () { 
+        $('#modalreview').modal('show');
+        
+    });
+    $('.star-rating .star').on('click', function() {
+        const ratingGroup = $(this).closest('.star-rating');
+        const value = parseInt($(this).data('value'));
+        const inputSelector = ratingGroup.data('input-id');
+        $(`#${inputSelector}`).val(value);
+
+        console.log(inputSelector + ' value=' + $(`#${inputSelector}`).val());
+
+        ratingGroup.find('.star').each(function() {
+            const sValue = parseInt($(this).data('value'));
+            if (sValue <= value) {
+                $(this).addClass('selected').html('&#9733;'); // Change to selected star
+            } else {
+                $(this).removeClass('selected').html('&#9734;'); // Change to unselected star
+            }
+        });
+    });
+
+});
+</script>
 @endsection
