@@ -177,11 +177,10 @@ class PemesananController extends Controller
         ->select('vendors_id')
         ->first();
 
-        $pengantar = DB::table('vendors_has_penggunas')
-            ->join('penggunas', 'penggunas.email', '=', 'vendors_has_penggunas.penggunas_email')
-            ->where('vendors_has_penggunas.vendors_id', '=', $vendor->vendors_id)
-            ->where('penggunas.role', '=', 'pengantar')
-            ->select('penggunas.nama as namapengantar', 'penggunas.id as id')
+        $pengantar = DB::table('penggunas')
+            ->where('vendors_id', '=', $vendor->vendors_id)
+            ->where('role', '=', 'pengantar')
+            ->select('nama as namapengantar', 'id')
             ->get();
 
         $data_pemesan = DB::table('pemesanans')
@@ -216,7 +215,7 @@ class PemesananController extends Controller
         // $pemesanan->pengantar = $emailpengantar;
         // $pemesanan->save();
 
-        $url = '/pesanancetak/' . $pemesanans[0]->vendors_id;
+        $url = '/pesanancetak2/' . $pemesanans[0]->vendors_id;
         return redirect($url);
         // return redirect()->route('pemesanans.index', [$pemesanans[0]->vendors_id]);
     }

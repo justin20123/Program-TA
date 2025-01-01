@@ -44,6 +44,9 @@ class NotaController extends Controller
         $idnota = 0;
         $idpemesanansstring = $request->idpemesanans;
         $idpemesanans = explode(",", $idpemesanansstring);
+        $pemesanan = Pemesanan::findOrFail($idpemesanans[0]);
+        $vendorid = $pemesanan->vendors_id;
+
 
         if ($request->opsiantar == "diambil") {
             $request->validate([
@@ -70,12 +73,10 @@ class NotaController extends Controller
                 'longitude' => 'required|'
             ]);
 
-            $vendorid = $request->input('idvendor');
 
             $pengantars = DB::table('penggunas')
-                ->join('vendors_has_penggunas', 'penggunas.id', '=', 'vendors_has_penggunas.penggunas_id')
-                ->where('vendors_has_penggunas.vendors_id', '=', $vendorid)
-                ->where('penggunas.role', '=', 'pengantar')
+                ->where('vendors_id', '=', $vendorid)
+                ->where('role', '=', 'pengantar')
                 ->count();
 
             if ($pengantars == 0) {
@@ -110,7 +111,7 @@ class NotaController extends Controller
             ]);
         }
 
-        return ["idnota" => $idnota, "message" => "Pesanan berhasil dibuat, silahkan menunggu diproses"];
+        return ["idnota" => $idnota, "idvendor" => $vendorid, "message" => "Pesanan berhasil dibuat, silahkan menunggu diproses"];
     }
 
     public function index()
@@ -121,6 +122,9 @@ class NotaController extends Controller
 
     public function indexPesanan()
     {
+        if(!Auth::user()){
+            return redirect('login');
+        }
 
         $notas = DB::table('notas')
             ->join('pemesanans', 'notas.id', '=', 'pemesanans.notas_id')
@@ -203,7 +207,7 @@ class NotaController extends Controller
             $notas_time = DB::table('pemesanans')
             ->join('notas', 'notas.id', '=', 'pemesanans.notas_id')
             ->where('pemesanans.vendors_id', '=', $nota->vendors_id)
-            ->where('notas.selesai', '!=', null)
+            ->where('notas.waktu_selesai', '!=', null)
             ->where('notas.opsi_pengambilan', '=', 'diantar')
             ->select('notas.waktu_transaksi', 'notas.waktu_selesai')
             ->get();

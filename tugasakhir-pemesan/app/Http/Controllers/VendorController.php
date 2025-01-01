@@ -113,7 +113,7 @@ class VendorController extends Controller
                     ->first();
     
                     $vendorData->jarak = $jarak_sorted[$key];
-                    array_push($vendorResult, $vendorData);
+                    $vendorResult = $vendorData;
                     //semua vendor
             }
             
@@ -214,32 +214,47 @@ class VendorController extends Controller
 
     public function loadUntukAnda(Request $request){
 
+        
+
         $latitude = $request->latitude;
         $longitude = $request->longitude;
         $idlayanan = $request->idlayanan;
+
+        $layanans = DB::table('vendors_has_jenis_bahan_cetaks')
+        ->where('layanan_cetaks_id','=',$idlayanan)
+        ->count();
+
+        if($layanans == 0){
+            return response()->json(['message' => 'Layanan ini belum memiliki vendor.']);
+        }
+        
         $layananSatuan = $this->getLayananSatuan($idlayanan);
-        $vendorLokasiTerdekat = $this->getLocation(null, $latitude, $longitude, 'sorted', 1);
-        $vendorLokasiTerdekat = $vendorLokasiTerdekat[0];
+        $vendorLokasiTerdekat = $this->getLocation(null, $latitude, $longitude, 'sorted');
 
         $vendorTermurah = $this->getHargaTermurah($idlayanan);
 
         $vendorRekomendasi = $this->topsisRecommended($idlayanan, $latitude, $longitude);
 
-        $vendors = [
-            $vendorLokasiTerdekat, 
-            $vendorTermurah, 
-            $vendorRekomendasi
-        ];
+        $vendors = [];
+        
+        array_push($vendors, $vendorLokasiTerdekat); 
+        array_push($vendors, $vendorTermurah); 
+        array_push($vendors, $vendorRekomendasi);
 
+        // dd($vendors);
+        $hargaCetakController = new HargaCetakController();
         foreach($vendors as $v){
-            $v->jarak = round((float)$this->getSingleLocation($latitude, $longitude, $v->id),2);
-            $ratingData = $this->getRating($v->id,'average');
+            $idvendor = $v->id;
+            // echo 'idvendor:'. $idvendor . "idlayanan:".$idlayanan."\n";
+            $v->jarak = round((float)$this->getSingleLocation($latitude, $longitude, $idvendor),2);
+            $ratingData = $this->getRating($idvendor,'average');
             $v->rating = round($ratingData['vendor_rating'],2);
             $v->total_nota = $ratingData['total_nota'];
-            $hargaCetakController = new HargaCetakController();
-            $v->hargamin = $hargaCetakController->getMinValue($v->id,$idlayanan);
-            $v->hargamaks = $hargaCetakController->getMaxValue($v->id,$idlayanan);
+            $v->hargamin = $hargaCetakController->getMinValue($idvendor,$idlayanan);
+            $v->hargamaks = $hargaCetakController->getMaxValue($idvendor,$idlayanan);
         }
+
+        // dd($vendors);
         
         return response()->json(['message' => 'success', 'data' => [
             'layanan' => $layananSatuan->nama,
@@ -283,7 +298,8 @@ class VendorController extends Controller
             if($i == 4){
                 break;
             }
-            $closestVendors = $this->getLocation(null, $latitude, $longitude, 'sorted');
+            $closestVendors = $this->getLocation(null, $latitude, $longitude, 'sorted', 4);
+
             foreach($closestVendors as $c){
                 $getLayanan = DB::table('vendors_has_jenis_bahan_cetaks')
                 ->join('vendors', 'vendors.id', '=', 'vendors_has_jenis_bahan_cetaks.vendors_id')
@@ -312,6 +328,13 @@ class VendorController extends Controller
         return response()->json(['message' => 'success', 'data' => $layanans]);
     }
 
+    public function checkzero($int){
+        if($int == 0){
+            $int = 0.000000001;
+        }
+        return $int;
+    }
+
     //topsis functions
     public function normalize($matriksTopsis){
         $matriksNormal = [];
@@ -324,6 +347,7 @@ class VendorController extends Controller
         $cols = count($matriksTopsis[0]);
         for ($i = 0; $i < $cols; $i++) {
             $sumpenyebut = 0;
+
             foreach ($matriksTopsis as $key=>$value){
                 $sumpenyebut += pow($matriksTopsis[$key][$i], 2);
             }
@@ -332,11 +356,19 @@ class VendorController extends Controller
         foreach ($matriksTopsis as $key=>$mt){
             for ($j = 0; $j < $cols; $j++) {
                 if($j==2 || $j==3){
+                    $penyebut = $arrpenyebut[$j];
+                    if($penyebut == 0){
+                        $penyebut = 0.000001;
+                    }
                     //karena "jarak" dan "harga" sifatnya cost, maka semakin tinggi semakin jelek
-                    $matriksNormal[$key][$j] = 1- ($matriksTopsis[$key][$j]/($arrpenyebut[$j]));
+                    $matriksNormal[$key][$j] = 1- ($matriksTopsis[$key][$j]/($penyebut));
                 }
                 else{
-                    $matriksNormal[$key][$j] = $matriksTopsis[$key][$j]/($arrpenyebut[$j]);
+                    $penyebut = $arrpenyebut[$j];
+                    if($penyebut == 0){
+                        $penyebut = 0.000001;
+                    }
+                    $matriksNormal[$key][$j] = $matriksTopsis[$key][$j]/($penyebut);
                 }
             }
         }
@@ -398,8 +430,12 @@ class VendorController extends Controller
 
     public function topsisRecommended($layanan, $latitude, $longitude,){
         $vendors = DB::table('vendors')
+        ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.vendors_id', '=', 'vendors.id')
         ->where('status','=','active')
-        ->select()
+        ->groupBy('vendors_has_jenis_bahan_cetaks.vendors_id') 
+        ->select('vendors_has_jenis_bahan_cetaks.vendors_id as id', DB::raw('COUNT(vendors_has_jenis_bahan_cetaks.vendors_id) as count_layanan'))
+        ->distinct()
+        ->having('count_layanan', '>', 0)
         ->get();
 
         $kualitasWeight = (4.96 + 4.89)/2; //rata-rata dari kualitas hasil cetak dan kesesuaian permintaan
@@ -415,33 +451,33 @@ class VendorController extends Controller
         foreach($vendors as $v){
             
             $rating = $this->getRating($v->id);
-            // dd($rating);
             $values = [];
 
             //kualitas
-            $kualitas = $rating['kualitas']['vendor_rating'];
+            $kualitas = $this->checkzero($rating['kualitas']['vendor_rating']);
+            
             array_push($values, $kualitas);
 
             //pelayanan pelanggan
-            $pelayanan = $rating['pelayanan']['vendor_rating'];            
+            $pelayanan = $this->checkzero($rating['pelayanan']['vendor_rating']);            
             array_push($values, $pelayanan);
             //jarak
-            $jarak = $this->getSingleLocation($latitude, $longitude,$v->id);
+            $jarak = $this->checkzero($this->getSingleLocation($latitude, $longitude,$v->id));
             $jarak = round($jarak*100, 2); //jadikan meter & bulatkan 2
             array_push($values, $jarak);
 
             //harga
-            $harga = $this->getHarga($v->id,$layanan);
+            $harga = $this->checkzero($this->getHarga($v->id,$layanan));
             array_push($values, $harga['avg_harga']);
             
             //fasilitas pengantaran
-            $fasilitas = $rating['fasilitas']['vendor_rating'];
+            $fasilitas = $this->checkzero($rating['fasilitas']['vendor_rating']);
             array_push($values, $fasilitas);
 
             //rating rata-rata (rating)
             $ratingController = new RatingController();
             $ratingRataRata = $ratingController->getRating($v->id, 'average');
-            array_push($values, $ratingRataRata['vendor_rating']);
+            array_push($values, $this->checkzero($ratingRataRata['vendor_rating']));
 
             array_push($matriksTopsis, $values);
         }
@@ -492,8 +528,8 @@ class VendorController extends Controller
  
     public function getLayananVendor($idvendor){
         $layanans = DB::table('vendors_has_jenis_bahan_cetaks')
-        ->join('layanan_cetaks', 'layanan_cetaks.id', '=', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id')
-        ->where('vendors_has_jenis_bahan_cetaks.vendors_has_layanan_cetaks.vendors_id', '=', $idvendor)
+        ->join('layanan_cetaks', 'layanan_cetaks_id', '=', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id')
+        ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $idvendor)
         ->where('vendors.status','=','active')
         ->select('vendors_has_jenis_bahan_cetaks.layanan_cetaks.*')
         ->get();
@@ -560,6 +596,21 @@ class VendorController extends Controller
         }
         
         return view('vendors.vendors', compact('vendors', 'layananvendor'));
+    }
+
+    public function isvendorada(){
+        $vendors = DB::table('vendors')
+        ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.vendors_id', '=', 'vendors.id')
+        ->where('status','=','active')
+        ->groupBy('vendors_has_jenis_bahan_cetaks.vendors_id') 
+        ->select( DB::raw('COUNT(vendors_has_jenis_bahan_cetaks.vendors_id) as count_layanan'))
+        ->having('count_layanan', '>', 0)
+        ->get();
+        $value = false;
+        if(count($vendors) > 0){
+            $value = true;
+        }
+        return response()->json(['value' => $value]);
     }
 
     public function indexCart()

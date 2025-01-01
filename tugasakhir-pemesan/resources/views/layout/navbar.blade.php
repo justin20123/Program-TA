@@ -4,15 +4,13 @@
     <div class="navbar-item justify-content-between">
         <a href="/" class="navbar-link">Home</a>
         <a class="navbar-link">&ensp;</a>
-        <a href="/cart" class="navbar-link">Cart</a>
+        <a href="/cart" class="navbar-link">Keranjang</a>
         <a class="navbar-link">&ensp;</a>
         <a href="/pesanan" class="navbar-link">Pesanan</a>
-        <a class="navbar-link">&ensp;</a>
-        <a href="/pegawai" class="navbar-link">Pegawai</a>
     </div>
     <div class="navbar-brand">Hak Akses: 
       @if(Auth::check())
-      {{ Auth::user()->role }}
+      {{ ucfirst(Auth::user()->role) }}
   
       @endif
     </div>

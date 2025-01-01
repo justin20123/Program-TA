@@ -30,6 +30,8 @@
 <input type="hidden" name="idvendor" value="{{ $layanan['idvendor'] }}">
 <input type="hidden" name="idlayanan" value="{{ $layanan['idlayanan'] }}">
 
-<input type="submit" value="Submit" class="btn btn-success"> 
+<div style="display: flex; justify-content: center;" class="pb-5 pt-2">
+  <input type="submit" value="Submit" class="btn btn-success">
+</div>    
 </form>
 @endsection

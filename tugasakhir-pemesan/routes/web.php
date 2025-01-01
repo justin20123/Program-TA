@@ -27,58 +27,79 @@ Route::post('login', [LoginController::class, 'login']);
 Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('/', function () {
     $user = Auth::user();
-    if($user){
-        if ($user->hasRole('pemesan')) {
+    if (Auth::user()) {
+        if (Auth::user()->role == 'pemesan') {
             return redirect()->route('home');
-        } else if (($user->hasRole('admin') || $user->hasRole('manajer') || $user->hasRole('pengantar') || $user->hasRole('pegawai'))){
+        } else if ((Auth::user()->role == 'admin') || (Auth::user()->role == 'manajer') || (Auth::user()->role == 'pengantar') || (Auth::user()->role == 'pegawai')) {
             Auth::logout();
             return redirect()->route('login')->with('error', 'User  ini tidak tercatat sebagai pemesan, silahkan login menggunakan aplikasi yang sesuai.');
         }
-    }
-    
-    else if (!$user) {
+    } else if (!Auth::user()) {
         return redirect()->route('login');
     }
-    
-}); 
+});
 //register
 
 Route::get('register', [RegisterController::class, 'bukaregister'])->name('register');
 Route::post('register', [RegisterController::class, 'register']);
 
+Route::get('/home', function () {
+    return view('home');
+})->name('home');
+Route::post('/location', [VendorController::class, 'loadVendorsTerdekat']);
+Route::get('/vendor/rating/{idvendor}', [VendorController::class, 'getRating']);
+Route::get('/vendor/harga/{idlayanan}', [VendorController::class, 'getHarga']);
+Route::get('/isvendorada', [VendorController::class, 'isvendorada']);
 
+Route::post('/untukanda', [VendorController::class, 'loadUntukAnda']);
+Route::post('/layananterdekat', [VendorController::class, 'loadLayananTerdekat']);
+Route::post('/getLayanan', [VendorController::class, 'loadLayanans']);
+Route::get('/vendors/{filename}', function ($filename) {
+    // Construct the path to the vendors directory
+    $path = base_path('../vendors/' . $filename); // Adjust this if necessary
+
+    // Check if the file exists
+    if (file_exists($path)) {
+        return response()->file($path); // Serve the file if it exists
+    }
+
+    // Return a 404 error if the file does not exist
+    abort(404);
+});
+
+ //fotolayanan
+ Route::get('/imagelayanan/{filename}', function ($filename) {
+    $path = base_path('../imagelayanan/' . $filename);
+
+    if (file_exists($path)) {
+        return response()->file($path);
+    }
+
+    abort(404);
+});
+
+Route::get('/pemesanan/{filename}', function ($filename) {
+    $path = base_path('../pemesanan/' . $filename);
+
+    if (file_exists($path)) {
+        //ambil lokasi file pemesanan
+        return response()->file($path);
+    }
+
+    abort(404);
+});
+
+//semua vendor
+Route::get('/vendor', [VendorController::class, 'index']);;
+
+//vendor semua layanan
+Route::get('/vendor/{idvendor}', [LayananController::class, 'index']);;
+
+//detail layanan
+Route::get('/vendor/{idvendor}/layanan/{idlayanan}', [LayananController::class, 'getDetailLayanan']);;
+Route::get('/loadlayanan/{idvendor}/{idlayanan}/{idjenisbahan}', [LayananController::class, 'detail_layanan_load']);
 Route::middleware(['web'])->group(function () {
-    Route::get('/home', function () {
-        return view('home'); 
-    })->name('home');
-    Route::post('/location', [VendorController::class, 'loadVendorsTerdekat']);
-    Route::get('/vendor/rating/{idvendor}', [VendorController::class, 'getRating']);
-    Route::get('/vendor/harga/{idlayanan}', [VendorController::class, 'getHarga']);
-    Route::post('/untukanda', [VendorController::class, 'loadUntukAnda']);
-    Route::post('/layananterdekat', [VendorController::class, 'loadLayananTerdekat']);
-    Route::post('/getLayanan', [VendorController::class, 'loadLayanans']);
-    Route::get('/vendors/{filename}', function ($filename) {
-        // Construct the path to the vendors directory
-        $path = base_path('../vendors/' . $filename); // Adjust this if necessary
-    
-        // Check if the file exists
-        if (file_exists($path)) {
-            return response()->file($path); // Serve the file if it exists
-        }
-    
-        // Return a 404 error if the file does not exist
-        abort(404);
-    });
-    
-    //semua vendor
-    Route::get('/vendor', [VendorController::class, 'index']);;
 
-    //vendor semua layanan
-    Route::get('/vendor/{idvendor}', [LayananController::class, 'index']);;
-
-    //detail layanan
-    Route::get('/vendor/{idvendor}/layanan/{idlayanan}', [LayananController::class, 'getDetailLayanan']);;
-    Route::get('/loadlayanan/{idvendor}/{idlayanan}/{idjenisbahan}', [LayananController::class, 'detail_layanan_load']);
 
     //proses pemesanan
     Route::post('/submitpesanan', [PemesananController::class, 'submitpesanan']);
@@ -89,16 +110,9 @@ Route::middleware(['web'])->group(function () {
 
     //orders
     Route::get('/cart/orders/{idvendor}', [PemesananController::class, 'indexOrder']);
-    Route::get('/pemesanan/{filename}', function ($filename) {
-        $path = base_path('../pemesanan/' . $filename);
+    
 
-        if (file_exists($path)) {
-            //ambil lokasi file pemesanan
-            return response()->file($path);
-        }
-
-        abort(404);
-    });
+   
 
     //checkout
     Route::post('/checkout', [PemesananController::class, 'bukacheckout'])->name('bukacheckout');
@@ -122,7 +136,7 @@ Route::middleware(['web'])->group(function () {
         }
 
         abort(404);
-    })->where('any', '.*'); 
+    })->where('any', '.*');
 
     Route::post('/verifikasipesanan', [NotaController::class, 'verifikasipesanan']);
     Route::post('/ajukanperubahan', [NotaController::class, 'ajukanperubahan']);

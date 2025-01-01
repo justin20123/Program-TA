@@ -10,7 +10,7 @@
   </ol>
 @endsection
 @section("menu")
-<div class="h3 px-4 py-2">Tambah pegawai</div>
+<div class="h3 px-4 py-2 text-center">Tambah Pegawai</div>
 <form action="{{route('pegawai.store')}}" method="post">
   @csrf
 <div class="h3 px-4 py-2">
@@ -25,6 +25,13 @@
     <label for="">Email</label>
     <input type="email"
       class="form-control" name="email" id="" aria-describedby="helpId" placeholder="" required>
+  </div>
+</div>
+<div class="h3 px-4 py-2">
+  <div class="form-group">
+    <label for="">Nomor Telepon</label>
+    <input type="tel" name="nomor_telepon" class="form-control" placeholder="Nomor Telepon" value="{{ old('nomor_telepon') }}"  required  pattern="[0-9]*" inputmode="numeric">
+
   </div>
 </div>
 <div class="h3 px-4 py-2">
@@ -54,8 +61,13 @@
   </div>
 </div>
 <input type="hidden" name="idvendor" value="{{$vendor[0]}}"> 
-<input type="submit" value="Submit" class="btn btn-success"> 
+<div style="display: flex; justify-content: center;" class="pb-5 pt-2">
+  <input type="submit" value="Submit" class="btn btn-success">
+</div>
 </form>
+@if (session('error'))
+                <p class="text text-danger">{{ session('error') }}</p>
+            @endif
 @endsection
 
 @section("script")

@@ -12,11 +12,13 @@
             <div class="spinner-border ml-auto" role="status" aria-hidden="true"></div>
         </div>
     </div>
-    
+
     <div id="content">
         <div class="container mt-3">
             <div class="d-flex justify-content-between align-items-center">
-                <h5>Welcome customer</h5>
+                @if(Auth::user())
+                <h5>Selamat datang {{Auth::user()->nama}}</h5>
+                @endif
                 <div class="form-inline">
                     <label class="mr-2">Perbandingan Harga:</label>
                     <div class="input-group">
@@ -30,10 +32,14 @@
                 </div>
             </div>
         </div>
+
         <div id="layanan-terdekat" class="p-5"></div>
         <div id="untuk-anda" class='p-5'></div>
         <div id="vendors-terdekat" class="p-5"></div>
     </div>
+    <div id="tidak-ada-vendor" class="px-5 pt-4"></div>
+
+
 
 
     <p id="status" class="px-5"></p>
@@ -41,7 +47,7 @@
 
 @section('script')
     <script>
-        var isLoaded = false;
+        var isLoaded;
         //ambil lokasi sekarang
         function ambilLokasiUser() {
             return new Promise((resolve, reject) => {
@@ -93,14 +99,14 @@
             $.each(data['data'], function(index, item) {
                 html += `
                 <div class="col-md-3">
-                    <button class="btn-card border-0" onclick="toVendorData(`+ item['id'] +`)">
+                    <button class="btn-card border-0" onclick="toVendorData(` + item['id'] + `)">
                         <div class="card" style='width:18rem; height:24rem;'>
                             <img style='width:18rem; height:12rem;' src="` + item['foto_lokasi'] + `" class="card-img-top" alt="Card image 1">
                             <div class="card-body">
                                 <h6 class="card-title">` + item['nama'] + `</h6>
                                 <p class="card-text">` + item['jarak'] + ` km dari lokasi anda</p>
                                 <a href="https://www.openstreetmap.org/?mlat=` + item['latitude'] + `&mlon=` + item[
-                            'longitude'] + `#map=15/` + item['latitude'] + `/` + item['longitude'] + `" target="_blank">Lihat di map</a>
+                    'longitude'] + `#map=15/` + item['latitude'] + `/` + item['longitude'] + `" target="_blank">Lihat di peta</a>
                             </div>
                         </div>
                     </button>
@@ -125,15 +131,17 @@
                 html += `
                 
                     <div class="col-md-3">
-                        <button class="btn-card border-0" onclick="toVendorData(`+ item['id'] +`, 'layanan', `+ item['idlayanan'] +`)">
+                        <button class="btn-card border-0" onclick="toVendorData(` + item['id'] + `, 'layanan', ` +
+                    item['idlayanan'] + `)">
                             <div class="card" style='width:18rem; height:24rem;'>
                                 <img style='width:18rem; height:12rem;' src="` + item['foto_lokasi'] + `" class="card-img-top" alt="Card image 1">
                                 <div class="card-body">
                                     <h6 class="card-title">` + item['layanan'] + `</h6>
                                     <p class="card-text">` + item['nama'] + `</p>
                                     <p class="card-text">Terdekat: ` + item['jarak'] + ` km dari lokasi anda</p>
-                                    <a href="https://www.openstreetmap.org/?mlat=` + item['latitude'] + `&mlon=` + item[
-                                'longitude'] + `#map=15/` + item['latitude'] + `/` + item['longitude'] + `" target="_blank">Lihat di map</a>
+                                    <a href="https://www.openstreetmap.org/?mlat=` + item['latitude'] + `&mlon=` +
+                    item[
+                        'longitude'] + `#map=15/` + item['latitude'] + `/` + item['longitude'] + `" target="_blank">Lihat di peta</a>
                                 </div>
                             </div>
                         </a>
@@ -242,51 +250,57 @@
         async function pageLoadUntukAnda(latitude, longitude, idlayanan) {
             try {
                 const response = await kirimReqUntukAnda(latitude, longitude, idlayanan);
-                // console.log(response);
-                data = response['data']
-                let layanan = data['layanan'];
-let satuan = data['satuan'];
-let vendors = data['vendors'];
-let html = `<div class="h5 p-4 pb-2">Untuk Anda</div>
-             <hr>
-             <div style="width: 100%; max-width: 800px; margin: auto;">`; // Center the container
-let items = ['Terdekat', 'Termurah', 'Direkomendasikan'];
+                let html = `<div class="h5 p-4 pb-2">Untuk Anda</div>
+                            <hr>
+                            <div style="width: 100%; max-width: 800px; margin: auto;">`;
+                if (response['message'] == 'success') {
+                    data = response['data']
+                    let layanan = data['layanan'];
+                    let satuan = data['satuan'];
+                    let vendors = data['vendors'];
+                     // Center the container
+                    let items = ['Terdekat', 'Termurah', 'Direkomendasikan'];
 
-for (let i = 0; i < items.length; i++) {
-    html += `
-    <button class="border-0 mb-3" onclick="toVendorData(${vendors[i].id})" style="width: 100%; text-align: left; transition: background-color 0.3s;">
-      <div class="h6 p-2 mb-2" style="font-weight: bold;">${items[i]}</div>
-      <div class="card mb-3" style="max-width: 100%; height: 200px border: 1px solid #ddd; border-radius: 8px;"> <!-- Set max-width to 100% to fit the parent -->
-        <div class="row no-gutters">
-          <div class="col-md-4">
-            <img src="${vendors[i].foto_lokasi}" class="card-img" alt="Image" style="width: 15rem; height: 20rem; object-fit: cover; border-top-left-radius: 8px; border-bottom-left-radius: 8px;">
-          </div>
-          <div class="col-md-8">
-            <div class="card-body">
-              <h6 class="card-title" style="font-size: 1.1rem; font-weight: bold;">${vendors[i].nama}</h6>
-              <p class="card-text text-muted" style="margin-bottom: 0;">
-                ${vendors[i].jarak} km dari lokasi anda<br>
-              </p>
-              <div class="d-flex align-items-center mb-2">
-                <span class="mr-2">${vendors[i].rating}</span>
-                <i class="fas fa-star text-warning"></i>
-                <span class="ml-2 text-muted">(${vendors[i].total_nota})</span>
-              </div>
-              <p class="card-text font-weight-bold">Rp. ${vendors[i].hargamin}-${vendors[i].hargamaks} <small>/${satuan} - ${layanan}</small></p>
-              <a href="https://www.openstreetmap.org/?mlat=${vendors[i].latitude}&mlon=${vendors[i].longitude}#map=15/${vendors[i].latitude}/${vendors[i].longitude}" target="_blank" style="text-decoration: none; color: #007bff;">Lihat di map</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </button>
-    <br>
-    `;
-}
+                    for (let i = 0; i < items.length; i++) {
+                        html += `
+                            <button class="border-0 mb-3" onclick="toVendorData(${vendors[i].id})" style="width: 100%; text-align: left; transition: background-color 0.3s;">
+                              <div class="h6 p-2 mb-2" style="font-weight: bold;">${items[i]}</div>
+                              <div class="card mb-3" style="max-width: 100%; height: 200px border: 1px solid #ddd; border-radius: 8px;"> <!-- Set max-width to 100% to fit the parent -->
+                                <div class="row no-gutters">
+                                  <div class="col-md-4">
+                                    <img src="${vendors[i].foto_lokasi}" class="card-img" alt="Image" style="width: 15rem; height: 20rem; object-fit: cover; border-top-left-radius: 8px; border-bottom-left-radius: 8px;">
+                                  </div>
+                                  <div class="col-md-8">
+                                    <div class="card-body">
+                                      <h6 class="card-title" style="font-size: 1.1rem; font-weight: bold;">${vendors[i].nama}</h6>
+                                      <p class="card-text text-muted" style="margin-bottom: 0;">
+                                        ${vendors[i].jarak} km dari lokasi anda<br>
+                                      </p>
+                                      <div class="d-flex align-items-center mb-2">
+                                        <span class="mr-2">${vendors[i].rating}</span>
+                                        <i class="fas fa-star text-warning"></i>
+                                        <span class="ml-2 text-muted">(${vendors[i].total_nota})</span>
+                                      </div>
+                                      <p class="card-text font-weight-bold">Rp. ${vendors[i].hargamin}-${vendors[i].hargamaks} <small>/${satuan} - ${layanan}</small></p>
+                                      <a href="https://www.openstreetmap.org/?mlat=${vendors[i].latitude}&mlon=${vendors[i].longitude}#map=15/${vendors[i].latitude}/${vendors[i].longitude}" target="_blank" style="text-decoration: none; color: #007bff;">Lihat di peta</a>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </button>
+                            <br>
+                            `;
+                    }
 
-html += `</div>`;
+                    html += `</div>`;
 
+                    
+                }
+                else{
+                    html += '<p>Layanan ini belum memiliki vendor</p>'
+                }
                 $('#untuk-anda').html(html);
-                return "done";
+                    return "done";
             } catch (error) {
                 console.error('Error:', error);
                 return "error";
@@ -296,14 +310,16 @@ html += `</div>`;
 
         async function pageLoad(idlayanan = 1) {
             $('#loading').show();
-            $("#content").css("display","none");
+            $("#content").css("display", "none");
 
             let latitude, longitude, statusUntukAnda, statusTerdekat;
 
             try {
+                
                 if (!isLoaded) {
                     statusDropDown = await pageLoadDropDownLayanan();
                 }
+                $('#layanans').val(idlayanan);
 
                 // Get the user's location
                 const position = await ambilLokasiUser();
@@ -328,8 +344,7 @@ html += `</div>`;
                         $('#loading').hide();
                     }
 
-                }
-                else{
+                } else {
                     if (statusUntukAnda == "done") {
 
                         $('#loading').hide();
@@ -346,16 +361,55 @@ html += `</div>`;
             }
         }
 
-        function toVendorData(idvendor, detail = null, idlayanan = null){
+        function toVendorData(idvendor, detail = null, idlayanan = null) {
             let url = `vendor/${idvendor}`;
-            if(detail == 'layanan'){
+            if (detail == 'layanan') {
                 url += `/layanan/${idlayanan}`
             }
             window.location.href = url;
         }
+
+        function isvendorada() {
+            $.ajax({
+                url: 'isvendorada',
+                type: 'GET',
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            }).then(function(response) {
+                console.log(response.value);
+                return response.value;
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                console.error(jqXHR);
+            });
+        }
+        async function checkVendorAda() {
+            try {
+                var isAdaVendor = await isvendorada();
+                console.log(isAdaVendor); // This will log the actual value returned from the AJAX call
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
         // Automatically get the location when the document is fully loaded
         $(document).ready(async function() {
-            pageLoad();
+            isLoaded = false;
+            $('#loading').show();
+            $("#content").css("display", "none");
+            $("#tidak-ada-vendor").hide();
+
+            var isadavendor = checkVendorAda();
+            console.log(isadavendor);
+
+            if (isadavendor) {
+                pageLoad();
+            } else {
+                $('#loading').hide();
+                $("#tidak-ada-vendor").html("<p class='text text-default'>Belum ada vendor yang aktif</p>");
+                $("#tidak-ada-vendor").show();
+            }
+
             $('#layanans').change(function() {
 
                 let selectedId = $(this).val();

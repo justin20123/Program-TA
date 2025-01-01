@@ -17,17 +17,6 @@
             </div>
         </div>
 
-        <div class="search-bar">
-            <form action="" method="GET" class="search-form">
-                <div class="input-container">
-                    <input type="text" name="query" placeholder="Search..." class="search-input">
-                    <button type="submit" class="search-button">
-                        <i class="fa fa-search" style="font-size: 16px;"></i>
-                    </button>
-                </div>
-            </form>
-        </div>
-
         <div class="layanans">
             @php
                 $totalLayanan = count($layanans);
@@ -35,13 +24,14 @@
                 $invisibleCards = ($itemsPerRow - ($totalLayanan % $itemsPerRow)) % $itemsPerRow; // Calculate invisible cards needed
             @endphp
 
+            @if ($totalLayanan > 0)
             <ul class="list-inline justify-content-center" style="display: flex; flex-wrap: wrap;">
                 @foreach ($layanans as $l)
                     <li class="list-inline-item p-3">
                         <a href="{{ asset('vendor/' . $vendor->id . '/layanan/' . $l->id) }}" style="color: inherit; text-decoration: none;">
                             <div class="card" style="width: 18rem;">
-                                <img class="card-img-top" style="height: 13rem;" src="{{ $l->url_image }}"
-                                    alt="Card image cap">
+                                <img class="card-img-top" style="height: 13rem;" src="{{ $l->url_image }}" alt="{{asset('assets/images/noimg.jpg')}}">
+
                                 <div class="card-body">
 
                                     <h5 class="card-title">{{ $l->nama }}</h5>
@@ -65,6 +55,10 @@
                         </div>
                     </li>
                 @endfor
+            </ul>
+            @else
+            <p class="text-center">Belum ada layanan yang tersedia</p>
+            @endif
         </div>
     </div>
 @endsection

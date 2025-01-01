@@ -60,7 +60,7 @@
                     <div class="form-group">
                         <label for="orderNotes" class="form-label">Informasi Tambahan</label>
                         <textarea class="form-control form-input" id="orderNotes" rows="3"
-                            placeholder="Notes about your order, e.g. special notes for delivery"></textarea>
+                            placeholder="Catatan tambahan"></textarea>
                     </div>
 
                     <input type="hidden" name="latitude" id="latitude">
@@ -329,7 +329,7 @@
                             if (result.isConfirmed) {
 
                                 // Redirect to the vendor page
-                                window.location.href = '/vendor/1';
+                                window.location.href = '/vendor/' + response.idvendor;
                             }
                         });
                     },

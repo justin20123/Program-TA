@@ -75,7 +75,7 @@
     @endforeach
     </tbody>
 </table>
-<a href="/addpegawai/{{$p->vendors_id}}" class="btn btn-success">Tambah Pegawai</a>
+<a href="/addpegawai/{{$datavendor->id}}" class="btn btn-success">Tambah Pegawai</a>
 @endsection
 
 @section('script')

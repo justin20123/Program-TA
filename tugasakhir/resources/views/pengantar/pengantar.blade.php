@@ -75,7 +75,7 @@
     @endforeach
     </tbody>
 </table>
-<a href="/addpengantar/{{$p->vendors_id}}" class="btn btn-success">Tambah Pengantar</a>
+<a href="/addpengantar/{{$datavendor->id}}" class="btn btn-success">Tambah Pengantar</a>
 @endsection
 
 @section('script')

@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Pengguna;
 use App\Models\VendorHasPengguna;
 use Database\Seeders\VendorHasPenggunaSeeder;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class PenggunaController extends Controller
@@ -23,10 +25,9 @@ class PenggunaController extends Controller
 
     public function indexPegawai($idvendor){
         $pegawais = DB::table('penggunas')
-        ->join('vendors_has_penggunas', 'penggunas.email', '=', 'vendors_has_penggunas.penggunas_email')
-        ->where('vendors_has_penggunas.vendors_id', '=', $idvendor)
-        ->where('penggunas.deleted_at', '=', null)
-        ->whereRaw('(penggunas.role = "manajer" OR penggunas.role = "pegawai")')
+        ->where('vendors_id', '=', $idvendor)
+        ->where('deleted_at', '=', null)
+        ->where('role', '=', 'pegawai')
         ->select()
         ->get();
 
@@ -42,10 +43,9 @@ class PenggunaController extends Controller
 
     public function indexPengantar($idvendor){
         $pengantars = DB::table('penggunas')
-        ->join('vendors_has_penggunas', 'penggunas.email', '=', 'vendors_has_penggunas.penggunas_email')
-        ->where('vendors_has_penggunas.vendors_id', '=', $idvendor)
-        ->where('penggunas.deleted_at', '=', null)
-        ->where('penggunas.role', '=', 'pengantar')
+        ->where('vendors_id', '=', $idvendor)
+        ->where('deleted_at', '=', null)
+        ->where('role', '=', 'pengantar')
         ->select()
         ->get();
 
@@ -70,21 +70,34 @@ class PenggunaController extends Controller
     }
 
     public function storePegawai(Request $request){
+        try {
 
+            $request->validate([
+                'nama' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:4',
+                'confirmpassword' => 'required|string|min:4',
+                'nomor_telepon' => 'required|string|regex:/^08[0-9]{6,}$/',
+            ]);
+        } catch (Exception $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
+
+        $user = Pengguna::where('email', '=',$request->input('email'))->first();
+        if($user){
+                return redirect()->back()->withInput()->with('error', 'Email ini sudah terdaftar');
+
+        }
         if($request->password == $request->confirmpassword){
             $pegawai = new Pengguna();
-            $pegawai->nama = $request->nama;
-            $pegawai->email = $request->email;
-            $pegawai->password = $request->password;
+            $pegawai->nama = $request->input('nama');
+            $pegawai->email = $request->input('email');
+            $pegawai->password = $request->input('password');
             $pegawai->role = 'pegawai';
             $pegawai->saldo = 0;
+            $pegawai->nomor_telepon = $request->input('nomor_telepon');
+            $pegawai->vendors_id = Auth::user()->vendors_id;
             $pegawai->save();
-
-            $vendors_has_penggunas = new VendorHasPengguna();
-            $vendors_has_penggunas->vendors_id = $request->idvendor;
-            $vendors_has_penggunas->penggunas_email = $pegawai->email;
-            $vendors_has_penggunas->penggunas_id = $pegawai->id;
-            $vendors_has_penggunas->save();
             
             return redirect()->route('pegawai.index',[$request->idvendor]);
         }
@@ -96,21 +109,35 @@ class PenggunaController extends Controller
     }
 
     public function storePengantar(Request $request){
+        try {
+
+            $request->validate([
+                'nama' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:4',
+                'confirmpassword' => 'required|string|min:4',
+                'nomor_telepon' => 'required|string|regex:/^08[0-9]{6,}$/',
+            ]);
+        } catch (Exception $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
+
+        $user = Pengguna::where('email', '=',$request->input('email'))->first();
+        if($user){
+                return redirect()->back()->withInput()->with('error', 'Email ini sudah terdaftar');
+
+        }
 
         if($request->password == $request->confirmpassword){
             $pengantar = new Pengguna();
-            $pengantar->nama = $request->nama;
-            $pengantar->email = $request->email;
-            $pengantar->password = $request->password;
+            $pengantar->nama = $request->input('nama');
+            $pengantar->email = $request->input('email');
+            $pengantar->password = $request->input('password');
             $pengantar->role = 'pengantar';
             $pengantar->saldo = 0;
+            $pengantar->nomor_telepon = $request->input('nomor_telepon');
+            $pengantar->vendors_id = Auth::user()->vendors_id;
             $pengantar->save();
-
-            $vendors_has_penggunas = new VendorHasPengguna();
-            $vendors_has_penggunas->vendors_id = $request->idvendor;
-            $vendors_has_penggunas->penggunas_email = $pengantar->email;
-            $vendors_has_penggunas->penggunas_id = $pengantar->id;
-            $vendors_has_penggunas->save();
             
             return redirect()->route('pengantar.index',[$request->idvendor]);
         }
@@ -124,45 +151,57 @@ class PenggunaController extends Controller
     public function editPegawai($idpegawai){
         $pegawai = DB::table('penggunas')
         ->where('id','=', $idpegawai)
-        ->select()
+        ->where('vendors_id','=', Auth::user()->vendors_id)
+        ->where('role','=', 'pegawai')
         ->first();
 
-        $idvendor = DB::table('vendors_has_penggunas')
-        ->where('penggunas_id','=', $idpegawai)
-        ->select('vendors_id')
-        ->first();
-
-        $vendor = [$idvendor->vendors_id];
-
-        return view('pegawai.editpegawai', compact('pegawai', 'vendor') );
+        return view('pegawai.editpegawai', compact('pegawai') );
     }
 
     public function updatePegawai(Request $request, $idpegawai){
+        try {
+
+            $request->validate([
+                'nama' => 'required|string|max:255', //nanti disesuaikan dgn db
+                'nomor_telepon' => 'required|string|regex:/^08[0-9]{6,}$/',
+            ]);
+        } catch (Exception $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
+
         $pegawai = Pengguna::findOrFail($idpegawai);
-        $pegawai->nama = $request->nama;
+        $pegawai->nama = $request->input('nama');
+        $pegawai->nomor_telepon = $request->input('nomor_telepon');
         $pegawai->save();
 
         return redirect()->route('pegawai.index',[$request->idvendor]);
+
     }
 
     public function editPengantar($idpengantar){
         $pengantar = DB::table('penggunas')
         ->where('id','=', $idpengantar)
-        ->select()
+        ->where('vendors_id','=', Auth::user()->vendors_id)
+        ->where('role','=', 'pengantar')
         ->first();
 
-        $idvendor = DB::table('vendors_has_penggunas')
-        ->where('penggunas_id','=', $idpengantar)
-        ->select('vendors_id')
-        ->first();
-
-        $vendor = [$idvendor->vendors_id];
-        return view('pengantar.editpengantar', compact('pengantar', 'vendor') );
+        return view('pengantar.editpengantar', compact('pengantar') );
     }
 
     public function updatePengantar(Request $request, $idpengantar){
+        try {
+
+            $request->validate([
+                'nama' => 'required|string|max:255', //nanti disesuaikan dgn db
+                'nomor_telepon' => 'required|string|regex:/^08[0-9]{6,}$/',
+            ]);
+        } catch (Exception $e) {
+            return back()->withInput()->with('error', $e->getMessage());
+        }
+
         $pengantar = Pengguna::findOrFail($idpengantar);
-        $pengantar->nama = $request->nama;
+        $pengantar->nama = $request->input('nama');
+        $pengantar->nomor_telepon = $request->input('nomor_telepon');
         $pengantar->save();
 
         return redirect()->route('pengantar.index',[$request->idvendor]);

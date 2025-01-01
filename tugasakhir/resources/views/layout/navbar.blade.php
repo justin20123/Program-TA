@@ -12,7 +12,7 @@
     </div>
     <div class="navbar-brand">Hak Akses: 
       @if(Auth::check())
-      {{ Auth::user()->role }}
+      {{ ucfirst(Auth::user()->role) }}
   
       @endif
     </div>

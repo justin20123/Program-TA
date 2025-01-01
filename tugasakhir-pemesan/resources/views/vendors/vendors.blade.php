@@ -45,6 +45,7 @@
                     <!-- Row 1 -->
                     @foreach($vendors as $v)
                     <div class="col-12 col-md-3 pb-4">
+                        <a href="/vendor/{{$v->id}}" style="color: inherit; text-decoration: none;">
                         <div class="card product-card border-0" style="height:29rem">
                             <img src="https://via.placeholder.com/150" class="card-img-top" alt="Product Image">
                             <div class="card-body">
@@ -52,9 +53,10 @@
                                 <h6 class="card-title mt-1">{{$v->nama}}</h6>
                                 <p class="text-primary mb-1">Rp. {{number_format($v->hargamin, 0, '.', ',')}}-{{number_format($v->hargamaks, 0, '.', ',')}}/{{$layananvendor->satuan}}</p>
                                 <p class="text-muted small">{{$layananvendor->nama}}</p>
-                                <a href="#" class="text-success small">{{ $v->statusantar }}</a>
+                                <p class="text text-success small">{{ $v->statusantar }}</a>
                             </div>
                         </div>
+                    </a>
                     </div>
                     @endforeach
                 </div> <!-- End of Row -->

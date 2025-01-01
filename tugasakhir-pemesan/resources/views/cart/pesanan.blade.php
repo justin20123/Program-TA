@@ -8,17 +8,17 @@
 @section('menu')
     <div class="container my-5">
         <!-- Cart Table -->
-        <h4>Cart Vendor A</h4>
+        <h4>Keranjang Vendor A</h4>
         <table class="table table-bordered">
             <thead>
                 <tr>
                     <th style="width: 40px; text-align: center;"></th>
                     <th>File</th>
-                    <th>Products</th>
-                    <th>Price (IDR)</th>
-                    <th>Quantity</th>
-                    <th>Additional Fee</th>
-                    <th>Sub-total (IDR)</th>
+                    <th>Produk</th>
+                    <th>Harga (Rupiah)</th>
+                    <th>Kuantitas</th>
+                    <th>Biaya Tambahan</th>
+                    <th>Sub-total (Rupiah)</th>
                 </tr>
             </thead>
             <tbody>

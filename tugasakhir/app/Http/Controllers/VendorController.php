@@ -32,7 +32,7 @@ class VendorController extends Controller
             Auth::logout();
             return redirect()->route('login')->with('error', 'Anda bukan manajer maupun pegawai, silahkan login menggunakan akun yang bersangkutan.');
         } else {
-            return view('tambahvendor.tambah');
+            return view('vendor.tambah');
         }
 
 
@@ -109,50 +109,17 @@ class VendorController extends Controller
 
     public function indexPegawai()
     {
-        $vendors = DB::table('vendors')
-            ->join('vendors_has_penggunas', 'vendors_has_penggunas.vendors_id', '=', 'vendors.id')
-            ->where('vendors_has_penggunas.penggunas_id', '=', Auth::user()->id)
-            ->get();
 
-        // dd($vendors);
 
-        $jumlah_pegawai = DB::table('vendors_has_penggunas')
-            ->leftJoin('penggunas', 'penggunas.email', '=', 'vendors_has_penggunas.penggunas_email')
-            ->select(DB::raw('count(vendors_has_penggunas.penggunas_email) as jumlah_pegawai'))
-            ->where('penggunas.role', '=', 'pegawai')
-            ->groupBy('vendors_has_penggunas.vendors_id')
-            ->get();
+        $id = Auth::user()->vendors_id;
+        return redirect()->to("/pegawai/$id");
 
-        foreach ($vendors as $key => $v) {
-            $v->jumlah_pegawai = $jumlah_pegawai[$key]->jumlah_pegawai;
-        }
-
-        return view('pegawai.home', compact('vendors'));
     }
 
     public function indexPengantar()
-    {;
-        $vendors = DB::table('vendors')
-            ->join('vendors_has_penggunas', 'vendors_has_penggunas.vendors_id', '=', 'vendors.id')
-            ->where('vendors_has_penggunas.penggunas_id', '=', Auth::user()->id)
-            ->get();
-
-        // dd($vendors);
-
-        $jumlah_pengantar = DB::table('vendors_has_penggunas')
-            ->leftJoin('penggunas', 'penggunas.email', '=', 'vendors_has_penggunas.penggunas_email')
-            ->select(DB::raw('count(vendors_has_penggunas.penggunas_email) as jumlah_pengantar'))
-            ->where('penggunas.role', '=', 'pengantar')
-            ->groupBy('vendors_has_penggunas.vendors_id')
-            ->get();
-
-        // dd($jumlah_pengantar);
-
-        foreach ($vendors as $key => $v) {
-            $v->jumlah_pengantar = $jumlah_pengantar[$key]->jumlah_pengantar;
-        }
-
-        return view('pengantar.home', compact('vendors'));
+    {
+        $id = Auth::user()->vendors_id;
+        return redirect()->to("/pengantar/$id");
     }
 
 

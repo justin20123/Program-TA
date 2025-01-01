@@ -113,7 +113,7 @@
         
         <a href="/vendors/{{ $jenisbahan[0]->idvendor }}/layanan/{{ $jenisbahan[0]->idlayanan }}/edit/{{ $jenisbahan[0]->idjenisbahan }}" 
           class="btn btn-primary">
-          Edit Opsi
+          Edit Jenis Bahan
         </a>
     </div>
     

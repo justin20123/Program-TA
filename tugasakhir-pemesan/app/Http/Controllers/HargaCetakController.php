@@ -62,7 +62,11 @@ class HargaCetakController extends Controller
 
         $arrAvgHarga = [];
 
-        foreach($jenisbahan as $keyjb=>$jb){
+        if(count($jenisbahan) == 0) {
+            return ['avg_harga'=> 0];
+        }
+
+        foreach($jenisbahan as $jb){
             //cek harga satuan tergeneralisasi dengan 10, 100, 200, 300, 400, 500, 1000
             $harga10 = $this->cekHarga(10, $jb->id);
             $harga100 = $this->cekHarga(100, $jb->id);

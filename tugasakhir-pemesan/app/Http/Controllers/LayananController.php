@@ -50,8 +50,8 @@ class LayananController extends Controller
 
         $hargacetakcontroller = new HargacetakController();
         foreach ($layanans as $l) {
-            $l->hargamin = $hargacetakcontroller->getMinValue($vendor_id, $l->id);
-            $l->hargamax = $hargacetakcontroller->getMaxValue($vendor_id, $l->id);
+            $l->hargamin = $hargacetakcontroller->getMinValue(1, $l->id);
+            $l->hargamax = $hargacetakcontroller->getMaxValue(1, $l->id);
         }
         $vendor = DB::table('vendors')
             ->where('vendors.id', '=', $vendor_id)

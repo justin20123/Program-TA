@@ -38,6 +38,7 @@ Route::post('register', [RegisterController::class, 'register']);
 
 //buka app
 Route::get('/', [VendorController::class, 'index']);
+
 Route::middleware(['auth'])->group(function () {
     //tambah vendor
     Route::post('/tambahvendor', [VendorController::class, 'tambahvendor'])->name('tambahvendor');
@@ -73,10 +74,10 @@ Route::middleware(['auth'])->group(function () {
 
     //detail
     Route::put('/detail/{iddetail}', [DetailCetaksController::class, 'update'])->name('detail.update');
-    Route::get('/createdetail/{idvendor}/{idlayanan}/{idjenisbahan}', [DetailCetaksController::class, 'create'])->name('detail.create');
+    Route::get('/createdetail/{idvendor}/{idlayanan}/{idjenisbahan}', [DetailCetaksController::class, 'create']);
     Route::put('/createdetail', [DetailCetaksController::class, 'store'])->name('detail.store');
     Route::delete('/deletedetail', [DetailCetaksController::class, 'destroy'])->name('detail.destroy');
-    Route::post('/layanancetak/detail/{idjenisbahan}/create', [DetailCetaksController::class, 'create'])->name('detail.create');
+    Route::post('/layanancetak/detail/{idjenisbahan}/create', [DetailCetaksController::class, 'create']);
 
     //Jenis bahan
     Route::get('/vendors/{idvendor}/layanan/{idlayanan}/edit/{idjenisbahan}', [JenisBahanController::class, 'edit'])->name('layanan.edit');
@@ -137,10 +138,10 @@ Route::middleware(['auth'])->group(function () {
 
 
     //pegawai home
-    Route::get('/pegawai', [VendorController::class, 'indexPegawai'])->name('pegawai.index');
+    Route::get('/pegawai', [VendorController::class, 'indexPegawai']);
 
     //list pegawai 
-    Route::get('/pegawai/listpegawai/{idvendor}', [PenggunaController::class, 'indexPegawai'])->name('pegawai.index');
+    Route::get('/pegawai/{idvendor}', [PenggunaController::class, 'indexPegawai'])->name('pegawai.index');;
 
     //tambah pegawai
     Route::get('/addpegawai/{idvendor}', [PenggunaController::class, 'createPegawai'])->name('pegawai.create');
@@ -154,10 +155,10 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/deletepegawai/{id}', [PenggunaController::class, 'deletePegawai'])->name('pegawai.delete');
 
     //home pengantar
-    Route::get('/pengantar', [VendorController::class, 'indexPengantar'])->name('pengantar.index');
+    Route::get('/pengantar', [VendorController::class, 'indexPengantar']);
 
     //list pengantar
-    Route::get('/pengantar/listpengantar/{idvendor}', [PenggunaController::class, 'indexPengantar'])->name('pengantar.index');
+    Route::get('/pengantar/{idvendor}', [PenggunaController::class, 'indexPengantar'])->name('pengantar.index');
 
     //tambah pengantar
     Route::get('/addpengantar/{idvendor}', [PenggunaController::class, 'createPengantar'])->name('pengantar.create');
