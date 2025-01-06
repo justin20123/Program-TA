@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Layanan;
+use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -25,6 +26,14 @@ class LayananController extends Controller
             ->whereNotNull('ratings.nilai')
             ->avg('ratings.nilai');
         return $ratings;
+    }
+
+    public function formatDate($datetime)
+    {
+        $dateTime = new DateTime($datetime);
+        $formattedDate = $dateTime->format('d F, Y');
+
+        return $formattedDate;
     }
     //ambil avg rating setiap layanan dalam 1 vendor
     public function getTotalNota($vendors_id, $layanans_id)
@@ -106,11 +115,76 @@ class LayananController extends Controller
         ->where('id', '=', $idlayanan)
         ->first();
 
+        $review = [];
 
+
+        $vendor_layanan_cetak = DB::table('vendors_has_jenis_bahan_cetaks')
+        ->where('layanan_cetaks_id', '=', $idlayanan)
+        ->where('vendors_id', '=', $vendor_id)
+        ->select('jenis_bahan_cetaks_id')
+        ->get();
+
+        $idvendorlayanancetak = [];
+        foreach($vendor_layanan_cetak as $vl){
+            array_push($idvendorlayanancetak, $vl->jenis_bahan_cetaks_id);
+        }
+
+
+        $pemesanans = DB::table('pemesanans')
+        ->whereIn('jenis_bahan_cetaks_id', $idvendorlayanancetak)
+        ->select('notas_id')
+        ->get();
+
+        $idnotas = [];
+        foreach($pemesanans as $p){
+            $currentidnota = $idnotas;
+            $isinserted = false;
+            foreach($currentidnota as $id){              
+                if($id == $p->notas_id){
+                    $isinserted = true;
+                }
+            }
+            if(!$isinserted){
+                array_push($idnotas, $p->notas_id);
+            }
+            
+        }
+
+        if(count($pemesanans) > 0){
+            $notas = DB::table('notas')
+            ->leftJoin('ratings', 'notas.id', '=', 'ratings.notas_id')
+            ->whereIn('notas.id', $idnotas)
+            ->select('notas.id', 'notas.ulasan','notas.waktu_selesai')
+            ->get();
+
+            foreach($notas as $n){
+                $rating = DB::table('ratings')
+                ->where('notas_id', '=', $n->id)
+                ->average('nilai');
+                $n->rating = $rating;
+
+                $pemesanan = DB::table('pemesanans')
+                ->where('notas_id', $n->id)
+                ->select('penggunas_email')
+                ->first();
+
+                $pemesan = DB::table('penggunas')
+                ->where('email', '=', $pemesanan->email)
+                ->select('nama')
+                ->first();
+
+                $n->pemesan = $pemesan->nama;
+
+                $n->waktu_selesai_formatted = $this->formatDate($n->waktu_selesai);
+            }
+            $review = $notas;
+        }
+
+        // dd($review);
         // dd($hargacetaks);
         // dd($opsidetail);
 
-        return view('vendors.detaillayanan', compact('jenisbahan', 'opsidetail', 'hargacetaks', 'layanan'));
+        return view('vendors.detaillayanan', compact('jenisbahan', 'opsidetail', 'hargacetaks', 'layanan', 'review'));
     }
 
     public function detail_layanan_load($vendor_id, $idlayanan, $idjenisbahan){
@@ -157,9 +231,13 @@ class LayananController extends Controller
             $l->satuan = $layanan->satuan;
         }
 
-       
+       $jenisbahan = DB::table('jenis_bahan_cetaks')
+       ->where('id', '=', $idjenisbahan)
+       ->select('deskripsi')
+       ->first();
+       $deskripsi = $jenisbahan->deskripsi;
 
-        return json_encode(['result'=>'success', 'data'=>['opsidetail'=>$opsiDetail , 'listharga'=>$listharga]]);
+        return json_encode(['result'=>'success', 'data'=>['opsidetail'=>$opsiDetail , 'listharga'=>$listharga, 'deskripsi'=>$deskripsi]]);
     }
 
     

@@ -163,7 +163,7 @@ class NotaController extends Controller
 
         return $formattedDate;
     }
-    public function formatDateTime2($datetime)
+    public function formatDate($datetime)
     {
         $dateTime = new DateTime($datetime);
         $formattedDate = $dateTime->format('d F, Y');
@@ -338,7 +338,7 @@ class NotaController extends Controller
         if ($nota->waktu_selesai) {
             $selesai = [
                 'waktu_progress_format' => $this->formatDateTime($nota->waktu_selesai),
-                'tanggal_selesai' => $this->formatDateTime2($nota->waktu_selesai),
+                'tanggal_selesai' => $this->formatDate($nota->waktu_selesai),
                 'progress' => 'Pesanan sudah selesai'
             ];
             array_push($arrSummary, $selesai);

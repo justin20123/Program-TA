@@ -6,6 +6,32 @@
     </ol>
 @endsection
 @section('menu')
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Konfirmasi Penghapusan</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="tutupmodal" class="btn btn-secondary">Batalkan</button>
+                <form id="deleteForm" action="/deletepesanan" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <div id="hiddens">
+
+                    </div>
+                    <button type="submit" class="btn btn-danger">Hapus</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
     <div class="container my-5">
         <!-- Cart Table -->
         <h4>Keranjang Vendor A</h4>
@@ -24,8 +50,8 @@
             <tbody>
                 @foreach ($pemesanans as $p)
                     <tr>
-                        <td>
-                            <input type="checkbox" id="item-{{ $p->id }}" value="{{ $p->id }}" checked />
+                        <td><button class="btn btn-danger button-delete" data-id="{{$p->id}}" data-layanan="{{$p->layanan}}" data-jumlah="{{$p->jumlah}}" data-satuan="{{$p->satuan}}" data-idvendor="{{$p->vendors_id}}">Hapus Pesanan</button>
+                            
                         </td>
                         <td>
                             <div>
@@ -63,10 +89,16 @@
             </tbody>
         </table>
 
+        @if (session('message'))
+            <div class="alert alert-danger">
+                {!! nl2br(e(session('message'))) !!}
+            </div>
+        @endif
         <!-- Cart Buttons -->
         <div class="d-flex justify-content-between mb-4">
-            <a href="/vendor" class="btn btn-outline-primary">Lihat vendor lainnya</a>
+            
             <a href="/vendor/{{ $pemesanans[0]->vendors_id }}" class="btn btn-primary">Tambah Barang</a>
+            <a href="/vendor" class="btn btn-danger-primary">Hapus pesanan dipilih</a>
         </div>
 
         <!-- Balance and Checkout Summary -->
@@ -138,6 +170,26 @@
 
             $('[id^="item-"]').change(function() {
                 updateSubtotal(this);
+            });
+
+            $(".button-delete").on("click", function () {
+                const id = $(this).data('id');
+                const layanan = $(this).data('layanan');
+                const jumlah = $(this).data('jumlah');
+                const satuan = $(this).data('satuan');
+                const idvendor = $(this).data('idvendor');
+
+                var message = "Apakah anda yakin ingin menghapus pesanan: " + layanan + " " + jumlah + " " + satuan
+                
+                $('#modal-body').html(message);
+                var hidden = `<input type="hidden" name="idpemesanan" value="${id}">
+                <input type="hidden" name="idvendor" value="${idvendor}">`;
+                $('#hiddens').html(hidden);
+                $('#confirmDeleteModal').modal('show');
+            });
+
+            $('#tutupmodal').on('click', function () {
+                $('#confirmDeleteModal').modal('hide');
             });
 
         });

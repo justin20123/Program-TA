@@ -59,47 +59,40 @@ class VendorController extends Controller
             }
         }
 
-        // dd($vendorpemesanan);
-
-        $pesanan = DB::table('vendors_has_jenis_bahan_cetaks')
-            ->leftJoin('jenis_bahan_cetaks', 'jenis_bahan_cetaks.id', '=', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id')
-            ->leftJoin('pemesanans', 'jenis_bahan_cetaks.id', '=', 'pemesanans.jenis_bahan_cetaks_id')
-            ->whereNotNull('pemesanans.notas_id')
-            ->select('vendors_has_jenis_bahan_cetaks.vendors_id as idvendor', 'pemesanans.notas_id as idnota')
-            ->groupBy('vendors_has_jenis_bahan_cetaks.vendors_id', 'pemesanans.notas_id')
-            ->orderBy('vendors_has_jenis_bahan_cetaks.vendors_id')
-            ->get();
-
-        // dd($pesanan);
-
-        $pesanan_count = [];
-        $vendor_id = null;
-        $i = 0;
-        $count = 0;
-        foreach ($pesanan as $p) {
-            if (!$vendor_id) {
-                $vendor_id = $p->idvendor;
-            }
-            if ($p->idvendor == $vendor_id) {
-                $count++;
-                $pesanan_count[$i] = [
-                    'idvdendor' => $vendor_id,
-                    'count' => $count,
-                ];
-            } else {
-                $i++;
-                $count = 1;
-                $vendor_id = $p->idvendor;
-                $pesanan_count[$i] = [
-                    'idvdendor' => $vendor_id,
-                    'count' => $count,
-                ];
-            }
-        }
-        $idvendor = null;
+        
 
         foreach ($vendorpemesanan as $key => $v) {
-            $v->jumlah_pesanan =  $pesanan_count[$key]['count'];
+            $ratings = DB::table('notas')
+            ->join('pemesanans','pemesanans.notas_id','=','notas.id')
+            
+            ->join('ratings','ratings.notas_id','=','notas.id')
+            ->where('pemesanans.vendors_id','=', $v->id)
+            ->whereNotNull('ratings.nilai')
+            ->select('notas.id',
+                DB::raw('avg(ratings.nilai) as average_rating'),
+            )
+            ->groupBy('notas.id')
+            ->get();
+            if($ratings->isNotEmpty()){
+                $totalRating = 0;
+                $totalNota = DB::table('notas')
+                ->join('pemesanans', 'pemesanans.notas_id', '=', 'notas.id')
+                ->where('pemesanans.vendors_id', '=', $v->id)
+                ->distinct('notas.id') // Ensure distinct count
+                ->count('notas.id');
+        
+                foreach ($ratings as $r) {
+                    $totalRating += $r->average_rating;
+
+                }        
+                $vendor_rating = $totalRating / $totalNota;
+                $v->jumlah_pesanan = $totalNota;
+                $v->rating = $vendor_rating;            
+            }
+            else{
+                $v->jumlah_pesanan = 0;
+                $v->rating = 0; 
+            }
         }
 
         // dd($vendorpemesanan);

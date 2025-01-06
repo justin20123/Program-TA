@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\JenisBahanCetak;
 use App\Models\Nota;
 use App\Models\Pemesanan;
 use Illuminate\Http\Request;
@@ -15,6 +16,20 @@ class PemesananController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function cekperubahan($idpemesanan){
+        $pemesanan = Pemesanan::find($idpemesanan);
+
+        $tanggal_pemesanan = $pemesanan->updated_at;
+        $jenisbahan = JenisBahanCetak::findOrFail($pemesanan->jenis_bahan_cetaks_id);
+        $tanggal_update_detail = $jenisbahan->updated_at;
+
+        if ($tanggal_pemesanan->lt($tanggal_update_detail)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public function index() {}
 
     public function indexOrder($idvendors)
@@ -24,6 +39,10 @@ class PemesananController extends Controller
             ->where('pemesanans.notas_id', '=', null)
             ->where('pemesanans.vendors_id', '=', $idvendors)
             ->get();
+
+        if(count($pemesanans) == 0){
+            return redirect()->route('indexCart');
+        }
 
         $subtotal = 0;
         foreach ($pemesanans as $p) {
@@ -101,7 +120,7 @@ class PemesananController extends Controller
             'harga_cetaks_id' => $idhargacetak,
             'jenis_bahan_cetaks_id' => $request->input('jenis_bahan_cetaks_id'),
             'vendors_id' => $request->input('vendors_id'),
-
+            'updated_at' => now(),
             'created_at' => now(),
         ]);
         if ($request->idopsidetail) {
@@ -137,6 +156,42 @@ class PemesananController extends Controller
 
         // dd($request);
         $idpemesanans = $request->input('idpemesanans');
+
+        $idperubahan = [];
+
+        foreach ($idpemesanans as $ip){
+            $adaperubahan = $this->cekperubahan($ip);
+            if($adaperubahan){
+                $pesanan = DB::table('pemesanans')
+                ->where('id', '=', $ip)
+                ->select('jumlah', 'jenis_bahan_cetaks_id',)
+                ->first();
+
+                $layanan = DB::table('vendors_has_jenis_bahan_cetaks')
+                ->join('layanan_cetaks', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', 'layanan_cetaks.id')
+                ->where('jenis_bahan_cetaks_id','=',$pesanan->jenis_bahan_cetaks_id)
+                ->select('layanan_cetaks.nama', 'layanan_cetaks.satuan')
+                ->first();
+                $perubahan = [
+                    "jumlah"=>$pesanan->jumlah,
+                    'layanan' =>$layanan->nama,
+                    'satuan' =>$layanan->satuan
+                ];
+                array_push($idperubahan, $perubahan);
+            }
+        }
+
+        if(count($idperubahan) > 0){
+
+            $message = "Terdapat perubahan detil pada pesanan:\n";
+            foreach($idperubahan as $iper){
+                $message .= "• " . $iper["layanan"]. ": " . $iper["jumlah"] . " " . $iper["satuan"] . "\n";
+            }
+            $message.= "Silakan lakukan perubahan pada detil pesanan tersebut sebelum melakukan checkout.";
+            
+            return back()->with('message', $message);
+        }
+
         $biaya_tambahan = $request->input('biaya_tambahan');
         $pemesanans = [];
         $subtotal = $request->subtotal;
@@ -185,6 +240,15 @@ class PemesananController extends Controller
         // dd($pemesanans);
         // return ['subtotal'=>$subtotal, 'pemesanans'=>$pemesanans];
         return view('cart.checkout', compact('pemesanans', 'subtotal', 'adapengantar'));
+    }
+
+    public function deletepesanan(Request $request){
+        $idpemesanan = $request->input('idpemesanan');
+        DB::table('pemesanans_has_opsi_details')->where('pemesanans_id', $idpemesanan)->delete();
+        DB::table('pemesanans')->where('id', $idpemesanan)->delete();
+        $idvendor = $request->input('idvendor');
+        //todo: buat file yg diupload ikut kehapus
+        return redirect()->route('indexOrder',['idvendor'=>$idvendor]);
     }
 
 

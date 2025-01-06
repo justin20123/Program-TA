@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\JenisBahanCetak;
 use App\Models\Layanan;
 use Exception;
 use Illuminate\Http\Request;
@@ -43,17 +44,17 @@ class LayananController extends Controller
 
     public function getTotalNotaRating($vendors_id, $layanans_id)
     {
-        $notas = DB::table('notas')
-        ->join('pemesanans', 'pemesanans.notas_id', '=', 'notas.id')
+        $notas = DB::table('ratings')
+        ->join('notas', 'ratings.notas_id', '=', 'notas.id')
+        ->join('pemesanans', 'notas.id', '=', 'pemesanans.notas_id')
         ->join('jenis_bahan_cetaks', 'pemesanans.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
         ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
         ->where('pemesanans.vendors_id', '=', $vendors_id)
         ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $layanans_id)
-        ->select('notas.id')
-        ->distinct()
-        ->get();
+        ->whereNotNull('ratings.nilai')
+        ->count('notas.id');
 
-        return count($notas);
+        return $notas;
     }
     //ambil totap nota setiap layanan dalam 1 vendor
 
@@ -124,12 +125,12 @@ class LayananController extends Controller
         ->select('nama')
         ->first();
         $rating = $this->getRating($vendor_id, $idlayanan);
-        $totalNota = $this->getTotalNota($vendor_id, $idlayanan);
+        $totalNota = $this->getTotalNotaRating($vendor_id, $idlayanan);
         if ($namaLayanan) {
             $layanan = [
                 'namaLayanan' => $namaLayanan->nama, 
                 'rating' => $this->getRating($vendor_id, $idlayanan),
-                'totalNota' => $this->getTotalNota($vendor_id, $idlayanan)
+                'totalNota' => $this->getTotalNotaRating($vendor_id, $idlayanan)
             ];
         } else {
 
@@ -213,6 +214,10 @@ class LayananController extends Controller
             "jumlah_cetak_maksimum" => $max,
             "harga_satuan" => $harga,
         ]);
+        $jenisbahan = JenisBahanCetak::findOrFail($idjenisbahan);
+        $jenisbahan->updated_at = now();
+        $jenisbahan->save();  
+
     }
 
     public function addjenisbahansetup($idlayanan, $idvendor, $array){
@@ -240,7 +245,9 @@ class LayananController extends Controller
             ]);
 
         }
-        
+        $jenisbahan = JenisBahanCetak::findOrFail($idjenisbahan);
+        $jenisbahan->updated_at = now();
+        $jenisbahan->save();
         return $arrayidjenisbahan;
     }
     public function setupfotokopi($idvendor){

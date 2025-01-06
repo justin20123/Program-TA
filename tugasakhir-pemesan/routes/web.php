@@ -90,7 +90,7 @@ Route::get('/pemesanan/{filename}', function ($filename) {
 });
 
 //semua vendor
-Route::get('/vendor', [VendorController::class, 'index']);;
+Route::get('/vendor', [VendorController::class, 'index'])->name('vendors');
 
 //vendor semua layanan
 Route::get('/vendor/{idvendor}', [LayananController::class, 'index']);;
@@ -100,16 +100,16 @@ Route::get('/vendor/{idvendor}/layanan/{idlayanan}', [LayananController::class, 
 Route::get('/loadlayanan/{idvendor}/{idlayanan}/{idjenisbahan}', [LayananController::class, 'detail_layanan_load']);
 Route::middleware(['web'])->group(function () {
 
-
+    Route::delete("/deletepesanan", [PemesananController::class, 'deletepesanan']);
     //proses pemesanan
     Route::post('/submitpesanan', [PemesananController::class, 'submitpesanan']);
     Route::post('/uploadfilepesanan', [PemesananController::class, 'uploadfile']);
 
     //cart
-    Route::get('/cart', [VendorController::class, 'indexCart']);
+    Route::get('/cart', [VendorController::class, 'indexCart'])->name('indexCart');;
 
     //orders
-    Route::get('/cart/orders/{idvendor}', [PemesananController::class, 'indexOrder']);
+    Route::get('/cart/orders/{idvendor}', [PemesananController::class, 'indexOrder'])->name('indexOrder');
     
 
    

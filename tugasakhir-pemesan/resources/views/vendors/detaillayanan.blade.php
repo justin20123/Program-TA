@@ -26,14 +26,13 @@
                 <h2 class="h4 font-weight-bold">Harga (1 {{ $layanan->satuan }} = {{ $layanan->kesetaraan_pcs }} pcs)</h2>
                 <ul class="list-unstyled text-muted mb-0" id='listharga'>
                     @foreach ($hargacetaks as $h)
-                    @if($h->jumlah_cetak_maksimum == null)
-                    <li>&gt;{{ $h->jumlah_cetak_minimum-1 }} {{ $layanan->satuan }} = Rp.
-                        {{ $h->harga_satuan }}/{{ $layanan->satuan }}</li>
-                    @else
-                    <li>{{ $h->jumlah_cetak_minimum }}–{{ $h->jumlah_cetak_maksimum }} {{ $layanan->satuan }} = Rp.
-                        {{ $h->harga_satuan }}/{{ $layanan->satuan }}</li>
-                    @endif
-                        
+                        @if ($h->jumlah_cetak_maksimum == null)
+                            <li>&gt;{{ $h->jumlah_cetak_minimum - 1 }} {{ $layanan->satuan }} = Rp.
+                                {{ $h->harga_satuan }}/{{ $layanan->satuan }}</li>
+                        @else
+                            <li>{{ $h->jumlah_cetak_minimum }}–{{ $h->jumlah_cetak_maksimum }} {{ $layanan->satuan }} = Rp.
+                                {{ $h->harga_satuan }}/{{ $layanan->satuan }}</li>
+                        @endif
                     @endforeach
                 </ul>
                 <input type="hidden" id="idvendor" value="{{ $jenisbahan[0]->idvendor }}">
@@ -65,30 +64,30 @@
                     </div>
                     <br>
                     <div id="listdetail">
-                        @if(count($opsidetail) > 0)
-                        @foreach ($opsidetail as $key => $od)
-                            <div class="form-group">
-                                <label class="font-weight-bold">{{ $od['detail']->value }}</label>
-                                <div class="select-container">
-                                    <select class="form-control custom-select px-4" name="opsidetail-{{ $key }}"
-                                        id="opsidetail-{{ $key }}">
-                                        @foreach ($od['opsi'] as $o)
-                                            <option value="{{ $o['id'] }}">{{ $o['opsi'] }} (+Rp.
-                                                {{ $o['biaya_tambahan'] }})</option>
-                                        @endforeach
-                                    </select>
-                                    <span class="caret-down-icon"><i class="fas fa-caret-down"></i></span>
+                        @if (count($opsidetail) > 0)
+                            @foreach ($opsidetail as $key => $od)
+                                <div class="form-group">
+                                    <label class="font-weight-bold">{{ $od['detail']->value }}</label>
+                                    <div class="select-container">
+                                        <select class="form-control custom-select px-4"
+                                            name="opsidetail-{{ $key }}" id="opsidetail-{{ $key }}">
+                                            @foreach ($od['opsi'] as $o)
+                                                <option value="{{ $o['id'] }}">{{ $o['opsi'] }} (+Rp.
+                                                    {{ $o['biaya_tambahan'] }})</option>
+                                            @endforeach
+                                        </select>
+                                        <span class="caret-down-icon"><i class="fas fa-caret-down"></i></span>
+                                    </div>
                                 </div>
-                            </div>
-                            <br>
-                        @endforeach
+                                <br>
+                            @endforeach
                         @else
-                        <p>Tidak ada opsi yang perlu ditambahkan</p>
+                            <p>Tidak ada opsi yang perlu ditambahkan</p>
                         @endif
                     </div>
 
                     <div class="form-group">
-                        <label id="labelQuantity" class="font-weight-bold mr-3">Jumlah (upload file terlebih
+                        <label id="labelQuantity" class="font-weight-bold mr-3">Jumlah (unggah dokumen terlebih
                             dahulu!)</label>
 
                         <input type="number" id="jumlahcopy" class="form-control w-25" min="1" value="1"
@@ -98,7 +97,7 @@
 
                     <div class="form-group d-flex">
 
-                        <button class="btn btn-outline-secondary">Cart</button>
+                        <a href="/cart" class="btn btn-outline-secondary">Keranjang</a>
                     </div>
                     <br>
                     <hr>
@@ -110,14 +109,14 @@
                     <br>
 
                     <div class="form-group">
-                        <label for="fileUpload" class="font-weight-bold">Upload File</label>
+                        <label for="fileUpload" class="font-weight-bold">Unggah Dokumen</label>
                         <div id="upload">
                             <input type="file" id="fileElem" style="display:none;" accept=".pdf" required>
                             <div id="drop-area" class="border border-primary rounded p-4 text-center">
-                                <p class="mb-2">Drag & Drop file anda atau klik untuk memilih file</p>
+                                <p class="mb-2">Seret & Jatuhkan dokumen anda atau klik untuk memilih dokumen</p>
                                 <img src="{{ asset('assets/downloads/upload.png') }}" alt="Upload Icon" class="mb-2"
                                     width="5%" height="5%">
-                                <p class="text-muted">Select Files</p>
+                                <p class="text-muted">Pilih Dokumen</p>
                             </div>
                             <div id="file-error"></div>
                         </div>
@@ -128,7 +127,7 @@
                             </div>
 
 
-                            <button type="button" id="lihat-file" class="btn btn-primary">Preview PDF</button>
+                            <button type="button" id="lihat-file" class="btn btn-primary">Lihat PDF</button>
 
 
 
@@ -137,20 +136,73 @@
 
                     </div>
                     <br>
-                    <div class="h5" id="displayharga">Display Harga: Rp.xxx.xxx</div>
-                    <button type="submit" class="btn btn-primary mr-3 mt-2">Add To Cart</button>
+                    <button type="submit" class="btn btn-primary mr-3 mt-2">Tambahkan ke keranjang</button>
                 </form>
 
 
             </div>
             <hr class="mx-auto my-5" style="width: 90%">
         </div>
+        <div class="container mt-4 px-5">
+            <div class="row">
+                <!-- Product Description Section -->
+                <div class="col-md-4">
+                    <h5 class="fw-bold mb-3">Deskripsi Produk</h5>
+                    <p class="text-muted" style="line-height: 1.7;" id="deskripsi">
+                        {{ $jenisbahan[0]->deskripsi }}
+                    </p>
+                </div>
+
+                <!-- Review Section -->
+                <div class="col-md-8">
+                    <h5 class="fw-bold mb-3">Ulasan</h5>
+                    @if (!$review)
+                        <div class="mb-4 pb-3">
+                            Belum ada ulasan untuk layanan ini
+                        </div>
+                    @else
+                        @foreach ($review as $key => $r)
+                            @if ($key < 3)
+                                <div class="mb-4 pb-3 border-bottom">
+                                    <div class="d-flex justify-content-between">
+                                        <h6 class="fw-bold mb-0">{{ $review->pemesan }}</h6>
+                                        <span class="text-warning">
+                                            @for ($i = 0; $i < 5; $i++)
+                                                @if ($i < round($review->rating))
+                                                    &#9733;
+                                                @else
+                                                    &#9734;
+                                                @endif
+                                            @endfor
+                                        </span>
+                                    </div>
+                                    <small
+                                        class="text-secondary d-block mb-2">{{ $review->waktu_selesai_formatted }}</small>
+                                    <p style="line-height: 1.7;">
+                                        {{ $review->ulasan }}
+                                    </p>
+                                </div>
+                            @endif
+                        @endforeach
+                        @if (count($review) > 3)
+                            <div>
+                                <a href="#" class="text-primary fw-bold text-decoration-none">Baca review
+                                    lainnya</a>
+                            </div>
+                        @endif
+                    @endif
+
+                </div>
+            </div>
+        </div>
+
     </div>
+
 @endsection
 
 
 @section('script')
-    {{-- pdf.js --}}
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
     {{-- swal (sweetalert) --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -163,7 +215,7 @@
                 success: function(response) {
                     $('#listOpsi').html('');
                     let html = '';
-                    
+
 
                     if (response.result == 'success') {
                         $('#listdetail').html('<p>Tidak ada opsi yang perlu ditambahkan</p>');
@@ -227,16 +279,18 @@
                         $html = '';
                         // console.table(response.data.listharga);
                         response.data.listharga.forEach(function(item) {
-                            if(item.jumlah_cetak_maksimum == null){
+                            if (item.jumlah_cetak_maksimum == null) {
                                 $html +=
-                                `<li>&gt;${item.jumlah_cetak_minimum - 1} ${item.satuan} = Rp. ${item.harga_satuan}/${item.satuan}</li>`;
-                            }
-                            else{
+                                    `<li>&gt;${item.jumlah_cetak_minimum - 1} ${item.satuan} = Rp. ${item.harga_satuan}/${item.satuan}</li>`;
+                            } else {
                                 $html +=
-                                `<li>${item.jumlah_cetak_minimum}–${item.jumlah_cetak_maksimum} ${item.satuan} = Rp. ${item.harga_satuan}/${item.satuan}</li>`;
+                                    `<li>${item.jumlah_cetak_minimum}–${item.jumlah_cetak_maksimum} ${item.satuan} = Rp. ${item.harga_satuan}/${item.satuan}</li>`;
                             }
-                            
+
                         });
+                        var deskripsi  = response.data.deskripsi;
+
+                        $('#deskripsi').html(`<p>${deskripsi}</p>`);
                         $('#listharga').html($html);
                     }
                 },
@@ -265,7 +319,7 @@
         let jumlHalaman;
         let totalLembar;
         $(document).ready(function() {
-            $("#displayharga").hide();
+            $('#file-detail').val('');
             if (!file) {
                 toggleUploadFile(false);
             }
@@ -344,7 +398,9 @@
                 idvendor = $('#idvendor').val();
                 idlayanan = $('#idlayanan').val();
                 idjenisbahan = $('#jenisbahan').val();
+
                 updateOpsiDetails(idvendor, idlayanan, idjenisbahan);
+
             });
 
 

@@ -39,23 +39,23 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Deletion</h5>
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Konfirmasi Penghapusan</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                Are you sure you want to delete this detail and its options?
+                Apakah Anda yakin ingin menghapus detail ini dan semua opsinya?
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Batalkan</button>
                 <form id="deleteForm" action="{{ route('detail.destroy') }}" method="POST">
                     @csrf
                     @method('DELETE')
                     <div id="hiddens">
 
                     </div>
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button type="submit" class="btn btn-danger">Hapus</button>
                 </form>
             </div>
         </div>
