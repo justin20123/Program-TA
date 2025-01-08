@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\JenisBahanCetak;
 use App\Models\Nota;
 use App\Models\Pemesanan;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class PemesananController extends Controller
 {
@@ -16,7 +19,8 @@ class PemesananController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function cekperubahan($idpemesanan){
+    public function cekperubahan($idpemesanan)
+    {
         $pemesanan = Pemesanan::find($idpemesanan);
 
         $tanggal_pemesanan = $pemesanan->updated_at;
@@ -40,7 +44,7 @@ class PemesananController extends Controller
             ->where('pemesanans.vendors_id', '=', $idvendors)
             ->get();
 
-        if(count($pemesanans) == 0){
+        if (count($pemesanans) == 0) {
             return redirect()->route('indexCart');
         }
 
@@ -67,25 +71,86 @@ class PemesananController extends Controller
         return view('cart.pesanan', compact('pemesanans', 'subtotal'));
     }
 
+    public function openeditpesanan($idpemesanan)
+    {
+        $pemesanan = Pemesanan::find($idpemesanan);
+
+        $layanan = DB::table('vendors_has_jenis_bahan_cetaks')
+            ->join('layanan_cetaks', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', 'layanan_cetaks.id')
+            ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $pemesanan->jenis_bahan_cetaks_id)
+            ->select('layanan_cetaks.id as id', 'layanan_cetaks.nama as nama', 'layanan_cetaks.satuan as satuan', 'layanan_cetaks.kesetaraan_pcs as kesetaraan_pcs')
+            ->first();
+
+        $vendor_id = $pemesanan->vendors_id;
+        $idlayanan = $layanan->id;
+        $idjenisbahan = $pemesanan->jenis_bahan_cetaks_id;
+
+        $jenisbahan = DB::table('vendors_has_jenis_bahan_cetaks')
+            ->join('jenis_bahan_cetaks', 'jenis_bahan_cetaks.id', '=', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id')
+            ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
+            ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $idlayanan)
+            ->select('jenis_bahan_cetaks.*', 'vendors_has_jenis_bahan_cetaks.vendors_id as idvendor')
+            ->get();
+
+        $detailcetaks = DB::table('detail_cetaks')
+            ->join('jenis_bahan_cetaks', 'detail_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
+            ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
+            ->leftJoin('opsi_details', 'detail_cetaks.id', '=', 'opsi_details.detail_cetaks_id')
+            ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
+            ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $idlayanan)
+            ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $idjenisbahan)
+            ->select('detail_cetaks.*', 'opsi_details.id as idopsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan')
+            ->get();
+
+        $opsidetail = [];
+        foreach ($detailcetaks as $detail) {
+            if (!isset($opsidetail[$detail->id])) {
+                $opsidetail[$detail->id] = [
+                    'detail' => $detail,
+                    'opsi' => [],
+                ];
+            }
+            if ($detail->idopsi) {
+                $opsidetail[$detail->id]['opsi'][] = [
+                    'id' => $detail->idopsi,
+                    'opsi' => $detail->opsi,
+                    'biaya_tambahan' => $detail->biaya_tambahan,
+                ];
+            }
+        }
+
+        $opsidetail = array_values($opsidetail);
+
+        $hargacetaks = DB::table('harga_cetaks')
+            ->where('id_bahan_cetaks', '=', $idjenisbahan)
+            ->get();
+
+        return view('pesanan.editpesanan', compact('pemesanan', 'idjenisbahan', 'jenisbahan', 'opsidetail', 'hargacetaks', 'layanan'));
+    }
+
     public function submitpesanan(Request $request)
     {
-        $request->validate([
-            'jumlah' => 'required',
-            'jenis_bahan_cetaks_id' => 'required',
-            'vendors_id' => 'required',
-            'file' => 'required|file|mimes:pdf|max:20480' //max 20mb
-        ]);
+        try {
+            $request->validate([
+                'jumlah' => 'required|integer|min:1',
+                'jenis_bahan_cetaks_id' => 'required',
+                'vendors_id' => 'required',
+                'file' => 'required|file|mimes:pdf|max:20480' //max 20mb
+            ]);
+        } catch (Exception $e) {
+            return redirect()->back()->with("error", 'Terjadi kesalahan saat melakukan pemesanan');
+        }
 
         $idopsidetail = null;
-        if ($request->idopsidetail) {
-            $idopsidetail = explode(",", $request->idopsidetail);
+        if ($request->input('idopsidetail')) {
+            $idopsidetail = explode(",", $request->input('idopsidetail'));
         }
         $hargacetakcontroller = new HargaCetakController();
         $idhargacetak = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id, true);
         $hargasatuan = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id);
         $harga = $hargasatuan * $request->input('jumlah');
         $biaya_tambahan = 0;
-        if ($request->idopsidetail) {
+        if ($request->input('idopsidetail')) {
 
             foreach ($idopsidetail as $id) {
                 $p = DB::table('opsi_details')
@@ -123,7 +188,7 @@ class PemesananController extends Controller
             'updated_at' => now(),
             'created_at' => now(),
         ]);
-        if ($request->idopsidetail) {
+        if ($request->input('idopsidetail')) {
             foreach ($idopsidetail as $od) {
                 DB::table('pemesanans_has_opsi_details')->insert([
                     'pemesanans_id' => $id,
@@ -138,14 +203,196 @@ class PemesananController extends Controller
         $directory = base_path('../pemesanan');
 
         $file->move($directory, $fileName);
-
         $relativePath = 'pemesanan/' . $fileName;
-
         $pemesanan = Pemesanan::find($id);
         $pemesanan->url_file = $relativePath;
         $pemesanan->save();
 
+        $filePath = $directory . '/' . $fileName;
+        $uploadDirectory = 'uploads';
+
+        if (!is_dir($uploadDirectory)) {
+            mkdir($uploadDirectory, 0755, true);
+        }
+
+        copy($filePath, $uploadDirectory . '/' . $fileName);
+
+
+
+
+
         return ["idpemesanan" => $id, "idvendor" => $request->input('vendors_id'), 'message' => "Pesanan dimasukkan ke dalam cart"];
+    }
+
+    public function updatepesanan(Request $request)
+    {
+        if ($request->input('ischanged')) {
+
+            try {
+                $request->validate([
+                    'file' => 'required|file|mimes:pdf|max:20480',
+                ], [
+                    'file.required' => 'File wajib diunggah.',
+                    'file.file' => 'Input harus berupa file.',
+                    'file.mimes' => 'File harus berupa PDF.',
+                    'file.max' => 'Ukuran file tidak boleh lebih dari 20MB.',
+                ]);
+            } catch (exception $e) {
+                $validator = Validator::make($request->all(), [
+                    'file' => 'required|file|mimes:pdf|max:20480',
+                ]);
+
+                if ($validator->fails()) {
+                    $errorMessage = $validator->errors()->first();
+                    return back()->with('error', $errorMessage);
+                }
+            }
+
+            try {
+                $request->validate([
+                    'jumlah' => 'required|integer|min:1',
+
+                ]);
+            } catch (Exception $e) {
+                return redirect()->back()->with("error", 'Jumlah tidak mencukupi minimum (1)');
+            }
+
+            $idopsidetail = null;
+            if ($request->input('idopsidetail')) {
+                $idopsidetail = explode(",", $request->input('idopsidetail'));
+            }
+            $hargacetakcontroller = new HargaCetakController();
+            $idhargacetak = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id, true);
+            $hargasatuan = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id);
+            $harga = $hargasatuan * $request->input('jumlah');
+            $biaya_tambahan = 0;
+            if ($request->input('idopsidetail')) {
+
+                foreach ($idopsidetail as $id) {
+                    $p = DB::table('opsi_details')
+                        ->where('id', '=', $id)
+                        ->first();
+                    if ($p->biaya_tambahan > 0) {
+                        if ($p->tipe == 'tambahan') {
+                            $biaya_tambahan = $p->biaya_tambahan;
+                        } elseif ($p->tipe == 'satuan') {
+                            $biaya_tambahan = $p->biaya_tambahan * $request->input('jumlah');
+                        } elseif ($p->tipe == 'jumlah') {
+                            $biaya_tambahan = $p->biaya_tambahan * $request->input('jumlahcopy');
+                        }
+                        $harga += $biaya_tambahan;
+                    }
+                }
+            }
+
+            $perlu_verifikasi = 0;
+            if ($harga > 200000) {
+                $perlu_verifikasi  = 1;
+            }
+
+            $id = DB::table('pemesanans')->insertGetId([
+                'penggunas_email' => Auth::user()->email,
+                'jumlah' => $request->input('jumlah'),
+                'subtotal_pesanan' => $harga,
+                'biaya_tambahan' => $biaya_tambahan,
+                'url_file' => '',
+                'catatan' => $request->input('catatan'),
+                'perlu_verifikasi' => $perlu_verifikasi,
+                'harga_cetaks_id' => $idhargacetak,
+                'jenis_bahan_cetaks_id' => $request->input('jenis_bahan_cetaks_id'),
+                'vendors_id' => $request->input('vendors_id'),
+                'updated_at' => now(),
+                'created_at' => now(),
+            ]);
+            if ($request->input('idopsidetail')) {
+                foreach ($idopsidetail as $od) {
+                    DB::table('pemesanans_has_opsi_details')->insert([
+                        'pemesanans_id' => $id,
+                        'opsi_details_id' => $od,
+                    ]);
+                }
+            }
+
+            $file = $request->file('file');
+            $fileName = $id . '.pdf';
+
+            $directory = base_path('../pemesanan');
+
+            $file->move($directory, $fileName);
+            $relativePath = 'pemesanan/' . $fileName;
+            $newpemesanan = Pemesanan::find($id);
+            $newpemesanan->url_file = $relativePath;
+            $newpemesanan->save();
+
+            $filePath = $directory . '/' . $fileName;
+            $uploadDirectory = 'uploads';
+
+            if (!is_dir($uploadDirectory)) {
+                mkdir($uploadDirectory, 0755, true);
+            }
+
+            copy($filePath, $uploadDirectory . '/' . $fileName);
+            DB::table('pemesanans_has_opsi_details')->where('pemesanans_id', $id)->delete();
+            DB::table('pemesanans')->where('id', $id)->delete();
+            return ["idpemesanan" => $id, "idvendor" => $request->input('vendors_id')];
+        }
+
+        else{
+            try {
+                $request->validate([
+                    'jumlah' => 'required|integer|min:1',
+
+                ]);
+            } catch (Exception $e) {
+                return redirect()->back()->with("error", 'Jumlah tidak mencukupi minimum (1)');
+            }
+            $pemesanan = Pemesanan::find($request->input('idpemesanan'));
+            $idopsidetail = null;
+            if ($request->input('idopsidetail')) {
+                $idopsidetail = explode(",", $request->input('idopsidetail'));
+            }
+            $hargacetakcontroller = new HargaCetakController();
+            $idhargacetak = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id, true);
+            $hargasatuan = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id);
+            $harga = $hargasatuan * $request->input('jumlah');
+            $biaya_tambahan = 0;
+            if ($request->input('idopsidetail')) {
+
+                foreach ($idopsidetail as $id) {
+                    $p = DB::table('opsi_details')
+                        ->where('id', '=', $id)
+                        ->first();
+                    if ($p->biaya_tambahan > 0) {
+                        if ($p->tipe == 'tambahan') {
+                            $biaya_tambahan = $p->biaya_tambahan;
+                        } elseif ($p->tipe == 'satuan') {
+                            $biaya_tambahan = $p->biaya_tambahan * $request->input('jumlah');
+                        } elseif ($p->tipe == 'jumlah') {
+                            $biaya_tambahan = $p->biaya_tambahan * $request->input('jumlahcopy');
+                        }
+                        $harga += $biaya_tambahan;
+                    }
+                }
+            }
+
+            $perlu_verifikasi = 0;
+            if ($harga > 200000) {
+                $perlu_verifikasi  = 1;
+            }
+            $pemesanan->jumlah = $request->input('jumlah');
+            $pemesanan->subtotal_pesanan = $harga;
+            $pemesanan->biaya_tambahan = $biaya_tambahan;
+            $pemesanan->perlu_verifikasi = $perlu_verifikasi;
+            $pemesanan->harga_cetaks_id = $idhargacetak;
+            $pemesanan->jenis_bahan_cetaks_id = $request->input('jenis_bahan_cetaks_id');
+            $pemesanan->vendors_id = $request->input('vendors_id');
+            $pemesanan->updated_at =now();
+
+            $pemesanan->save();
+            return ["idpemesanan" => $id, "idvendor" => $request->input('vendors_id')];
+        }
+
+       
     }
     public function bukacheckout(Request $request)
     {
@@ -159,36 +406,36 @@ class PemesananController extends Controller
 
         $idperubahan = [];
 
-        foreach ($idpemesanans as $ip){
+        foreach ($idpemesanans as $ip) {
             $adaperubahan = $this->cekperubahan($ip);
-            if($adaperubahan){
+            if ($adaperubahan) {
                 $pesanan = DB::table('pemesanans')
-                ->where('id', '=', $ip)
-                ->select('jumlah', 'jenis_bahan_cetaks_id',)
-                ->first();
+                    ->where('id', '=', $ip)
+                    ->select('jumlah', 'jenis_bahan_cetaks_id',)
+                    ->first();
 
                 $layanan = DB::table('vendors_has_jenis_bahan_cetaks')
-                ->join('layanan_cetaks', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', 'layanan_cetaks.id')
-                ->where('jenis_bahan_cetaks_id','=',$pesanan->jenis_bahan_cetaks_id)
-                ->select('layanan_cetaks.nama', 'layanan_cetaks.satuan')
-                ->first();
+                    ->join('layanan_cetaks', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', 'layanan_cetaks.id')
+                    ->where('jenis_bahan_cetaks_id', '=', $pesanan->jenis_bahan_cetaks_id)
+                    ->select('layanan_cetaks.nama', 'layanan_cetaks.satuan')
+                    ->first();
                 $perubahan = [
-                    "jumlah"=>$pesanan->jumlah,
-                    'layanan' =>$layanan->nama,
-                    'satuan' =>$layanan->satuan
+                    "jumlah" => $pesanan->jumlah,
+                    'layanan' => $layanan->nama,
+                    'satuan' => $layanan->satuan
                 ];
                 array_push($idperubahan, $perubahan);
             }
         }
 
-        if(count($idperubahan) > 0){
+        if (count($idperubahan) > 0) {
 
             $message = "Terdapat perubahan detil pada pesanan:\n";
-            foreach($idperubahan as $iper){
-                $message .= "• " . $iper["layanan"]. ": " . $iper["jumlah"] . " " . $iper["satuan"] . "\n";
+            foreach ($idperubahan as $iper) {
+                $message .= "• " . $iper["layanan"] . ": " . $iper["jumlah"] . " " . $iper["satuan"] . "\n";
             }
-            $message.= "Silakan lakukan perubahan pada detil pesanan tersebut sebelum melakukan checkout.";
-            
+            $message .= "Silakan lakukan perubahan pada detil pesanan tersebut sebelum melakukan checkout.";
+
             return back()->with('message', $message);
         }
 
@@ -242,13 +489,27 @@ class PemesananController extends Controller
         return view('cart.checkout', compact('pemesanans', 'subtotal', 'adapengantar'));
     }
 
-    public function deletepesanan(Request $request){
+    public function deletepesanan(Request $request)
+    {
         $idpemesanan = $request->input('idpemesanan');
+        $pemesanan = Pemesanan::find($idpemesanan);
+
+        $filePath = base_path('../Program TA/' . $pemesanan->url_file);
+
+        $filekosong = base_path('public/assets/0byte.txt');
+        if (file_exists($filePath)) {
+            try {
+                copy($filekosong, $filePath);
+            } catch (Exception $e) {
+                return back()->with('message', 'Gagal menghapus file pemesanan');
+            }
+        }
         DB::table('pemesanans_has_opsi_details')->where('pemesanans_id', $idpemesanan)->delete();
+
+
         DB::table('pemesanans')->where('id', $idpemesanan)->delete();
         $idvendor = $request->input('idvendor');
-        //todo: buat file yg diupload ikut kehapus
-        return redirect()->route('indexOrder',['idvendor'=>$idvendor]);
+        return redirect()->route('indexOrder', ['idvendor' => $idvendor]);
     }
 
 
@@ -274,7 +535,7 @@ class PemesananController extends Controller
     {
         $request->validate([
             'penggunas_email' => 'required',
-            'jumlah' => 'required',
+            'jumlah' => 'required|integer|min:1',
             'url_file' => 'required',
             'harga_cetaks_id' => 'required',
             'harga_cetaks_id_jenis_bahan_cetaks' => 'required',
@@ -324,7 +585,7 @@ class PemesananController extends Controller
     {
         $request->validate([
             'penggunas_email' => 'required',
-            'jumlah' => 'required',
+            'jumlah' => 'required|integer|min:1',
             'url_file' => 'required',
             'harga_cetaks_id' => 'required',
             'harga_cetaks_id_jenis_bahan_cetaks' => 'required',

@@ -59,8 +59,8 @@ class LayananController extends Controller
 
         $hargacetakcontroller = new HargacetakController();
         foreach ($layanans as $l) {
-            $l->hargamin = $hargacetakcontroller->getMinValue(1, $l->id);
-            $l->hargamax = $hargacetakcontroller->getMaxValue(1, $l->id);
+            $l->hargamin = $hargacetakcontroller->getMinValue($vendor_id, $l->id);
+            $l->hargamax = $hargacetakcontroller->getMaxValue($vendor_id, $l->id);
         }
         $vendor = DB::table('vendors')
             ->where('vendors.id', '=', $vendor_id)
@@ -149,42 +149,55 @@ class LayananController extends Controller
             }
             
         }
+         $avgrating = 0;
+        
 
         if(count($pemesanans) > 0){
+            $totalrating = 0;
             $notas = DB::table('notas')
             ->leftJoin('ratings', 'notas.id', '=', 'ratings.notas_id')
             ->whereIn('notas.id', $idnotas)
+            ->where('notas.waktu_selesai', '!=', null)
+            ->where('notas.ulasan','!=', "")
             ->select('notas.id', 'notas.ulasan','notas.waktu_selesai')
             ->get();
 
-            foreach($notas as $n){
-                $rating = DB::table('ratings')
-                ->where('notas_id', '=', $n->id)
-                ->average('nilai');
-                $n->rating = $rating;
+            if(count($notas) > 0){
+                foreach($notas as $n){
+                    $totalrating++;
+                    $rating = DB::table('ratings')
+                    ->where('notas_id', '=', $n->id)
+                    ->average('nilai');
+                    $n->rating = $rating;
+    
+                    $pemesanan = DB::table('pemesanans')
+                    ->where('notas_id', $n->id)
+                    ->select('penggunas_email')
+                    ->first();
+    
+                    $pemesan = DB::table('penggunas')
+                    ->where('email', '=', $pemesanan->email)
+                    ->select('nama')
+                    ->first();
+    
+                    $n->pemesan = $pemesan->nama;
+    
+                    $n->waktu_selesai_formatted = $this->formatDate($n->waktu_selesai);
+                }
+                $review = $notas;
 
-                $pemesanan = DB::table('pemesanans')
-                ->where('notas_id', $n->id)
-                ->select('penggunas_email')
-                ->first();
-
-                $pemesan = DB::table('penggunas')
-                ->where('email', '=', $pemesanan->email)
-                ->select('nama')
-                ->first();
-
-                $n->pemesan = $pemesan->nama;
-
-                $n->waktu_selesai_formatted = $this->formatDate($n->waktu_selesai);
+                $avgrating = $totalrating/count($notas);
             }
-            $review = $notas;
+
+            
+            
         }
 
         // dd($review);
         // dd($hargacetaks);
         // dd($opsidetail);
 
-        return view('vendors.detaillayanan', compact('jenisbahan', 'opsidetail', 'hargacetaks', 'layanan', 'review'));
+        return view('vendors.detaillayanan', compact('jenisbahan', 'opsidetail', 'hargacetaks', 'layanan', 'review', 'avgrating'));
     }
 
     public function detail_layanan_load($vendor_id, $idlayanan, $idjenisbahan){

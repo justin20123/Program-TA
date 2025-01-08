@@ -66,7 +66,7 @@
 
                                 <div>
                                     {{ $p->layanan }}<br>
-                                    <a href="#" class="text-primary">Details</a>
+                                    <a href="/editpesanan/{{ $p->id }}" class="text-primary">Edit</a>
                                 </div>
                             </div>
                         </td>

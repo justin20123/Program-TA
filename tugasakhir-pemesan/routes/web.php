@@ -111,8 +111,9 @@ Route::middleware(['web'])->group(function () {
     //orders
     Route::get('/cart/orders/{idvendor}', [PemesananController::class, 'indexOrder'])->name('indexOrder');
     
-
-   
+    //edit pesanan
+    Route::get('/editpesanan/{idpemesanan}', [PemesananController::class, 'openeditpesanan']);
+    Route::post('/updatepesanan', [PemesananController::class, 'updatepesanan']);
 
     //checkout
     Route::post('/checkout', [PemesananController::class, 'bukacheckout'])->name('bukacheckout');
