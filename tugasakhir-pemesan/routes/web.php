@@ -110,10 +110,12 @@ Route::middleware(['web'])->group(function () {
 
     //orders
     Route::get('/cart/orders/{idvendor}', [PemesananController::class, 'indexOrder'])->name('indexOrder');
+    Route::get('/lihatcatatan/{idpemesanan}', [PemesananController::class, 'lihatcatatan']);
     
     //edit pesanan
     Route::get('/editpesanan/{idpemesanan}', [PemesananController::class, 'openeditpesanan']);
-    Route::post('/updatepesanan', [PemesananController::class, 'updatepesanan']);
+    Route::post('/UpdatePesananTanpaFile', [PemesananController::class, 'UpdatePesananTanpaFile']);
+    Route::post('/UpdatePesananDenganFile', [PemesananController::class, 'UpdatePesananDenganFile']);
 
     //checkout
     Route::post('/checkout', [PemesananController::class, 'bukacheckout'])->name('bukacheckout');

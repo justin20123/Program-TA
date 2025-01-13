@@ -57,9 +57,9 @@ class NotaController extends Controller
 
             $idnota = DB::table('notas')->insertGetid([
                 'harga_total' => $request->harga_total,
-                'waktu_transaksi' => now(),
+                'waktu_transaksi' => Carbon::now('Asia/Jakarta'),
                 'opsi_pengambilan' => "diambil",
-                'waktu_menerima_pesanan' => now(),
+                'waktu_menerima_pesanan' => Carbon::now('Asia/Jakarta'),
                 'waktu_diantar' => null,
                 'waktu_tunggu_diambil' => null,
                 'waktu_selesai' => null,
@@ -85,9 +85,9 @@ class NotaController extends Controller
 
             $idnota = DB::table('notas')->insertGetid([
                 'harga_total' => $request->harga_total,
-                'waktu_transaksi' => now(),
+                'waktu_transaksi' => Carbon::now('Asia/Jakarta'),
                 'opsi_pengambilan' => "diantar",
-                'waktu_menerima_pesanan' => now(),
+                'waktu_menerima_pesanan' => Carbon::now('Asia/Jakarta'),
                 'waktu_diantar' => null,
                 'waktu_tunggu_diambil' => null,
                 'waktu_selesai' => null,
@@ -106,7 +106,7 @@ class NotaController extends Controller
                 'pemesanans_id' => $id,
                 'notas_id' => $idnota,
                 'urutan_progress' => 0,
-                'waktu_progress' => now(),
+                'waktu_progress' => Carbon::now('Asia/Jakarta'),
                 'progress' => "proses",
             ]);
         }
@@ -418,7 +418,7 @@ class NotaController extends Controller
         $nota_progress->pemesanans_id = $request->idpemesanan;
         $nota_progress->notas_id = $request->idnota;
         $nota_progress->urutan_progress = $latest_progress;
-        $nota_progress->waktu_progress = now();
+        $nota_progress->waktu_progress = Carbon::now('Asia/Jakarta');
         $nota_progress->progress = 'terverifikasi';
 
         $nota_progress->save();
@@ -464,7 +464,7 @@ class NotaController extends Controller
         $nota_progress->pemesanans_id = $request->idpemesanan;
         $nota_progress->notas_id = $request->idnota;
         $nota_progress->urutan_progress = $latest_progress;
-        $nota_progress->waktu_progress = now();
+        $nota_progress->waktu_progress = Carbon::now('Asia/Jakarta');
         $nota_progress->perubahan = $request->perubahan;
         $nota_progress->progress = 'memperbaiki';
 

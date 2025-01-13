@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\JenisBahanCetak;
 use App\Models\Layanan;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -215,7 +216,7 @@ class LayananController extends Controller
             "harga_satuan" => $harga,
         ]);
         $jenisbahan = JenisBahanCetak::findOrFail($idjenisbahan);
-        $jenisbahan->updated_at = now();
+        $jenisbahan->updated_at = Carbon::now('Asia/Jakarta');
         $jenisbahan->save();  
 
     }
@@ -244,10 +245,11 @@ class LayananController extends Controller
                 'jenis_bahan_cetaks_id' => $idjenisbahan,
             ]);
 
+            $jenisbahan = JenisBahanCetak::findOrFail($idjenisbahan);
+            $jenisbahan->updated_at = Carbon::now('Asia/Jakarta');
+            $jenisbahan->save();
         }
-        $jenisbahan = JenisBahanCetak::findOrFail($idjenisbahan);
-        $jenisbahan->updated_at = now();
-        $jenisbahan->save();
+        
         return $arrayidjenisbahan;
     }
     public function setupfotokopi($idvendor){

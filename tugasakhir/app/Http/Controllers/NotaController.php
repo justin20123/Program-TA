@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Nota;
 use App\Models\NotaProgress;
+use Carbon\Carbon;
 use Illuminate\Auth\Events\Validated;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +19,7 @@ class NotaController extends Controller
 
     public function terimaPesanan($idnota){
         $nota = Nota::findOrFail($idnota);
-        $nota->waktu_menerima_pesanan = now();
+        $nota->waktu_menerima_pesanan = Carbon::now('Asia/Jakarta');
         $nota->save();
 
         return back()->with('message', 'Pesanan berhasil diterima');
@@ -72,7 +73,7 @@ class NotaController extends Controller
         $nota_progress->pemesanans_id = $request->idpemesanan;
         $nota_progress->notas_id = $id_nota;
         $nota_progress->urutan_progress = $latest_progress;
-        $nota_progress->waktu_progress = now();
+        $nota_progress->waktu_progress = Carbon::now('Asia/Jakarta');
         $nota_progress->progress = 'menunggu verifikasi';
         $nota_progress->url_ubah_file = $relativePath;
         

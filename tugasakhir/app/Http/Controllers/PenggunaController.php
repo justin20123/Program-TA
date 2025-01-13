@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Pengguna;
 use App\Models\VendorHasPengguna;
+use Carbon\Carbon;
 use Database\Seeders\VendorHasPenggunaSeeder;
 use Exception;
 use Illuminate\Http\Request;
@@ -12,11 +13,14 @@ use Illuminate\Support\Facades\DB;
 
 class PenggunaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    
+    public function ceklogin()
+    {
+        if(!Auth::user()){
+            return redirect()->route('login');
+        }
+    }
+
     public function index()
     {
         $penggunas = Pengguna::all();
@@ -239,7 +243,7 @@ class PenggunaController extends Controller
 
     public function deletePegawai(Request $request, $id){
         $pegawai = Pengguna::findOrFail($id);
-        $pegawai->deleted_at = now();
+        $pegawai->deleted_at = Carbon::now('Asia/Jakarta');
         $pegawai->save();
 
         return redirect()->route('pegawai.index',[$request->idvendor]);
@@ -255,7 +259,7 @@ class PenggunaController extends Controller
 
     public function deletePengantar(Request $request){
         $pengantar = Pengguna::findOrFail($request->id);
-        $pengantar->deleted_at = now();
+        $pengantar->deleted_at = Carbon::now('Asia/Jakarta');
         $pengantar->save();
 
         return redirect()->route('pengantar.index',[$request->idvendor]);

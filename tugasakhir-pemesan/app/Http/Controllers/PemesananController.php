@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\JenisBahanCetak;
 use App\Models\Nota;
 use App\Models\Pemesanan;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Smalot\PdfParser\Parser;
 
 class PemesananController extends Controller
 {
@@ -26,6 +28,7 @@ class PemesananController extends Controller
         $tanggal_pemesanan = $pemesanan->updated_at;
         $jenisbahan = JenisBahanCetak::findOrFail($pemesanan->jenis_bahan_cetaks_id);
         $tanggal_update_detail = $jenisbahan->updated_at;
+        // dd("update detail: $tanggal_update_detail - pemesanan: $tanggal_pemesanan");
 
         if ($tanggal_pemesanan->lt($tanggal_update_detail)) {
             return true;
@@ -75,11 +78,25 @@ class PemesananController extends Controller
     {
         $pemesanan = Pemesanan::find($idpemesanan);
 
+        $count = 0;
+        $filePath = public_path('uploads/' . $idpemesanan . '.pdf');
+        if (file_exists($filePath)) {
+            $parser = new Parser();
+            $pdf = $parser->parseFile($filePath);
+            $count = count($pdf->getPages());
+        }
+
+        $jumlahcopy = $pemesanan->jumlah / $count;
+
+
         $layanan = DB::table('vendors_has_jenis_bahan_cetaks')
             ->join('layanan_cetaks', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', 'layanan_cetaks.id')
             ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $pemesanan->jenis_bahan_cetaks_id)
             ->select('layanan_cetaks.id as id', 'layanan_cetaks.nama as nama', 'layanan_cetaks.satuan as satuan', 'layanan_cetaks.kesetaraan_pcs as kesetaraan_pcs')
             ->first();
+
+
+
 
         $vendor_id = $pemesanan->vendors_id;
         $idlayanan = $layanan->id;
@@ -125,7 +142,7 @@ class PemesananController extends Controller
             ->where('id_bahan_cetaks', '=', $idjenisbahan)
             ->get();
 
-        return view('pesanan.editpesanan', compact('pemesanan', 'idjenisbahan', 'jenisbahan', 'opsidetail', 'hargacetaks', 'layanan'));
+        return view('pesanan.editpesanan', compact('pemesanan', 'jumlahcopy', 'idjenisbahan', 'jenisbahan', 'opsidetail', 'hargacetaks', 'layanan'));
     }
 
     public function submitpesanan(Request $request)
@@ -185,8 +202,8 @@ class PemesananController extends Controller
             'harga_cetaks_id' => $idhargacetak,
             'jenis_bahan_cetaks_id' => $request->input('jenis_bahan_cetaks_id'),
             'vendors_id' => $request->input('vendors_id'),
-            'updated_at' => now(),
-            'created_at' => now(),
+            'updated_at' => Carbon::now('Asia/Jakarta'),
+            'created_at' => Carbon::now('Asia/Jakarta'),
         ]);
         if ($request->input('idopsidetail')) {
             foreach ($idopsidetail as $od) {
@@ -224,177 +241,201 @@ class PemesananController extends Controller
         return ["idpemesanan" => $id, "idvendor" => $request->input('vendors_id'), 'message' => "Pesanan dimasukkan ke dalam cart"];
     }
 
-    public function updatepesanan(Request $request)
+    public function UpdatePesananTanpaFile(Request $request)
     {
-        if ($request->input('ischanged')) {
+        try {
 
-            try {
-                $request->validate([
-                    'file' => 'required|file|mimes:pdf|max:20480',
-                ], [
-                    'file.required' => 'File wajib diunggah.',
-                    'file.file' => 'Input harus berupa file.',
-                    'file.mimes' => 'File harus berupa PDF.',
-                    'file.max' => 'Ukuran file tidak boleh lebih dari 20MB.',
-                ]);
-            } catch (exception $e) {
-                $validator = Validator::make($request->all(), [
-                    'file' => 'required|file|mimes:pdf|max:20480',
-                ]);
+            $request->validate([
+                'jumlah' => 'required|integer|min:1',
 
-                if ($validator->fails()) {
-                    $errorMessage = $validator->errors()->first();
-                    return back()->with('error', $errorMessage);
-                }
-            }
-
-            try {
-                $request->validate([
-                    'jumlah' => 'required|integer|min:1',
-
-                ]);
-            } catch (Exception $e) {
-                return redirect()->back()->with("error", 'Jumlah tidak mencukupi minimum (1)');
-            }
-
-            $idopsidetail = null;
-            if ($request->input('idopsidetail')) {
-                $idopsidetail = explode(",", $request->input('idopsidetail'));
-            }
-            $hargacetakcontroller = new HargaCetakController();
-            $idhargacetak = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id, true);
-            $hargasatuan = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id);
-            $harga = $hargasatuan * $request->input('jumlah');
-            $biaya_tambahan = 0;
-            if ($request->input('idopsidetail')) {
-
-                foreach ($idopsidetail as $id) {
-                    $p = DB::table('opsi_details')
-                        ->where('id', '=', $id)
-                        ->first();
-                    if ($p->biaya_tambahan > 0) {
-                        if ($p->tipe == 'tambahan') {
-                            $biaya_tambahan = $p->biaya_tambahan;
-                        } elseif ($p->tipe == 'satuan') {
-                            $biaya_tambahan = $p->biaya_tambahan * $request->input('jumlah');
-                        } elseif ($p->tipe == 'jumlah') {
-                            $biaya_tambahan = $p->biaya_tambahan * $request->input('jumlahcopy');
-                        }
-                        $harga += $biaya_tambahan;
-                    }
-                }
-            }
-
-            $perlu_verifikasi = 0;
-            if ($harga > 200000) {
-                $perlu_verifikasi  = 1;
-            }
-
-            $id = DB::table('pemesanans')->insertGetId([
-                'penggunas_email' => Auth::user()->email,
-                'jumlah' => $request->input('jumlah'),
-                'subtotal_pesanan' => $harga,
-                'biaya_tambahan' => $biaya_tambahan,
-                'url_file' => '',
-                'catatan' => $request->input('catatan'),
-                'perlu_verifikasi' => $perlu_verifikasi,
-                'harga_cetaks_id' => $idhargacetak,
-                'jenis_bahan_cetaks_id' => $request->input('jenis_bahan_cetaks_id'),
-                'vendors_id' => $request->input('vendors_id'),
-                'updated_at' => now(),
-                'created_at' => now(),
             ]);
-            if ($request->input('idopsidetail')) {
-                foreach ($idopsidetail as $od) {
-                    DB::table('pemesanans_has_opsi_details')->insert([
-                        'pemesanans_id' => $id,
-                        'opsi_details_id' => $od,
-                    ]);
-                }
-            }
-
-            $file = $request->file('file');
-            $fileName = $id . '.pdf';
-
-            $directory = base_path('../pemesanan');
-
-            $file->move($directory, $fileName);
-            $relativePath = 'pemesanan/' . $fileName;
-            $newpemesanan = Pemesanan::find($id);
-            $newpemesanan->url_file = $relativePath;
-            $newpemesanan->save();
-
-            $filePath = $directory . '/' . $fileName;
-            $uploadDirectory = 'uploads';
-
-            if (!is_dir($uploadDirectory)) {
-                mkdir($uploadDirectory, 0755, true);
-            }
-
-            copy($filePath, $uploadDirectory . '/' . $fileName);
-            DB::table('pemesanans_has_opsi_details')->where('pemesanans_id', $id)->delete();
-            DB::table('pemesanans')->where('id', $id)->delete();
-            return ["idpemesanan" => $id, "idvendor" => $request->input('vendors_id')];
+        } catch (Exception $e) {
+            return redirect()->back()->with("error", 'Jumlah tidak mencukupi minimum (1)');
         }
 
-        else{
-            try {
-                $request->validate([
-                    'jumlah' => 'required|integer|min:1',
+        $idopsidetail = null;
+        if ($request->input('idopsidetail')) {
+            $idopsidetail = explode(",", $request->input('idopsidetail'));
+        }
+        $jumlah = $request->input('jumlah');
 
-                ]);
-            } catch (Exception $e) {
-                return redirect()->back()->with("error", 'Jumlah tidak mencukupi minimum (1)');
-            }
-            $pemesanan = Pemesanan::find($request->input('idpemesanan'));
-            $idopsidetail = null;
-            if ($request->input('idopsidetail')) {
-                $idopsidetail = explode(",", $request->input('idopsidetail'));
-            }
-            $hargacetakcontroller = new HargaCetakController();
-            $idhargacetak = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id, true);
-            $hargasatuan = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id);
-            $harga = $hargasatuan * $request->input('jumlah');
-            $biaya_tambahan = 0;
-            if ($request->input('idopsidetail')) {
+        $hargacetakcontroller = new HargaCetakController();
+        $idhargacetak = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id, true);
+        $hargasatuan = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id);
+        $harga = $hargasatuan * $jumlah;
+        $biaya_tambahan = 0;
+        if ($request->input('idopsidetail')) {
 
-                foreach ($idopsidetail as $id) {
-                    $p = DB::table('opsi_details')
-                        ->where('id', '=', $id)
-                        ->first();
-                    if ($p->biaya_tambahan > 0) {
-                        if ($p->tipe == 'tambahan') {
-                            $biaya_tambahan = $p->biaya_tambahan;
-                        } elseif ($p->tipe == 'satuan') {
-                            $biaya_tambahan = $p->biaya_tambahan * $request->input('jumlah');
-                        } elseif ($p->tipe == 'jumlah') {
-                            $biaya_tambahan = $p->biaya_tambahan * $request->input('jumlahcopy');
-                        }
-                        $harga += $biaya_tambahan;
+            foreach ($idopsidetail as $id) {
+                $p = DB::table('opsi_details')
+                    ->where('id', '=', $id)
+                    ->first();
+                if ($p->biaya_tambahan > 0) {
+                    if ($p->tipe == 'tambahan') {
+                        $biaya_tambahan = $p->biaya_tambahan;
+                    } elseif ($p->tipe == 'satuan') {
+                        $biaya_tambahan = $p->biaya_tambahan * $request->input('jumlah');
+                    } elseif ($p->tipe == 'jumlah') {
+                        $biaya_tambahan = $p->biaya_tambahan * $request->input('jumlahcopy');
                     }
+                    $harga += $biaya_tambahan;
                 }
             }
-
-            $perlu_verifikasi = 0;
-            if ($harga > 200000) {
-                $perlu_verifikasi  = 1;
-            }
-            $pemesanan->jumlah = $request->input('jumlah');
-            $pemesanan->subtotal_pesanan = $harga;
-            $pemesanan->biaya_tambahan = $biaya_tambahan;
-            $pemesanan->perlu_verifikasi = $perlu_verifikasi;
-            $pemesanan->harga_cetaks_id = $idhargacetak;
-            $pemesanan->jenis_bahan_cetaks_id = $request->input('jenis_bahan_cetaks_id');
-            $pemesanan->vendors_id = $request->input('vendors_id');
-            $pemesanan->updated_at =now();
-
-            $pemesanan->save();
-            return ["idpemesanan" => $id, "idvendor" => $request->input('vendors_id')];
         }
 
-       
+        $perlu_verifikasi = 0;
+        if ($harga > 200000) {
+            $perlu_verifikasi  = 1;
+        }
+        $pemesanan = Pemesanan::find($request->input('idpemesanan'));
+        $pemesanan->jumlah = $jumlah;
+        $pemesanan->subtotal_pesanan = $harga;
+        $pemesanan->biaya_tambahan = $biaya_tambahan;
+        $pemesanan->perlu_verifikasi = $perlu_verifikasi;
+        if($request->input('catatan')){
+            $pemesanan->catatan = $request->input('catatan');
+        }
+        $pemesanan->harga_cetaks_id = $idhargacetak;
+        $pemesanan->jenis_bahan_cetaks_id = $request->input('jenis_bahan_cetaks_id');
+        $pemesanan->vendors_id = $request->input('vendors_id');
+        $pemesanan->updated_at = Carbon::now('Asia/Jakarta');
+
+        $pemesanan->save();
+        return ["idpemesanan" => $request->input('idpemesanan'), "idvendor" => $request->input('vendors_id')];
     }
-    public function bukacheckout(Request $request)
+
+    public function UpdatePesananDenganFile(Request $request)
+    {
+
+
+        try {
+            $request->validate([
+                'file' => 'required|file|mimes:pdf|max:20480',
+            ], [
+                'file.required' => 'File wajib diunggah.',
+                'file.file' => 'Input harus berupa file.',
+                'file.mimes' => 'File harus berupa PDF.',
+                'file.max' => 'Ukuran file tidak boleh lebih dari 20MB.',
+            ]);
+        } catch (exception $e) {
+            $validator = Validator::make($request->all(), [
+                'file' => 'required|file|mimes:pdf|max:20480',
+            ]);
+
+            if ($validator->fails()) {
+                $errorMessage = $validator->errors()->first();
+                return back()->with('error', $errorMessage);
+            }
+        }
+        // dd('a');
+
+        try {
+            $request->validate([
+                'jumlah' => 'required|integer|min:1',
+
+            ]);
+        } catch (Exception $e) {
+            return redirect()->back()->with("error", 'Jumlah tidak mencukupi minimum (1)');
+        }
+
+        $idopsidetail = null;
+        if ($request->input('idopsidetail')) {
+            $idopsidetail = explode(",", $request->input('idopsidetail'));
+        }
+        $hargacetakcontroller = new HargaCetakController();
+        $idhargacetak = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id, true);
+        $hargasatuan = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id);
+        $harga = $hargasatuan * $request->input('jumlah');
+        $biaya_tambahan = 0;
+        if ($request->input('idopsidetail')) {
+
+            foreach ($idopsidetail as $id) {
+                $p = DB::table('opsi_details')
+                    ->where('id', '=', $id)
+                    ->first();
+                if ($p->biaya_tambahan > 0) {
+                    if ($p->tipe == 'tambahan') {
+                        $biaya_tambahan = $p->biaya_tambahan;
+                    } elseif ($p->tipe == 'satuan') {
+                        $biaya_tambahan = $p->biaya_tambahan * $request->input('jumlah');
+                    } elseif ($p->tipe == 'jumlah') {
+                        $biaya_tambahan = $p->biaya_tambahan * $request->input('jumlahcopy');
+                    }
+                    $harga += $biaya_tambahan;
+                }
+            }
+        }
+
+        $perlu_verifikasi = 0;
+        if ($harga > 200000) {
+            $perlu_verifikasi  = 1;
+        }
+
+
+
+        $id = DB::table('pemesanans')->insertGetId([
+            'penggunas_email' => Auth::user()->email,
+            'jumlah' => $request->input('jumlah'),
+            'subtotal_pesanan' => $harga,
+            'biaya_tambahan' => $biaya_tambahan,
+            'url_file' => '',
+            'catatan' => $request->input('catatan'),
+            'perlu_verifikasi' => $perlu_verifikasi,
+            'harga_cetaks_id' => $idhargacetak,
+            'jenis_bahan_cetaks_id' => $request->input('jenis_bahan_cetaks_id'),
+            'vendors_id' => $request->input('vendors_id'),
+            'updated_at' => Carbon::now('Asia/Jakarta'),
+            'created_at' => Carbon::now('Asia/Jakarta'),
+        ]);
+        if ($request->input('idopsidetail')) {
+            foreach ($idopsidetail as $od) {
+                DB::table('pemesanans_has_opsi_details')->insert([
+                    'pemesanans_id' => $id,
+                    'opsi_details_id' => $od,
+                ]);
+            }
+        }
+
+        $file = $request->file('file');
+        $fileName = $id . '.pdf';
+
+        $directory = base_path('../pemesanan');
+
+        $file->move($directory, $fileName);
+        $relativePath = 'pemesanan/' . $fileName;
+        $newpemesanan = Pemesanan::find($id);
+        $newpemesanan->url_file = $relativePath;
+        $newpemesanan->save();
+
+        $filePath = $directory . '/' . $fileName;
+        $uploadDirectory = 'uploads';
+
+        if (!is_dir($uploadDirectory)) {
+            mkdir($uploadDirectory, 0755, true);
+        }
+
+
+        $deletefilepath = public_path('uploads/' . $request->input('idpemesanan') . '.pdf');
+        DB::table('pemesanans_has_opsi_details')->where('pemesanans_id', $request->input('idpemesanan'))->delete();
+        DB::table('pemesanans')->where('id', $request->input('idpemesanan'))->delete();
+        unlink($deletefilepath);
+
+        copy($filePath, $uploadDirectory . '/' . $fileName);
+
+        return ["idpemesanan" => $id, "idvendor" => $request->input('vendors_id')];
+    }
+
+    public function lihatcatatan($idpemesanan) {
+        $pemesanan = Pemesanan::find($idpemesanan);
+        $layanan = DB::table('vendors_has_jenis_bahan_cetaks')
+                ->join('layanan_cetaks', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', 'layanan_cetaks.id')
+                ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $pemesanan->jenis_bahan_cetaks_id)
+                ->select('layanan_cetaks.nama as namalayanan', 'layanan_cetaks.satuan as satuanlayanan')
+                ->first();
+        return ["jumlah"=> $pemesanan->jumlah,"catatan"=>$pemesanan->catatan, "layanan" =>$layanan->namalayanan, "satuan" => $layanan->satuanlayanan];
+    }
+
+     public function bukacheckout(Request $request)
     {
         $request->validate([
             'idpemesanans' => 'required|array',

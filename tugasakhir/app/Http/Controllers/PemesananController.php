@@ -18,19 +18,23 @@ class PemesananController extends Controller
      */
     public function getStatus($nota)
     {
-        if (!$nota->waktu_menerima_pesanan) {
-            $status_nota = "Menunggu diterima vendor";
-        } elseif (!$nota->waktu_diantar && !$nota->waktu_tunggu_diambil) {
-            $status_nota = "Pesanan diterima";
-        } else if ($nota->waktu_diantar || $nota->waktu_tunggu_diambil) {
+        if ($nota->waktu_selesai) {
+            $status_nota = "Selesai";
+        }
+        else if ($nota->waktu_diantar || $nota->waktu_tunggu_diambil) {
             if ($nota->waktu_diantar) {
                 $status_nota = "Diantar";
             } else {
                 $status_nota = "Menunggu diambil";
             }
-        } else if ($nota->waktu_selesai) {
-            $status_nota = "Selesai";
         }
+         elseif ($nota->wakti_menerima_pesanan) {
+            $status_nota = "Pesanan diterima";
+        } 
+        else {
+            $status_nota = "Menunggu diterima vendor";
+        }
+        
         return $status_nota;
     }
 
@@ -107,9 +111,14 @@ class PemesananController extends Controller
 
         $isVerifikasiSelesai = true;
         $isMenungguSelesai = true; 
+        $isSelesai = true;
 
         if(!$notaData->waktu_diantar && !$notaData->waktu_tunggu_diambil){
             $isMenungguSelesai = false; 
+        }
+
+        if(!$notaData->waktu_selesai){
+            $isSelesai = false; 
         }
 
             foreach ($pemesanans as $p) {
@@ -162,7 +171,7 @@ class PemesananController extends Controller
         // dd($isVerifikasiSelesai);
         // dd($notaDetail);
 
-        return view('pesanan.orderdetail', compact('notaDetail', 'isVerifikasiSelesai','isMenungguSelesai'));
+        return view('pesanan.orderdetail', compact('notaDetail', 'isVerifikasiSelesai','isMenungguSelesai','isSelesai'));
     }
 
     public function pilihpengantar(Request $request)

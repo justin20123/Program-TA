@@ -222,7 +222,9 @@
                     @endforeach
                 </tbody>
             </table>
-            @if ($isMenungguSelesai)
+            @if($isSelesai)
+                <p class="text-center my-5">Pesanan Sudah Selesai</p>
+            @elseif ($isMenungguSelesai)
                 <button class="btn btn-primary text-center my-5" id="btnSelesai">Mark Selesai</button>
             @else
                 @if ($notaDetail[0]['nota']->opsi_pengambilan == 'diantar')

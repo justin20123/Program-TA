@@ -6,88 +6,125 @@
     </ol>
 @endsection
 @section('menu')
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="confirmDeleteModalLabel">Konfirmasi Penghapusan</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body" id="modal-body">
-                
-            </div>
-            <div class="modal-footer">
-                <button type="button" id="tutupmodal" class="btn btn-secondary">Batalkan</button>
-                <form id="deleteForm" action="/deletepesanan" method="POST">
-                    @csrf
-                    @method('DELETE')
-                    <div id="hiddens">
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Konfirmasi Penghapusan</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="modal-body">
 
-                    </div>
-                    <button type="submit" class="btn btn-danger">Hapus</button>
-                </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary tutupmodal">Batalkan</button>
+                    <form id="deleteForm" action="/deletepesanan" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <div id="hiddens-modal">
+
+                        </div>
+                        <button type="submit" class="btn btn-danger">Hapus</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
-</div>
+    <div class="modal fade" id="modalcatatan" tabindex="-1" role="dialog" aria-labelledby="modalcatatanLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalcatatantitle">Catatan</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="modal-body">
+                    <p class="modal-body" id="modalcatatantext">Catatan</h5>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary tutupmodal">Tutup</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="container my-5">
         <!-- Cart Table -->
-        <h4>Keranjang Vendor A</h4>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th style="width: 40px; text-align: center;"></th>
-                    <th>File</th>
-                    <th>Produk</th>
-                    <th>Harga (Rupiah)</th>
-                    <th>Kuantitas</th>
-                    <th>Biaya Tambahan</th>
-                    <th>Sub-total (Rupiah)</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($pemesanans as $p)
+        <h4 class="mb-3">Keranjang Vendor A</h4>
+        <div class="table-responsive-md" style="overflow-x: auto; overflow-y: hidden;">
+            <table class="table table-bordered">
+                <thead>
                     <tr>
-                        <td><button class="btn btn-danger button-delete" data-id="{{$p->id}}" data-layanan="{{$p->layanan}}" data-jumlah="{{$p->jumlah}}" data-satuan="{{$p->satuan}}" data-idvendor="{{$p->vendors_id}}">Hapus Pesanan</button>
-                            
-                        </td>
-                        <td>
-                            <div>
-                                <iframe src="/{{ $p->url_file }}"
-                                    style="width: 100px; height: 100px; border: none; overflow: hidden;"></iframe>
-                                <br>
-                                <a class="btn btn-primary" href="/{{ $p->url_file }}" target="_blank">Preview</a>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="d-flex align-items-center">
-
-                                <div>
-                                    {{ $p->layanan }}<br>
-                                    <a href="/editpesanan/{{ $p->id }}" class="text-primary">Edit</a>
-                                </div>
-                            </div>
-                        </td>
-                        <td>{{ number_format($p->harga_satuan, 0, '.', ',') }}</td>
-                        
-                        <td>{{ number_format($p->jumlah, 0, '.', ',') }} {{ $p->satuan }}</td>
-                        <td>Rp.{{ number_format($p->biaya_tambahan, 0, '.', ',') }}</td>
-                        <td class="font-weight-bold">
-                            <div id='hargaitem-{{ $p->id }}'>
-                                {{ number_format($p->subtotal_pesanan, 0, '.', ',') }}
-                            </div>
-
-                        </td>
+                        <th style="width: 40px; text-align: center;">Pilih</th>
+                        <th>File</th>
+                        <th>Produk</th>
+                        <th>Harga (Rupiah)</th>
+                        <th>Kuantitas</th>
+                        <th>Biaya Tambahan</th>
+                        <th>Sub-total (Rupiah)</th>
+                        <th>Catatan</th>
+                        <th>Hapus Pesanan</th>
                     </tr>
-                    <input type="hidden" name="biaya_tambahan-{{$p->id}}" id="biaya_tambahan-{{$p->id}}" value="{{$p->biaya_tambahan}}">
-                    <input type="hidden" name="jumlah-{{$p->id}}" id="jumlah-{{$p->id}}" value="{{$p->jumlah}}">
-                @endforeach
+                </thead>
+                <tbody>
+                    @foreach ($pemesanans as $p)
+                        <tr>
+                            <td>
+                                <input type="checkbox" id="item-{{ $p->id }}" value="{{ $p->id }}" checked />
+                            </td>
+
+                            <td>
+                                <div>
+                                    <iframe src="/{{ $p->url_file }}"
+                                        style="width: 100px; height: 100px; border: none; overflow: hidden;"></iframe>
+                                    <br>
+                                    <a class="btn btn-primary" href="/{{ $p->url_file }}" target="_blank">Preview</a>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+
+                                    <div>
+                                        {{ $p->layanan }}<br>
+                                        <a href="/editpesanan/{{ $p->id }}" class="text-primary">Edit</a>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ number_format($p->harga_satuan, 0, '.', ',') }}</td>
+
+                            <td>{{ number_format($p->jumlah, 0, '.', ',') }} {{ $p->satuan }}</td>
+                            <td>Rp.{{ number_format($p->biaya_tambahan, 0, '.', ',') }}</td>
+                            <td class="font-weight-bold">
+                                <div id='hargaitem-{{ $p->id }}'>
+                                    {{ number_format($p->subtotal_pesanan, 0, '.', ',') }}
+                                </div>
+
+                            </td>
+                            <td>
+                                <button class="btn btn-link bukacatatan" data-idpemesanan="{{ $p->id }}">Lihat
+                                    Catatan</button>
+                            </td>
+                            <td>
+                                <button class="btn btn-danger button-delete" data-id="{{ $p->id }}"
+                                    data-layanan="{{ $p->layanan }}" data-jumlah="{{ $p->jumlah }}"
+                                    data-satuan="{{ $p->satuan }}" data-idvendor="{{ $p->vendors_id }}">Hapus</button>
+                            </td>
+                        </tr>
+                        <input type="hidden" name="biaya_tambahan-{{ $p->id }}"
+                            id="biaya_tambahan-{{ $p->id }}" value="{{ $p->biaya_tambahan }}">
+                        <input type="hidden" name="jumlah-{{ $p->id }}" id="jumlah-{{ $p->id }}"
+                            value="{{ $p->jumlah }}">
+                    @endforeach
 
 
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
 
         @if (session('message'))
             <div class="alert alert-danger">
@@ -95,16 +132,15 @@
             </div>
         @endif
         <!-- Cart Buttons -->
-        <div class="d-flex justify-content-between mb-4">
-            
-            <a href="/vendor/{{ $pemesanans[0]->vendors_id }}" class="btn btn-primary">Tambah Barang</a>
-            <a href="/vendor" class="btn btn-danger-primary">Hapus pesanan dipilih</a>
+        <div class="d-flex justify-content-between mb-4 flex-wrap">
+
+            <a href="/vendor/{{ $pemesanans[0]->vendors_id }}" class="btn btn-primary mb-2">Tambah Barang</a>
         </div>
 
         <!-- Balance and Checkout Summary -->
-        <div class="d-flex justify-content-between align-items-start">
+        <div class="d-flex justify-content-between align-items-start flex-wrap">
             <!-- Balance -->
-            <h5>Balance: Rp. 500,000</h5>
+            <h5 class="mb-2">Balance: Rp. 500,000</h5>
 
             <!-- Card Totals -->
             <div class="card" style="width: 18rem;">
@@ -120,7 +156,8 @@
                         <div id="hiddens">
 
                         </div>
-                        <input type="submit" value="UPDATE CHECKOUT" class="btn btn-primary btn-block mt-3 font-weight-bold"> 
+                        <input type="submit" value="UPDATE CHECKOUT"
+                            class="btn btn-primary btn-block mt-3 font-weight-bold">
                     </form>
 
                 </div>
@@ -132,7 +169,7 @@
 @section('script')
     <script>
         $(document).ready(function() {
-            
+
 
             let subtotal = 0;
 
@@ -157,8 +194,10 @@
 
                         var biayaTambahan = $('#biaya_tambahan-' + itemId).val();
 
-                        $('#hiddens').append(`<input type="hidden" name="idpemesanans[]" value="${itemId}">`);
-                        $('#hiddens').append(`<input type="hidden" name="biaya_tambahan[]" value="${biayaTambahan}">`);
+                        $('#hiddens').append(
+                            `<input type="hidden" name="idpemesanans[]" value="${itemId}">`);
+                        $('#hiddens').append(
+                            `<input type="hidden" name="biaya_tambahan[]" value="${biayaTambahan}">`);
                     }
                 });
                 $('#subtotal').text('Rp. ' + subtotal.toLocaleString());
@@ -172,24 +211,51 @@
                 updateSubtotal(this);
             });
 
-            $(".button-delete").on("click", function () {
+            $(".button-delete").on("click", function() {
                 const id = $(this).data('id');
                 const layanan = $(this).data('layanan');
                 const jumlah = $(this).data('jumlah');
                 const satuan = $(this).data('satuan');
                 const idvendor = $(this).data('idvendor');
 
-                var message = "Apakah anda yakin ingin menghapus pesanan: " + layanan + " " + jumlah + " " + satuan
-                
+                var message = "Apakah anda yakin ingin menghapus pesanan: " + layanan + " " + jumlah + " " +
+                    satuan
+
                 $('#modal-body').html(message);
                 var hidden = `<input type="hidden" name="idpemesanan" value="${id}">
                 <input type="hidden" name="idvendor" value="${idvendor}">`;
-                $('#hiddens').html(hidden);
+                $('#hiddens-modal').html(hidden);
                 $('#confirmDeleteModal').modal('show');
             });
 
-            $('#tutupmodal').on('click', function () {
+            $('.tutupmodal').on('click', function() {
                 $('#confirmDeleteModal').modal('hide');
+                $('#modalcatatan').modal('hide');
+            });
+
+            $('.bukacatatan').click(function() {
+
+                var idpemesanan = $(this).data('idpemesanan');
+                $.ajax({
+                    type: 'GET',
+                    url: '/lihatcatatan/' + idpemesanan,
+                    success: function(data) {
+                        var title = "Layanan: " + data.layanan + " " + data.jumlah + " " + data
+                            .satuan;
+                        var catatan = data.catatan;
+                        var text = "";
+                        if (!catatan) {
+                            text = "Belum ada catatan untuk pesanan ini";
+                        } else {
+                            text = "Catatan: " + catatan;
+                        }
+
+                        $("#modalcatatantitle").text(title);
+                        $("#modalcatatantext").text(text);
+                        $('#modalcatatan').modal('show');
+                    }
+                });
+
             });
 
         });

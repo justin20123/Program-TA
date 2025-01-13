@@ -38,6 +38,7 @@
                 <input type="hidden" id="idvendor" value="{{ $jenisbahan[0]->idvendor }}">
                 <input type="hidden" id="idlayanan" value="{{ $layanan->id }}">
                 <input type="hidden" id="satuan" value="{{ $layanan->satuan }}">
+                <input type="hidden" id="jumlahcopyhidden" value="{{ $jumlahcopy }}">
 
             </div>
 
@@ -92,11 +93,6 @@
                             required disabled>
                     </div>
                     <br>
-
-                    <div class="form-group d-flex">
-
-                        <a href="/cart" class="btn btn-outline-secondary">Keranjang</a>
-                    </div>
                     <br>
                     <hr>
 
@@ -255,16 +251,22 @@
         let totalLembar;
         let idpemesanan;
         let isFileDeleted = false;
+        var satuan;
 
         $(document).ready(function() {
             toggleUploadFile(true);
             idpemesanan = $('#idpemesanan').val();
+            var copy = $('#jumlahcopyhidden').val();
+            console.log(copy);
             fileUrl = `/uploads/${idpemesanan}.pdf`;
-            var satuan = $('#satuan').val();
+            satuan = $('#satuan').val();
             pdfjsLib.getDocument(fileUrl).promise.then(function(pdf) {
                 jumlHalaman = pdf.numPages;
-                $('#labelQuantity').text(`Jumlah (total: ${jumlHalaman} ${satuan})`);
+                totalLembar = jumlHalaman * copy;
+                $('#labelQuantity').text(`Jumlah (total: ${totalLembar} ${satuan})`);
+                $('#jumlahcopy').val(copy);
             })
+            $('#jumlahcopy').val(1);
             $('#jumlahcopy').prop('disabled', false);
 
             $('#file-name').text("Dokumen terunggah (PDF)");
@@ -347,7 +349,7 @@
                 if (Number.isInteger(parseInt($("#jumlahcopy").val())) && jumlHalaman != null) {
                     let value = $("#jumlahcopy").val();
                     totalLembar = value * jumlHalaman;
-                    $("#labelQuantity").text(`Jumlah (total: ${totalLembar} lembar)`);
+                    $("#labelQuantity").text(`Jumlah (total: ${totalLembar} ${satuan})`);
 
                 }
             });
@@ -377,10 +379,10 @@
                         const catatan = $("#catatan").val();
                         const jenis_bahan_cetaks_id = $('#jenisbahan').val();
                         const vendors_id = $('#idvendor').val();
-
+                        const idpemesanan = $('#idpemesanan').val();
                         const formData = new FormData();
                         formData.append('file', file);
-                        formData.append('ischanged', isFileDeleted);
+                        formData.append('idpemesanan', idpemesanan);
                         formData.append('jumlahcopy', jumlahCopy);
                         formData.append('jumlah', totalQuantity);
                         formData.append('jenis_bahan_cetaks_id', jenis_bahan_cetaks_id);
@@ -391,7 +393,7 @@
 
                         // Make the AJAX POST request
                         $.ajax({
-                            url: '/updatepesanan',
+                            url: '/UpdatePesananDenganFile',
                             type: 'POST',
                             contentType: false,
                             processData: false,
@@ -437,9 +439,10 @@
                     const catatan = $("#catatan").val();
                     const jenis_bahan_cetaks_id = $('#jenisbahan').val();
                     const vendors_id = $('#idvendor').val();
+                    const idpemesanan = $('#idpemesanan').val();
                     const formData = new FormData();
                     formData.append('file', '');
-                    formData.append('ischanged', 'false');
+                    formData.append('idpemesanan', idpemesanan);
                     formData.append('jumlahcopy', jumlahCopy);
                     formData.append('jumlah', totalQuantity);
                     formData.append('jenis_bahan_cetaks_id', jenis_bahan_cetaks_id);
@@ -448,7 +451,7 @@
                     formData.append('catatan', catatan);
                     // Make the AJAX POST request
                     $.ajax({
-                        url: '/updatepesanan',
+                        url: '/UpdatePesananTanpaFile',
                         type: 'POST',
                         contentType: false,
                         processData: false,
