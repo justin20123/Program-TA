@@ -131,7 +131,7 @@ class VendorController extends Controller
 
         $idvendor = DB::table('vendors')->insertGetId([
             'nama' => $request->nama,
-            'status' => 'active',
+            'status' => 'menunggu verifikasi',
             'foto_lokasi' => '',
             'longitude' => $request->longitude,
             'latitude' => $request->latitude,
@@ -164,6 +164,8 @@ class VendorController extends Controller
             ->where('vendors_id', '=', $idvendor)
             ->select('layanan_cetaks_id')
             ->get();
+
+            // dd($layananvendor);
         $layananvendorid = [];
         foreach ($layananvendor as $lv) {
             array_push($layananvendorid, $lv->layanan_cetaks_id);

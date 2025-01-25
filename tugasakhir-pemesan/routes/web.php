@@ -114,8 +114,8 @@ Route::middleware(['web'])->group(function () {
     
     //edit pesanan
     Route::get('/editpesanan/{idpemesanan}', [PemesananController::class, 'openeditpesanan']);
-    Route::post('/UpdatePesananTanpaFile', [PemesananController::class, 'UpdatePesananTanpaFile']);
-    Route::post('/UpdatePesananDenganFile', [PemesananController::class, 'UpdatePesananDenganFile']);
+    Route::post('/updatepesanantanpafile', [PemesananController::class, 'updatepesanantanpafile']);
+    Route::post('/updatepesanandenganfile', [PemesananController::class, 'updatepesanandenganfile']);
 
     //checkout
     Route::post('/checkout', [PemesananController::class, 'bukacheckout'])->name('bukacheckout');

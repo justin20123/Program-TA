@@ -107,7 +107,8 @@
                             </td>
                             <td>
                                 <button class="btn btn-link bukacatatan" data-idpemesanan="{{ $p->id }}">Lihat
-                                    Catatan</button>
+                                    Catatan
+                                </button>
                             </td>
                             <td>
                                 <button class="btn btn-danger button-delete" data-id="{{ $p->id }}"
@@ -170,7 +171,6 @@
     <script>
         $(document).ready(function() {
 
-
             let subtotal = 0;
 
             function updateSubtotal() {
@@ -219,7 +219,7 @@
                 const idvendor = $(this).data('idvendor');
 
                 var message = "Apakah anda yakin ingin menghapus pesanan: " + layanan + " " + jumlah + " " +
-                    satuan
+                    satuan;
 
                 $('#modal-body').html(message);
                 var hidden = `<input type="hidden" name="idpemesanan" value="${id}">
@@ -234,14 +234,12 @@
             });
 
             $('.bukacatatan').click(function() {
-
                 var idpemesanan = $(this).data('idpemesanan');
                 $.ajax({
                     type: 'GET',
                     url: '/lihatcatatan/' + idpemesanan,
                     success: function(data) {
-                        var title = "Layanan: " + data.layanan + " " + data.jumlah + " " + data
-                            .satuan;
+                        var title = "Layanan: " + data.layanan + " " + data.jumlah + " " + data.satuan;
                         var catatan = data.catatan;
                         var text = "";
                         if (!catatan) {
@@ -253,11 +251,14 @@
                         $("#modalcatatantitle").text(title);
                         $("#modalcatatantext").text(text);
                         $('#modalcatatan').modal('show');
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("AJAX Error: ", status, error);
+                        alert("Terjadi kesalahan saat mengambil catatan. Silakan coba lagi.");
                     }
                 });
-
             });
-
         });
     </script>
 @endsection
+</create_file>

@@ -169,7 +169,8 @@ class PemesananController extends Controller
         $biaya_tambahan = 0;
         if ($request->input('idopsidetail')) {
 
-            foreach ($idopsidetail as $id) {
+            foreach ($idopsidetail as $key => $id) {
+
                 $p = DB::table('opsi_details')
                     ->where('id', '=', $id)
                     ->first();
@@ -241,7 +242,7 @@ class PemesananController extends Controller
         return ["idpemesanan" => $id, "idvendor" => $request->input('vendors_id'), 'message' => "Pesanan dimasukkan ke dalam cart"];
     }
 
-    public function UpdatePesananTanpaFile(Request $request)
+    public function updatepesanantanpafile(Request $request)
     {
         try {
 
@@ -264,12 +265,67 @@ class PemesananController extends Controller
         $hargasatuan = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id);
         $harga = $hargasatuan * $jumlah;
         $biaya_tambahan = 0;
-        if ($request->input('idopsidetail')) {
 
-            foreach ($idopsidetail as $id) {
+        DB::table('pemesanans_has_opsi_details')
+            ->where('pemesanans_id', '=', $request->input('idpemesanan'))
+            ->delete();
+
+
+        $arrdetail = array();
+        $pees = DB::table('pemesanans')
+            ->where('id', '=', $request->input('idpemesanan'))
+            ->first();
+
+        $jenisbahan = DB::table('jenis_bahan_cetaks')
+            ->where('id', '=', $pees->jenis_bahan_cetaks_id)
+            ->first();
+        array_push($arrdetail, "jenis:" . $jenisbahan->nama);
+        $layanan_id = DB::table('vendors_has_jenis_bahan_cetaks')
+            ->where('jenis_bahan_cetaks_id', '=', $jenisbahan->id)
+            ->first();
+        $layanan_nama = DB::table('layanan_cetaks')
+            ->where('id', '=', $layanan_id->layanan_cetaks_id)
+            ->first();
+        array_push($arrdetail, "layanan:" . $layanan_nama->nama);
+        dd($arrdetail);
+
+        if ($idopsidetail) {
+            foreach ($idopsidetail as $key => $id) {
+                // dd($id);
+                // cek info opsi
+
                 $p = DB::table('opsi_details')
                     ->where('id', '=', $id)
                     ->first();
+                // dd($p);
+                $detail = DB::table('detail_cetaks')
+                    ->where('id', '=', $p->detail_cetaks_id)
+                    ->first();
+                $jenisbahan = DB::table('jenis_bahan_cetaks')
+                    ->where('id', '=', $detail->jenis_bahan_cetaks_id)
+                    ->first();
+                $detail->jenisbahan = $jenisbahan->nama;
+                $layanan_id = DB::table('vendors_has_jenis_bahan_cetaks')
+                    ->where('jenis_bahan_cetaks_id', '=', $jenisbahan->id)
+                    ->first();
+                $layanan_nama = DB::table('layanan_cetaks')
+                    ->where('id', '=', $layanan_id->layanan_cetaks_id)
+                    ->first();
+                $detail->layanan = $layanan_nama->nama;
+                array_push($arrdetail, $detail);
+                // }
+
+                dd($arrdetail);
+
+                $p = DB::table('opsi_details')
+                    ->where('id', '=', $id)
+                    ->first();
+
+                DB::table('pemesanans_has_opsi_details')->insert([
+                    'pemesanans_id' => $request->input('idpemesanan'),
+                    'opsi_details_id' => $id,
+                ]);
+
                 if ($p->biaya_tambahan > 0) {
                     if ($p->tipe == 'tambahan') {
                         $biaya_tambahan = $p->biaya_tambahan;
@@ -292,7 +348,7 @@ class PemesananController extends Controller
         $pemesanan->subtotal_pesanan = $harga;
         $pemesanan->biaya_tambahan = $biaya_tambahan;
         $pemesanan->perlu_verifikasi = $perlu_verifikasi;
-        if($request->input('catatan')){
+        if ($request->input('catatan')) {
             $pemesanan->catatan = $request->input('catatan');
         }
         $pemesanan->harga_cetaks_id = $idhargacetak;
@@ -304,7 +360,7 @@ class PemesananController extends Controller
         return ["idpemesanan" => $request->input('idpemesanan'), "idvendor" => $request->input('vendors_id')];
     }
 
-    public function UpdatePesananDenganFile(Request $request)
+    public function updatepesanandenganfile(Request $request)
     {
 
 
@@ -347,9 +403,12 @@ class PemesananController extends Controller
         $hargasatuan = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id);
         $harga = $hargasatuan * $request->input('jumlah');
         $biaya_tambahan = 0;
-        if ($request->input('idopsidetail')) {
-
-            foreach ($idopsidetail as $id) {
+        DB::table('pemesanans_has_opsi_details')
+            ->where('pemesanans_id', '=', $request->input('idpemesanan'))
+            ->delete();
+        // dd($idopsidetail);
+        if ($idopsidetail) {
+            foreach ($idopsidetail as $key => $id) {
                 $p = DB::table('opsi_details')
                     ->where('id', '=', $id)
                     ->first();
@@ -363,6 +422,10 @@ class PemesananController extends Controller
                     }
                     $harga += $biaya_tambahan;
                 }
+                DB::table('pemesanans_has_opsi_details')->insert([
+                    'pemesanans_id' => $request->input('idpemesanan'),
+                    'opsi_details_id' => $id,
+                ]);
             }
         }
 
@@ -425,17 +488,18 @@ class PemesananController extends Controller
         return ["idpemesanan" => $id, "idvendor" => $request->input('vendors_id')];
     }
 
-    public function lihatcatatan($idpemesanan) {
+    public function lihatcatatan($idpemesanan)
+    {
         $pemesanan = Pemesanan::find($idpemesanan);
         $layanan = DB::table('vendors_has_jenis_bahan_cetaks')
-                ->join('layanan_cetaks', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', 'layanan_cetaks.id')
-                ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $pemesanan->jenis_bahan_cetaks_id)
-                ->select('layanan_cetaks.nama as namalayanan', 'layanan_cetaks.satuan as satuanlayanan')
-                ->first();
-        return ["jumlah"=> $pemesanan->jumlah,"catatan"=>$pemesanan->catatan, "layanan" =>$layanan->namalayanan, "satuan" => $layanan->satuanlayanan];
+            ->join('layanan_cetaks', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', 'layanan_cetaks.id')
+            ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $pemesanan->jenis_bahan_cetaks_id)
+            ->select('layanan_cetaks.nama as namalayanan', 'layanan_cetaks.satuan as satuanlayanan')
+            ->first();
+        return ["jumlah" => $pemesanan->jumlah, "catatan" => $pemesanan->catatan, "layanan" => $layanan->namalayanan, "satuan" => $layanan->satuanlayanan];
     }
 
-     public function bukacheckout(Request $request)
+    public function bukacheckout(Request $request)
     {
         $request->validate([
             'idpemesanans' => 'required|array',

@@ -110,6 +110,27 @@
         </div>
     </div>
 
+    <div class="modal fade" id="modalcatatan" tabindex="-1" role="dialog" aria-labelledby="modalcatatanLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalcatatantitle">Catatan</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="modal-body">
+                    <p class="modal-body" id="modalcatatantext">Catatan</h5>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary tutupmodal">Tutup</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="error-message" style="color: red; display: none;"></div>
     @if (session('message'))
         <div class="alert alert-success">
@@ -146,7 +167,7 @@
                     @endif
                 </div>
             </div>
-            @if (!$notaDetail[0]['nota']->waktu_selesai )
+            @if (!$notaDetail[0]['nota']->waktu_selesai)
                 <div class="step-item">
                 @else
                     <div class="step-item active">
@@ -174,6 +195,7 @@
                     <tr>
                         <th>Image</th>
                         <th>Item</th>
+                        <th>Catatan</th>
                         @if (!$isVerifikasiSelesai)
                             <th>Action</th>
                         @endif
@@ -193,7 +215,13 @@
                                 <div>{{ $p->layanan }}</div>
                                 <div>{{ $p->jumlah . ' ' . $p->satuan }}</div>
                                 <div>Rp. {{ number_format($p->harga_satuan * $p->jumlah, 0, ',', '.') }}</div>
-                                <a href="/{{ $p->url_file }}" class="btn btn-primary py-2" target="_blank">Download File</a>
+                                <a href="/{{ $p->url_file }}" class="btn btn-primary py-2" target="_blank">Download
+                                    File</a>
+                            </td>
+                            <td>
+                                <button class="btn btn-link bukacatatan" data-idpemesanan="{{ $p->id }}">Lihat
+                                    Catatan
+                                </button>
                             </td>
                             <td>
                                 <ul class="list-inline justify-content-between">
@@ -222,7 +250,7 @@
                     @endforeach
                 </tbody>
             </table>
-            @if($isSelesai)
+            @if ($isSelesai)
                 <p class="text-center my-5">Pesanan Sudah Selesai</p>
             @elseif ($isMenungguSelesai)
                 <button class="btn btn-primary text-center my-5" id="btnSelesai">Mark Selesai</button>
@@ -314,7 +342,7 @@
                             processData: false,
                             contentType: false,
                             headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}' 
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
                             },
                             success: function(response) {
                                 // Check if response is valid
@@ -338,7 +366,7 @@
                     });
 
                     $('#btnAntarModal').click(function() {
-                        var idnota = $(this).data('idnota'); 
+                        var idnota = $(this).data('idnota');
                         var formData = new FormData();
                         formData.append('idnota', idnota);
 
@@ -347,7 +375,7 @@
                             url: "/pilihpengantar",
                             data: formData,
                             headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}' 
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
                             },
                             processData: false,
                             contentType: false,
@@ -367,7 +395,7 @@
                     });
 
                     $('#btnAmbilModal').click(function() {
-                        var idnota = $(this).data('idnota'); 
+                        var idnota = $(this).data('idnota');
                         var formData = new FormData();
                         formData.append('idnota', idnota);
 
@@ -376,7 +404,7 @@
                             url: "/requestambil",
                             data: formData,
                             headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}' 
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
                             },
                             processData: false,
                             contentType: false,
@@ -398,7 +426,7 @@
                     });
 
                     $('#btnSelesaiModal').click(function() {
-                        var idnota = $(this).data('idnota'); 
+                        var idnota = $(this).data('idnota');
                         var formData = new FormData();
                         formData.append('idnota', idnota);
 
@@ -407,10 +435,10 @@
                             url: "/selesaikanpesanan",
                             data: formData,
                             headers: {
-                                'X-CSRF-TOKEN': '{{ csrf_token() }}' 
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
                             },
-                            processData: false, 
-                            contentType: false, 
+                            processData: false,
+                            contentType: false,
                             success: function() {
                                 $('#modalselesai').modal('hide');
                                 window.location.reload();
@@ -422,13 +450,37 @@
                         });
                     });
 
+                    $('.bukacatatan').click(function() {
 
+                        var idpemesanan = $(this).data('idpemesanan');
+                        $.ajax({
+                            type: 'GET',
+                            url: '/lihatcatatan/' + idpemesanan,
+                            success: function(data) {
+                                var title = "Layanan: " + data.layanan + " " + data.jumlah + " " + data
+                                    .satuan;
+                                var catatan = data.catatan;
+                                var text = "";
+                                if (!catatan) {
+                                    text = "Belum ada catatan untuk pesanan ini";
+                                } else {
+                                    text = "Catatan: " + catatan;
+                                }
+
+                                $("#modalcatatantitle").text(title);
+                                $("#modalcatatantext").text(text);
+                                $('#modalcatatan').modal('show');
+                            }
+                        });
+
+                    });
 
                     $(".close").click(function() {
                         $('#modalKirimContoh').modal('hide');
                         $('#modalperubahan').modal('hide');
                         $('#modalantar').modal('hide');
                         $('#modalambil').modal('hide');
+                        $('#modalcatatan').modal('hide');
                     });
                 });
             </script>

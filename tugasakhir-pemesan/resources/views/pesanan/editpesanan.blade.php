@@ -257,7 +257,6 @@
             toggleUploadFile(true);
             idpemesanan = $('#idpemesanan').val();
             var copy = $('#jumlahcopyhidden').val();
-            console.log(copy);
             fileUrl = `/uploads/${idpemesanan}.pdf`;
             satuan = $('#satuan').val();
             pdfjsLib.getDocument(fileUrl).promise.then(function(pdf) {
@@ -381,6 +380,9 @@
                         const vendors_id = $('#idvendor').val();
                         const idpemesanan = $('#idpemesanan').val();
                         const formData = new FormData();
+
+                        console.log(idopsidetail);
+
                         formData.append('file', file);
                         formData.append('idpemesanan', idpemesanan);
                         formData.append('jumlahcopy', jumlahCopy);
@@ -393,7 +395,7 @@
 
                         // Make the AJAX POST request
                         $.ajax({
-                            url: '/UpdatePesananDenganFile',
+                            url: '/updatepesanandenganfile',
                             type: 'POST',
                             contentType: false,
                             processData: false,
@@ -451,7 +453,7 @@
                     formData.append('catatan', catatan);
                     // Make the AJAX POST request
                     $.ajax({
-                        url: '/UpdatePesananTanpaFile',
+                        url: '/updatepesanantanpafile',
                         type: 'POST',
                         contentType: false,
                         processData: false,

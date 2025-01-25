@@ -42,13 +42,14 @@ class LoginController extends Controller
         }
 
 
-        if ($user) {
+        else{
             if (Hash::check($password, $user->password)) {
                 Auth::login($user);
                 $request->session()->regenerate();
-                return redirect()->route('home');
+                return redirect()->route('home'); 
             }
         }
+
 
         return back()->with('error', 'Email atau password salah')->withInput($request->all());
     }

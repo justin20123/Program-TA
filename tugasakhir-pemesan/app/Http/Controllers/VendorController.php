@@ -14,7 +14,13 @@ class VendorController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-
+     public function getVendors(){
+        $vendors = DB::table('vendors')
+        ->where('status', 'active')
+        ->get();
+        return $vendors;
+     }
+    
     public function getJarak($vendor, $latitude, $longitude){
         $latitudeUser = deg2rad($latitude);
         $longitudeUser = deg2rad($longitude);
@@ -53,9 +59,7 @@ class VendorController extends Controller
         }
         
         //hitung jarak
-        $vendors = DB::table('vendors')
-        ->select()
-        ->get();
+        $vendors = $this->getVendors();
 
         foreach($vendors as $v){
             $jarak = $this->getJarak($v, $latitude, $longitude);
@@ -184,7 +188,7 @@ class VendorController extends Controller
     }
 
     public function getHargaTermurah($idlayanan){
-        $vendors = DB::table('vendors')->get();
+        $vendors = $this->getVendors();
         $hargaMin = null;
         $vendorMin = null;
         foreach($vendors as $key=>$v){
@@ -229,10 +233,11 @@ class VendorController extends Controller
         }
         
         $layananSatuan = $this->getLayananSatuan($idlayanan);
-        $vendorLokasiTerdekat = $this->getLocation(null, $latitude, $longitude, 'sorted');
-
         $vendorTermurah = $this->getHargaTermurah($idlayanan);
-
+        if(!$vendorTermurah){
+            return response()->json(['message' => 'Layanan ini belum memiliki vendor']);
+        }
+        $vendorLokasiTerdekat = $this->getLocation(null, $latitude, $longitude, 'sorted');
         $vendorRekomendasi = $this->topsisRecommended($idlayanan, $latitude, $longitude);
 
         $vendors = [];

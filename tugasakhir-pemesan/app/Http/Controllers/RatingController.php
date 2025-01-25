@@ -99,7 +99,7 @@ class RatingController extends Controller
             }
             else{
                 return [
-                    'vendor_rating' => 0, //data netral u/ memberi peluang vendor baru
+                    'vendor_rating' => 0, 
                     'total_nota' => 0
                 ];
             }
@@ -130,7 +130,7 @@ class RatingController extends Controller
             }
             else{
                 return [
-                    'vendor_rating' => 0, //data netral u/ memberi peluang vendor baru
+                    'vendor_rating' => 0, 
                     'total_nota' => 0
                 ]; 
             }

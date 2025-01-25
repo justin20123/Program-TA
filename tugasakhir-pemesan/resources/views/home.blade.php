@@ -1,14 +1,14 @@
 @extends('layout.sneat')
 @section('breadcrumb')
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="#">Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Vendors</li>
+        <li class="breadcrumb-item"><a href="#">Beranda</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Penyedia</li>
     </ol>
 @endsection
 @section('menu')
     <div id="loading">
         <div class="d-flex align-items-center justify-content-center" style="height: 100vh; display: flex;">
-            <strong>Loading...</strong>
+            <strong>Memuat...</strong>
             <div class="spinner-border ml-auto" role="status" aria-hidden="true"></div>
         </div>
     </div>
@@ -39,9 +39,6 @@
     </div>
     <div id="tidak-ada-vendor" class="px-5 pt-4"></div>
 
-
-
-
     <p id="status" class="px-5"></p>
 @endsection
 
@@ -54,7 +51,7 @@
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(resolve, reject);
                 } else {
-                    reject("Geolocation tidak dapat dilakukan melalui browseer ini.");
+                    reject("Geolocation tidak dapat dilakukan melalui browser ini.");
                 }
             });
         }
@@ -89,7 +86,7 @@
             let html = "";
             $('#vendors-terdekat').html(`
             <div class="d-flex justify-content-between align-items-center px-4 pt-3">
-                <div class="h5 p-2">List Vendor</div>
+                <div class="h5 p-2">Daftar Penyedia</div>
                 <a href="/vendor" class="text-danger h5 p-2">Lihat Semua</a></div>
                 <div class="container mt-5">
                 <div class="row" id="vendorsJarak">
@@ -104,7 +101,7 @@
                             <img style='width:18rem; height:12rem;' src="` + item['foto_lokasi'] + `" class="card-img-top" alt="Card image 1">
                             <div class="card-body">
                                 <h6 class="card-title">` + item['nama'] + `</h6>
-                                <p class="card-text">` + item['jarak'] + ` km dari lokasi anda</p>
+                                <p class="card-text">` + item['jarak'] + ` km dari lokasi Anda</p>
                                 <a href="https://www.openstreetmap.org/?mlat=` + item['latitude'] + `&mlon=` + item[
                     'longitude'] + `#map=15/` + item['latitude'] + `/` + item['longitude'] + `" target="_blank">Lihat di peta</a>
                             </div>
@@ -138,7 +135,7 @@
                                 <div class="card-body">
                                     <h6 class="card-title">` + item['layanan'] + `</h6>
                                     <p class="card-text">` + item['nama'] + `</p>
-                                    <p class="card-text">Terdekat: ` + item['jarak'] + ` km dari lokasi anda</p>
+                                    <p class="card-text">Terdekat: ` + item['jarak'] + ` km dari lokasi Anda</p>
                                     <a href="https://www.openstreetmap.org/?mlat=` + item['latitude'] + `&mlon=` +
                     item[
                         'longitude'] + `#map=15/` + item['latitude'] + `/` + item['longitude'] + `" target="_blank">Lihat di peta</a>
@@ -183,7 +180,7 @@
             });
         }
         async function pageLoadDropDownLayanan() {
-            $('#status').text("Loading Data...");
+            $('#status').text("Memuat Data...");
 
             try {
 
@@ -209,7 +206,7 @@
         }
 
         async function pageLoadLayananTerdekat(latitude, longitude) {
-            $('#status').text("Loading Data...");
+            $('#status').text("Memuat Data...");
 
             try {
 
@@ -369,25 +366,36 @@
             window.location.href = url;
         }
 
-        function isvendorada() {
-            $.ajax({
-                url: 'isvendorada',
-                type: 'GET',
-                contentType: 'application/json',
-                headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                }
-            }).then(function(response) {
-                console.log(response.value);
-                return response.value;
-            }).fail(function(jqXHR, textStatus, errorThrown) {
-                console.error(jqXHR);
-            });
+        async function isvendorada() {
+            
+            return $.ajax({
+        url: 'isvendorada',
+        type: 'GET',
+        contentType: 'application/json',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        }
+    }).then(function(response) {
+        return response.value; // Ensure the response value is returned
+    }).fail(function(jqXHR, textStatus, errorThrown) {
+        console.error(jqXHR);
+        throw new Error('AJAX request failed');
+    });
         }
         async function checkVendorAda() {
             try {
-                var isAdaVendor = await isvendorada();
-                console.log(isAdaVendor); // This will log the actual value returned from the AJAX call
+                var isAdaVendor = await isvendorada()
+                console.log(isAdaVendor);
+                if(isAdaVendor){
+                    await pageLoad();
+                } 
+                else 
+                {
+                    console.log('masuk');
+                    $('#loading').hide();
+                    $("#tidak-ada-vendor").html("<p class='text text-default'>Belum ada vendor yang aktif</p>");
+                    $("#tidak-ada-vendor").show();
+                }
             } catch (error) {
                 console.error('Error:', error);
             }
@@ -399,16 +407,7 @@
             $("#content").css("display", "none");
             $("#tidak-ada-vendor").hide();
 
-            var isadavendor = checkVendorAda();
-            console.log(isadavendor);
-
-            if (isadavendor) {
-                pageLoad();
-            } else {
-                $('#loading').hide();
-                $("#tidak-ada-vendor").html("<p class='text text-default'>Belum ada vendor yang aktif</p>");
-                $("#tidak-ada-vendor").show();
-            }
+            await checkVendorAda();
 
             $('#layanans').change(function() {
 

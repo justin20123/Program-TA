@@ -12,9 +12,9 @@
             <label class="p-5 mb-0">Urutkan Berdasarkan:</label>
             <div class="select-container">
                 <select class="form-control custom-select" style="width: 200px;">
-                    <option>Most Recent</option>
-                    <option>Price: Low to High</option>
-                    <option>Price: High to Low</option>
+                    <option>Urutan Transaksi</option>
+                    <option>Harga: Tinggi ke Rendah</option>
+                    <option>Harga: Rendah ke Tinggi</option>
                 </select>
                 <span class="caret-down-icon"><i class="fas fa-caret-down"></i></span>
             </div>

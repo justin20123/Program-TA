@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\JenisBahanCetak;
 use App\Models\OpsiDetail;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OpsiDetailController extends Controller
 {
@@ -25,6 +28,15 @@ class OpsiDetailController extends Controller
         $layananid = $request->input('idlayanan');
 
         $detailid = $request->input('iddetail');
+
+        $detail = DB::table('detail_cetaks')
+        ->where('id', $detailid)
+        ->select('jenis_bahan_cetaks_id')
+        ->first();
+        
+        $jenisbahan = JenisBahanCetak::find($detail->jenis_bahan_cetaks_id);
+        $jenisbahan->updated_at = Carbon::now('Asia/Jakarta');
+        $jenisbahan->save();
 
         $opsiDetail->opsi = $request->input('opsi'); // Ensure you have the correct input name
         if ($request->input('deskripsi')) {
@@ -59,6 +71,15 @@ class OpsiDetailController extends Controller
 
         $detailid = $request->input('iddetail');
 
+        $detail = DB::table('detail_cetaks')
+        ->where('id', $detailid)
+        ->select('jenis_bahan_cetaks_id')
+        ->first();
+        
+        $jenisbahan = JenisBahanCetak::find($detail->jenis_bahan_cetaks_id);
+        $jenisbahan->updated_at = Carbon::now('Asia/Jakarta');
+        $jenisbahan->save();
+
         // Update the OpsiDetail properties
         $opsiDetail->opsi = $request->input('opsi'); // Ensure you have the correct input name
         if ($request->input('deskripsi')) {
@@ -74,7 +95,15 @@ class OpsiDetailController extends Controller
     public function destroy($vendor_id, $idlayanan, $id)
     {
         $opsiDetail = OpsiDetail::findOrFail($id);
+
+        $detail = DB::table('detail_cetaks')
+        ->where('id', $opsiDetail->detail_cetaks_id)
+        ->select('jenis_bahan_cetaks_id')
+        ->first();
         
+        $jenisbahan = JenisBahanCetak::find($detail->jenis_bahan_cetaks_id);
+        $jenisbahan->updated_at = Carbon::now('Asia/Jakarta');
+        $jenisbahan->save();
         $opsiDetail->delete();
         return redirect()->route('layanan.detail_layanan', [$vendor_id, $idlayanan]);
     }
