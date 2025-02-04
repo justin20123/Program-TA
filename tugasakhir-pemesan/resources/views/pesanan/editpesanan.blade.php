@@ -52,7 +52,7 @@
                         <div class="select-container">
                             <select class="form-control custom-select px-4" name="jenisbahan" id="jenisbahan">
                                 @foreach ($jenisbahan as $key => $jb)
-                                    @if ($key == $idjenisbahan)
+                                    @if ($key == $idjenisbahan - 1)
                                         <option value="{{ $jb->id }}" selected>{{ $jb->nama }}</option>
                                     @else
                                         <option value="{{ $jb->id }}">{{ $jb->nama }}</option>
@@ -105,7 +105,7 @@
                     <div class="form-group" id="fg-input-file">
                         <label for="fileUpload" class="font-weight-bold">Unggah Dokumen</label>
                         <div id="upload">
-                            
+
                         </div>
                         <div id="file-detail">
                             <div class="file-name-container d-flex justify-content-between">
@@ -138,91 +138,42 @@
     {{-- swal (sweetalert) --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        function updateOpsiDetails(idvendor, idlayanan, idjenisbahan) {
+        function updateOpsiDetails(idjenisbahan) {
             $.ajax({
-                url: `/loadlayanan/${idvendor}/${idlayanan}/${idjenisbahan}`,
+                url: `/loadeditpesanan/${idjenisbahan}`,
                 type: 'GET',
                 dataType: 'json',
                 success: function(response) {
-                    $('#listOpsi').html('');
+                    $('#listdetail').html(''); // Clear previous options
                     let html = '';
 
-
                     if (response.result == 'success') {
-                        $('#listdetail').html('<p>Tidak ada opsi yang perlu ditambahkan</p>');
-                        if (response.data.opsidetail > 0) {
-                            let opsiDetail = {};
-                            response.data.opsidetail.forEach(function(item) {
-                                const detailid = item.detail.id;
-
-                                if (!opsiDetail[detailid]) {
-                                    opsiDetail[detailid] = {
-                                        id: detailid,
-                                        value: item.detail.value,
-                                        opsi: []
-                                    };
-                                }
-
-                                item.opsi.forEach(function(opsi) {
-                                    opsiDetail[detailid].opsi.push({
-                                        idopsi: opsi.id,
-                                        opsi: opsi.opsi,
-                                        biaya_tambahan: opsi.biaya_tambahan
-                                    });
-                                });
-                            });
-
-                            // Construct the HTML for each detail and its options
-                            for (let key in opsiDetail) {
-                                const detail = opsiDetail[key];
+                        if (response.data.opsidetail.length > 0) {
+                            response.data.opsidetail.forEach(function(item, key) {
                                 html += `
-                                     <div class="form-group">
-                                        <label class="font-weight-bold" id="detail-${key}">${detail.value}</label>                                         
-                                             `;
-                                if (detail.opsi.length > 0) {
-                                    html +=
-                                        `<div class="select-container">
-                                             <select class="form-control custom-select px-4" name="opsidetail-${key}"
-                                                 id="opsidetail-${key}">`
-                                    detail.opsi.forEach(function(option) {
-                                        html += `
-                                                <option value="${option.idopsi}">${option.opsi}(+Rp. 
-                                                ${option.biaya_tambahan})</option>
-                                            `;
-                                    });
+                            <div class="form-group">
+                                <label class="font-weight-bold">${item.detail.value}</label>
+                                <div class="select-container">
+                                    <select class="form-control custom-select px-4" name="opsidetail-${key}" id="opsidetail-${key}">
+                        `;
+                                item.opsi.forEach(function(option) {
                                     html += `
-                                            </select>
-                                        <span class="caret-down-icon"><i class="fas fa-caret-down"></i></span>
-                                    </div>
-                                </div>
-                                <br>
+                                <option value="${option.id}">${option.opsi} (+Rp. ${option.biaya_tambahan})</option>
                             `;
-
-                                } else {
-                                    html = '<p>No Options required.</p>';
-                                }
-
-                                $('#listdetail').html(html);
-                            }
+                                });
+                                html += `
+                                    </select>
+                                    <span class="caret-down-icon"><i class="fas fa-caret-down"></i></span>
+                                </div>
+                            </div>
+                            <br>
+                        `;
+                            });
+                        } else {
+                            html = '<p>Tidak ada opsi yang perlu ditambahkan</p>';
                         }
 
-                        $('#listharga').html('');
-                        $html = '';
-                        // console.table(response.data.listharga);
-                        response.data.listharga.forEach(function(item) {
-                            if (item.jumlah_cetak_maksimum == null) {
-                                $html +=
-                                    `<li>&gt;${item.jumlah_cetak_minimum - 1} ${item.satuan} = Rp. ${item.harga_satuan}/${item.satuan}</li>`;
-                            } else {
-                                $html +=
-                                    `<li>${item.jumlah_cetak_minimum}–${item.jumlah_cetak_maksimum} ${item.satuan} = Rp. ${item.harga_satuan}/${item.satuan}</li>`;
-                            }
-
-                        });
-                        var deskripsi = response.data.deskripsi;
-
-                        $('#deskripsi').html(`<p>${deskripsi}</p>`);
-                        $('#listharga').html($html);
+                        $('#listdetail').html(html); // Update the listdetail div with new options
                     }
                 },
                 error: function(xhr, status, error) {
@@ -272,12 +223,12 @@
             $('#file-detail').val('');
 
 
-            $(document).on('dragover',"#drop-area", function(event) {
+            $(document).on('dragover', "#drop-area", function(event) {
                 event.preventDefault(); // Prevent default drag behaviors
             });
 
 
-            $(document).on('drop',"#drop-area", function(event) {
+            $(document).on('drop', "#drop-area", function(event) {
                 event.preventDefault(); // Prevent default drop behaviors
                 file = event.originalEvent.dataTransfer.files[0]; // Get dropped files
                 if (file.length > 0) {
@@ -288,7 +239,7 @@
             });
 
 
-            $(document).on('click',"#drop-area", function() {
+            $(document).on('click', "#drop-area", function() {
                 $('#inputfile').click();
             });
 
@@ -310,7 +261,7 @@
             });
 
             // Handle file selection
-            $(document).on('change',"#inputfile", function(){
+            $(document).on('change', "#inputfile", function() {
                 file = this.files[0]; // Get the selected file
                 if (file && file.type === 'application/pdf') {
                     const fileReader = new FileReader();
@@ -353,11 +304,9 @@
                 }
             });
             $('#jenisbahan').on('change', function() {
-                idvendor = $('#idvendor').val();
-                idlayanan = $('#idlayanan').val();
                 idjenisbahan = $('#jenisbahan').val();
 
-                updateOpsiDetails(idvendor, idlayanan, idjenisbahan);
+                updateOpsiDetails(idjenisbahan);
 
             });
 
@@ -377,6 +326,7 @@
                         const totalQuantity = totalLembar;
                         const catatan = $("#catatan").val();
                         const jenis_bahan_cetaks_id = $('#jenisbahan').val();
+
                         const vendors_id = $('#idvendor').val();
                         const idpemesanan = $('#idpemesanan').val();
                         const formData = new FormData();
@@ -427,8 +377,7 @@
                     File harus berupa PDF!
                     </div>`);
                     }
-                }
-                else{
+                } else {
                     $('#fg-input-file').html("");
                     const idjenisbahan = $('#jenisbahan').val();
                     let idopsidetail = [];
@@ -440,6 +389,7 @@
                     const totalQuantity = totalLembar;
                     const catatan = $("#catatan").val();
                     const jenis_bahan_cetaks_id = $('#jenisbahan').val();
+                    console.log(jenis_bahan_cetaks_id);
                     const vendors_id = $('#idvendor').val();
                     const idpemesanan = $('#idpemesanan').val();
                     const formData = new FormData();
@@ -480,7 +430,7 @@
                             $('#response').text('Error: ' + error);
                         }
                     });
-                    
+
                 }
 
             });

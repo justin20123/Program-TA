@@ -9,7 +9,10 @@
   </ol>
 @endsection
 @section("title")
-<div class="h3 px-4 py-2">Harga {{ $detail->namajenisbahan }}</div>
+<a href="/layanans/{{ $detail->id_vendor }}/details/{{ $detail->id_layanan_cetak }}" class="px-4 pt-3 text-black">
+    <i class="fas fa-arrow-left"></i>
+</a>
+<div class="h3 px-4 py-2">Harga {{ $detail->nama_jenis_bahan }}</div>
 
 @endsection
 
@@ -24,7 +27,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                Are you sure you want to delete this detail and its options?
+                Apakah anda yakin ingin menghapus harga ini?
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -42,7 +45,7 @@
 </div>
 @endsection
 @section("buttontambah")
-<a href="../../opsiharga/create/{{ $detail->idjenisbahan }}" class="btn btn-success">Tambah Harga</a>
+<a href="../../opsiharga/create/{{ $detail->id_jenis_bahan }}" class="btn btn-success">Tambah Harga</a>
 @endsection 
 @section("tableitem")
     @foreach($hargas as $h)
@@ -56,7 +59,7 @@
                 <li class="list-inline-item">
                     <button type="button" class="btn btn-danger btn-sm mx-2 delete-button" 
                         data-id="{{$h->id}}" 
-                        data-jenisbahan="{{ $detail->idjenisbahan }}" 
+                        data-jenisbahan="{{ $detail->id_jenis_bahan }}" 
                         data-toggle="modal" 
                         data-target="#confirmDeleteModal">Delete
                     </button>

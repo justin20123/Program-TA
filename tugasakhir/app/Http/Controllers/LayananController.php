@@ -17,47 +17,46 @@ class LayananController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function getRating($vendors_id, $layanans_id)
+    public function getRating($vendor_id, $layanan_id)
     {
         $ratings = DB::table('ratings')
             ->join('notas', 'ratings.notas_id', '=', 'notas.id')
             ->join('pemesanans', 'notas.id', '=', 'pemesanans.notas_id')
             ->join('jenis_bahan_cetaks', 'pemesanans.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
             ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
-            ->where('pemesanans.vendors_id', '=', $vendors_id)
-            ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $layanans_id)
+            ->where('pemesanans.vendors_id', '=', $vendor_id)
+            ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $layanan_id)
             ->whereNotNull('ratings.nilai')
             ->avg('ratings.nilai');
         return $ratings;
     }
-    //ambil avg rating setiap layanan dalam 1 vendor
-    public function getTotalNota($vendors_id, $layanans_id)
+
+    public function getTotalNota($vendor_id, $layanan_id)
     {
         $total_nota = DB::table('notas')
             ->join('pemesanans', 'pemesanans.notas_id', '=', 'notas.id')
             ->join('jenis_bahan_cetaks', 'pemesanans.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
             ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
-            ->where('pemesanans.vendors_id', '=', $vendors_id)
-            ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $layanans_id)
+            ->where('pemesanans.vendors_id', '=', $vendor_id)
+            ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $layanan_id)
             ->count();
         return $total_nota;
     }
 
-    public function getTotalNotaRating($vendors_id, $layanans_id)
+    public function getTotalNotaRating($vendor_id, $layanan_id)
     {
         $notas = DB::table('ratings')
         ->join('notas', 'ratings.notas_id', '=', 'notas.id')
         ->join('pemesanans', 'notas.id', '=', 'pemesanans.notas_id')
         ->join('jenis_bahan_cetaks', 'pemesanans.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
         ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
-        ->where('pemesanans.vendors_id', '=', $vendors_id)
-        ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $layanans_id)
+        ->where('pemesanans.vendors_id', '=', $vendor_id)
+        ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $layanan_id)
         ->whereNotNull('ratings.nilai')
         ->count('notas.id');
 
         return $notas;
     }
-    //ambil totap nota setiap layanan dalam 1 vendor
 
     public function index()
     {
@@ -81,177 +80,169 @@ class LayananController extends Controller
         return view('layanan.layanancetak', compact('layanans', 'vendor'));
     }
 
-    public function detail_layanan($vendor_id, $idlayanan)
+    public function detail_layanan($vendor_id, $id_layanan)
     {         
-        $jenisbahan = DB::table('jenis_bahan_cetaks')
+        $jenis_bahan = DB::table('jenis_bahan_cetaks')
         ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
         ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
-        ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $idlayanan)
-        ->select('jenis_bahan_cetaks.id as idjenisbahan', 'jenis_bahan_cetaks.nama as namajenisbahan', 'vendors_has_jenis_bahan_cetaks.vendors_id as idvendor', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id as idlayanan')
+        ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $id_layanan)
+        ->select('jenis_bahan_cetaks.id as id_jenis_bahan', 'jenis_bahan_cetaks.nama as nama_jenis_bahan', 'jenis_bahan_cetaks.deskripsi as deskripsi', 'vendors_has_jenis_bahan_cetaks.vendors_id as id_vendor', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id as id_layanan')
         ->get();
 
-        $detailcetaks = DB::table('detail_cetaks')
+        $detail_cetaks = DB::table('detail_cetaks')
         ->join('jenis_bahan_cetaks', 'detail_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
         ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
         ->leftJoin('opsi_details', 'detail_cetaks.id', '=', 'opsi_details.detail_cetaks_id') 
         ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
-        ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $idlayanan)
-        ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $jenisbahan[0]->idjenisbahan   )
-        ->select('detail_cetaks.*', 'opsi_details.id as idopsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan')
+        ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $id_layanan)
+        ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $jenis_bahan[0]->id_jenis_bahan)
+        ->select('detail_cetaks.*', 'opsi_details.id as id_opsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan')
         ->get();
 
-        
-
-        $opsiDetail = [];
-        foreach ($detailcetaks as $detail) {
-            if (!isset($opsiDetail[$detail->id])) {
-                $opsiDetail[$detail->id] = [
+        $opsi_detail = [];
+        foreach ($detail_cetaks as $detail) {
+            if (!isset($opsi_detail[$detail->id])) {
+                $opsi_detail[$detail->id] = [
                     'detail' => $detail,
                     'opsi' => [],
                 ];
             }
-            if ($detail->idopsi) { 
-                $opsiDetail[$detail->id]['opsi'][] = [
-                    'id' => $detail->idopsi,
+            if ($detail->id_opsi) { 
+                $opsi_detail[$detail->id]['opsi'][] = [
+                    'id' => $detail->id_opsi,
                     'opsi' => $detail->opsi, 
                     'biaya_tambahan' => $detail->biaya_tambahan, 
                 ];
             }
         } 
 
-        $opsiDetail = array_values($opsiDetail);
+        $opsi_detail = array_values($opsi_detail);
 
-        $namaLayanan = DB::table('layanan_cetaks')
-        ->where('id','=',$idlayanan)
+        $nama_layanan = DB::table('layanan_cetaks')
+        ->where('id', '=', $id_layanan)
         ->select('nama')
         ->first();
-        $rating = $this->getRating($vendor_id, $idlayanan);
-        $totalNota = $this->getTotalNotaRating($vendor_id, $idlayanan);
-        if ($namaLayanan) {
+        if ($nama_layanan) {
             $layanan = [
-                'namaLayanan' => $namaLayanan->nama, 
-                'rating' => $this->getRating($vendor_id, $idlayanan),
-                'totalNota' => $this->getTotalNotaRating($vendor_id, $idlayanan)
+                'nama_layanan' => $nama_layanan->nama, 
+                'rating' => $this->getRating($vendor_id, $id_layanan),
+                'total_nota' => $this->getTotalNotaRating($vendor_id, $id_layanan)
             ];
         } else {
-
             $layanan = [
-                'namaLayanan' => 'Unknown', 
+                'nama_layanan' => '', 
                 'rating' => 0,
-                'totalNota' => 0 
+                'total_nota' => 0 
             ];
         }
         
-        // dd($jenisbahan);
-        // dd($opsiDetail);
-
-        return view('layanan.detail', compact('opsiDetail', 'layanan', 'jenisbahan'));
+        return view('layanan.detail', compact('opsi_detail', 'layanan', 'jenis_bahan'));
     }
 
-    public function detail_layanan_load($vendor_id, $idlayanan, $idjenisbahan){
-        $detailcetaks = DB::table('detail_cetaks')
+    public function detail_layanan_load($vendor_id, $id_layanan, $id_jenis_bahan){
+        $detail_cetaks = DB::table('detail_cetaks')
         ->join('jenis_bahan_cetaks', 'detail_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
         ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
         ->leftJoin('opsi_details', 'detail_cetaks.id', '=', 'opsi_details.detail_cetaks_id') 
         ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
-        ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $idlayanan)
-        ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $idjenisbahan)
-        ->select('detail_cetaks.*', 'opsi_details.id as idopsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan')
+        ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $id_layanan)
+        ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $id_jenis_bahan)
+        ->select('detail_cetaks.*', 'opsi_details.id as id_opsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan')
         ->get();
 
-        $opsiDetail = [];
-        foreach ($detailcetaks as $detail) {
-            if (!isset($opsiDetail[$detail->id])) {
-                $opsiDetail[$detail->id] = [
+        $opsi_detail = [];
+        $jenis_bahan = DB::table('jenis_bahan_cetaks')
+        ->where('id', '=', $id_jenis_bahan)
+        ->first();
+        foreach ($detail_cetaks as $detail) {
+            
+            if (!isset($opsi_detail[$detail->id])) {
+                $opsi_detail[$detail->id] = [
                     'detail' => $detail,
                     'opsi' => [],
                 ];
             }
-            if ($detail->idopsi) { 
-                $opsiDetail[$detail->id]['opsi'][] = [
-                    'id' => $detail->idopsi,
+            if ($detail->id_opsi) { 
+                $opsi_detail[$detail->id]['opsi'][] = [
+                    'id' => $detail->id_opsi,
                     'opsi' => $detail->opsi, 
                     'biaya_tambahan' => $detail->biaya_tambahan, 
                 ];
             }
         } 
 
-        $opsiDetail = array_values($opsiDetail);
+        $opsi_detail = array_values($opsi_detail);
 
-        // dd($opsiDetail);
-
-            return json_encode(['result'=>'success', 'data'=>$opsiDetail]);
+        return json_encode(['result' => 'success', 'data' => $opsi_detail, 'jenis_bahan'=>$jenis_bahan]);
     }
 
-    public function edit_opsi($vendor_id, $idlayanan, $idjenisbahan, $iddetail, $idopsi){
-        $detailcetaks = DB::table('detail_cetaks')
+    public function edit_opsi($vendor_id, $id_layanan, $id_jenis_bahan, $id_detail, $id_opsi){
+        $detail_cetaks = DB::table('detail_cetaks')
         ->join('jenis_bahan_cetaks', 'detail_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
         ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
         ->leftJoin('opsi_details', 'detail_cetaks.id', '=', 'opsi_details.detail_cetaks_id') 
         ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
-        ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $idlayanan)
-        ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $idjenisbahan)
-        ->where('detail_cetaks.id', '=', $iddetail)
-        ->where('opsi_details.id', '=', $idopsi)
-
-        ->select('detail_cetaks.*', 'opsi_details.id as idopsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan', 'detail_cetaks.value as namadetail')
+        ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $id_layanan)
+        ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $id_jenis_bahan)
+        ->where('detail_cetaks.id', '=', $id_detail)
+        ->where('opsi_details.id', '=', $id_opsi)
+        ->select('detail_cetaks.*', 'opsi_details.id as id_opsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan', 'detail_cetaks.value as nama_detail')
         ->first();
 
         $layanan = [
-            "idvendor" => $vendor_id,
-            "idlayanan" => $idlayanan,
-            "idjenisbahan" => $idjenisbahan,
-            "iddetail" => $iddetail,
+            "id_vendor" => $vendor_id,
+            "id_layanan" => $id_layanan,
+            "id_jenis_bahan" => $id_jenis_bahan,
+            "id_detail" => $id_detail,
         ];
 
-        return view('layanan.editoption', compact('detailcetaks','layanan'));
+        return view('layanan.editoption', compact('detail_cetaks', 'layanan'));
     }
 
-    //setups
-    public function addhargasetup($idjenisbahan, $min, $max=null, $harga) {
+    public function addhargasetup($id_jenis_bahan, $min, $max = null, $harga) {
         DB::table('harga_cetaks')->insert([
-            "id_bahan_cetaks" => $idjenisbahan,
+            "id_bahan_cetaks" => $id_jenis_bahan,
             "jumlah_cetak_minimum" => $min,
             "jumlah_cetak_maksimum" => $max,
             "harga_satuan" => $harga,
         ]);
-        $jenisbahan = JenisBahanCetak::findOrFail($idjenisbahan);
-        $jenisbahan->updated_at = Carbon::now('Asia/Jakarta');
-        $jenisbahan->save();  
-
+        $jenis_bahan = JenisBahanCetak::findOrFail($id_jenis_bahan);
+        $jenis_bahan->updated_at = Carbon::now('Asia/Jakarta');
+        $jenis_bahan->save();  
     }
 
-    public function addjenisbahansetup($idlayanan, $idvendor, $array){
-        $arrayidjenisbahan = [];
-        foreach($array as $a){
-            $idjenisbahan = DB::table('jenis_bahan_cetaks')->insertGetId([
+    public function addjenisbahansetup($id_layanan, $id_vendor, $array) {
+        $array_id_jenis_bahan = [];
+        foreach($array as $a) {
+            $id_jenis_bahan = DB::table('jenis_bahan_cetaks')->insertGetId([
                 'nama' => $a['nama'],
                 'gambar'=> "",
                 'deskripsi' => "",
             ]);
-            array_push($arrayidjenisbahan, $idjenisbahan);
-            foreach($a['arrminimum'] as $key=>$m){
-                $hargasatuan = $a['arrharga'][$key];
+            array_push($array_id_jenis_bahan, $id_jenis_bahan);
+            foreach($a['arrminimum'] as $key => $m) {
+                $harga_satuan = $a['arrharga'][$key];
                 if ($key === count($a['arrminimum']) - 1) {
                     $max = null; 
                 } else {
                     $max = $a['arrminimum'][$key + 1] - 1;
                 }
-                $this->addhargasetup($idjenisbahan, $m, $max, $hargasatuan);
+                $this->addhargasetup($id_jenis_bahan, $m, $max, $harga_satuan);
             }
             DB::table('vendors_has_jenis_bahan_cetaks')->insert([
-                'layanan_cetaks_id' => $idlayanan,
-                'vendors_id' => $idvendor,
-                'jenis_bahan_cetaks_id' => $idjenisbahan,
+                'layanan_cetaks_id' => $id_layanan,
+                'vendors_id' => $id_vendor,
+                'jenis_bahan_cetaks_id' => $id_jenis_bahan,
             ]);
 
-            $jenisbahan = JenisBahanCetak::findOrFail($idjenisbahan);
-            $jenisbahan->updated_at = Carbon::now('Asia/Jakarta');
-            $jenisbahan->save();
+            $jenis_bahan = JenisBahanCetak::findOrFail($id_jenis_bahan);
+            $jenis_bahan->updated_at = Carbon::now('Asia/Jakarta');
+            $jenis_bahan->save();
         }
         
-        return $arrayidjenisbahan;
+        return $array_id_jenis_bahan;
     }
+
     public function setupfotokopi($idvendor){
         $arrdefaultjenisbahan = [
             [
@@ -1240,28 +1231,13 @@ class LayananController extends Controller
         return redirect()->route('layananindex', [$idvendor]);
     }
 
-    
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
+    public function create() {
         return view('layanans.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        $vendorid = $request->input('idvendor');
-        $layananid = $request->input('idlayanan');
+    public function store(Request $request) {
+        $vendor_id = $request->input('id_vendor');
+        $layanan_id = $request->input('id_layanan');
         
         $layanan = new Layanan();
         $layanan->nama = $request->input('nama');
@@ -1270,51 +1246,22 @@ class LayananController extends Controller
         }
         $layanan->biaya_tambahan = $request->input('biaya_tambahan');
         $layanan->save();
-        return redirect()->route('layanan.detail_layanan', [$vendorid, $layananid]);
+        return redirect()->route('layanan.detail_layanan', [$vendor_id, $layanan_id]);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Layanan  $layanan
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Layanan $layanan)
-    {
+    public function show(Layanan $layanan) {
         return view('layanans.show', compact('layanan'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Layanan  $layanan
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Layanan $layanan)
-    {
+    public function edit(Layanan $layanan) {
         return view('layanans.edit', compact('layanan'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Layanan  $layanan
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Layanan $layanan)
-    {
-        
+    public function update(Request $request, Layanan $layanan) {
+        // Update logic...
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Layanan  $layanan
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Layanan $layanan)
-    {
+    public function destroy(Layanan $layanan) {
         $layanan->delete();
         return redirect()->route('layanans.index');
     }

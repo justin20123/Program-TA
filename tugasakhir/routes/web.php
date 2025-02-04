@@ -11,6 +11,7 @@ use App\Http\Controllers\PenggunaController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\LayananController;
 use App\Http\Controllers\OpsiDetailController;
+use App\Http\Controllers\RatingController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -66,10 +67,11 @@ Route::middleware(['auth'])->group(function () {
     //opsi detail
     Route::get('/layanans/{vendor_id}/details/{idlayanan}/{idjenisbahan}', [LayananController::class, 'detail_layanan_load'])->name('layanan.detail_layanan_load');
     Route::get('/layanans/{idvendor}/details/{idlayanan}/edit/{idjenisbahan}/{iddetail}/{idopsi}', [LayananController::class, 'edit_opsi'])->name('layanan.edit_opsi');
-    Route::get('/opsidetail/{idvendor}/{idlayanan}/{idopsi}', [OpsiDetailController::class, 'edit'])->name('opsidetail.edit');
-    Route::get('/deleteopsidetail/{idvendor}/{idlayanan}/{idopsi}', [OpsiDetailController::class, 'destroy'])->name('opsidetail.destroy');
-    Route::get('/addopsidetail/{idvendor?}/{idlayanan?}/{idopsi?}', [OpsiDetailController::class, 'create'])->name('opsidetail.create');
-    Route::put('/opsidetail/{idopsi}', [OpsiDetailController::class, 'update'])->name('opsidetail.update');
+    Route::get('/opsidetail/list/{idopsi}', [OpsiDetailController::class, 'index'])->name('opsidetail.index');
+    Route::get('/opsidetail/edit/{idopsi}', [OpsiDetailController::class, 'edit'])->name('opsidetail.edit');
+    Route::delete('/deleteopsidetail', [OpsiDetailController::class, 'destroy'])->name('opsidetail.destroy');
+    Route::get('/addopsidetail/{iddetail?}', [OpsiDetailController::class, 'create'])->name('opsidetail.create');
+    Route::put('/opsidetail/update', [OpsiDetailController::class, 'update'])->name('opsidetail.update');
     Route::post('/addopsidetail', [OpsiDetailController::class, 'store'])->name('opsidetail.store');
 
     //detail
@@ -81,7 +83,9 @@ Route::middleware(['auth'])->group(function () {
 
     //Jenis bahan
     Route::get('/vendors/{idvendor}/layanan/{idlayanan}/edit/{idjenisbahan}', [JenisBahanController::class, 'edit'])->name('layanan.edit');
-    Route::put('/jenisbahan/{idopsi}', [JenisBahanController::class, 'update'])->name('jenisbahan.update');
+    Route::post('/jenisbahan/store', [JenisBahanController::class, 'store'])->name('jenisbahan.store');
+    Route::put('/jenisbahan/update', [JenisBahanController::class, 'update'])->name('jenisbahan.update');
+    Route::delete('/jenisbahan/delete', [JenisBahanController::class, 'destroy'])->name('jenisbahan.destroy');
 
     //harga
     Route::get('/layanancetak/editharga/{idjenisbahan}', [HargaCetakController::class, 'index'])->name('harga.index');
@@ -171,21 +175,6 @@ Route::middleware(['auth'])->group(function () {
     //hapus pengantar
     Route::delete('/deletepengantar/{id}', [PenggunaController::class, 'deletePengantar'])->name('pengantar.delete');
 
-
-    Route::get('/layanancetak', function () {
-        return view('layanancetak');
-    });
-
-    Route::get('/layanancetak/fotokopi', function () {
-        return view('layanan.detail');
-    });
-    Route::get('/layanancetak/fotokopi/createdetail', function () {
-        return view('layanan.createdetail');
-    });
-    Route::get('/layanancetak/fotokopi/editdetail', function () {
-        return view('layanan.editdetail');
-    });
-    Route::get('/layanancetak/fotokopi/editdetail/edit/option', function () {
-        return view('layanan.editoption');
-    });
+    //ulasan
+    Route::get('/ulasan/{idvendor}/layanan/{idlayanan}', [RatingController::class, 'index'])->name('rating.index');
 });

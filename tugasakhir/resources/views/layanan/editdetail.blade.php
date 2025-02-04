@@ -9,6 +9,10 @@
   </ol>
 @endsection
 @section("title")
+<a href="{{ url()->previous() }}" class="px-4 py-2 text-black">
+    <i class="fas fa-arrow-left"></i>
+</a>
+<a href="{{ url()->previous() }}" class="btn btn-secondary">Kembali</a>
 <div class="h3 px-4 py-2">Pilih Jenis dan Bahan</div>
 <form action="" method="post">
     <div class="form-group">

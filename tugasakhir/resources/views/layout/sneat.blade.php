@@ -117,6 +117,13 @@
     /* The left side will be fully transparent (100%), and the right will be 50% opacity */
 }
 
+#jenis-bahan-actions .btn {
+    width: fit-content;
+    height: 40px;
+    margin: 0 10px;
+    white-space: nowrap;
+}
+
     </style>
     
     <meta charset="utf-8" />

@@ -35,7 +35,7 @@
                     placeholder="" value="{{ $harga->harga_satuan }}">
             </div>
         </div>
-        <input type="hidden" name='idjenisbahan' value="{{ $detail->id }}">
+        <input type="hidden" name='id_jenis_bahan' value="{{ $detail->id }}">
         <div style="display: flex; justify-content: center;" class="pb-5 pt-2">
           <input type="submit" value="Submit" class="btn btn-success">
         </div>

@@ -114,6 +114,7 @@ Route::middleware(['web'])->group(function () {
     
     //edit pesanan
     Route::get('/editpesanan/{idpemesanan}', [PemesananController::class, 'openeditpesanan']);
+    Route::get('/loadeditpesanan/{idpemesanan}', [PemesananController::class, 'load_editpesanan']);
     Route::post('/updatepesanantanpafile', [PemesananController::class, 'updatepesanantanpafile']);
     Route::post('/updatepesanandenganfile', [PemesananController::class, 'updatepesanandenganfile']);
 

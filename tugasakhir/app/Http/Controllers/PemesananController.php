@@ -28,7 +28,7 @@ class PemesananController extends Controller
                 $status_nota = "Menunggu diambil";
             }
         }
-         elseif ($nota->wakti_menerima_pesanan) {
+        elseif ($nota->wakti_menerima_pesanan) {
             $status_nota = "Pesanan diterima";
         } 
         else {
@@ -38,30 +38,26 @@ class PemesananController extends Controller
         return $status_nota;
     }
 
-
     public function index()
     {
         $vendor = DB::table('vendors')
             ->join('penggunas', 'penggunas.vendors_id', '=', 'vendors.id')
             ->where('penggunas.id', '=', Auth::user()->id)
-            ->select('vendors.id as idvendor')
+            ->select('vendors.id as id_vendor')
             ->first();
 
-            $vendorid = $vendor->idvendor;
+        $vendor_id = $vendor->id_vendor;
             
-        $notaData = DB::table('notas')
+        $nota_data = DB::table('notas')
             ->join('pemesanans', 'pemesanans.notas_id', '=', 'notas.id')
             ->join('penggunas', 'penggunas.email', '=', 'pemesanans.penggunas_email')
-            ->where('pemesanans.vendors_id', '=', $vendorid)
+            ->where('pemesanans.vendors_id', '=', $vendor_id)
             ->select('notas.*', 'pemesanans.id as pemesanans_id', 'penggunas.nama as nama')
             ->get();
 
-            // dd($notaData);
-
-        $notaDetail = [];
-        foreach ($notaData as $n) {
+        $nota_detail = [];
+        foreach ($nota_data as $n) {
             $n->status = $this->getStatus($n);
-
 
             $pemesanan = DB::table('pemesanans')
                 ->join('jenis_bahan_cetaks', 'jenis_bahan_cetaks.id', '=', 'pemesanans.jenis_bahan_cetaks_id')
@@ -70,121 +66,105 @@ class PemesananController extends Controller
                 ->where('pemesanans.id', '=', $n->pemesanans_id)
                 ->select('pemesanans.*', 'layanan_cetaks.satuan as satuan', 'layanan_cetaks.nama as layanan')
                 ->first();
-            // Check if the nota already exists in the detail array
-            if (!isset($notaDetail[$n->id])) {
-                $notaDetail[$n->id] = [
+
+            if (!isset($nota_detail[$n->id])) {
+                $nota_detail[$n->id] = [
                     'nota' => $n,
                     'pemesanans' => [],
                 ];
             }
-            array_push($notaDetail[$n->id]['pemesanans'], $pemesanan);
+            array_push($nota_detail[$n->id]['pemesanans'], $pemesanan);
         }
 
-        $notaDetail = array_values($notaDetail);
+        $nota_detail = array_values($nota_detail);
 
-        // dd($notaDetail);
-
-        return view('pesanan.orders', compact('notaDetail'));
+        return view('pesanan.orders', compact('nota_detail'));
     }
 
-    public function detailPesanan($vendor_id, $idnota)
+    public function detailPesanan($vendor_id, $id_nota)
     {
-        $notaData = DB::table('notas')
+        $nota_data = DB::table('notas')
             ->join('pemesanans', 'pemesanans.notas_id', '=', 'notas.id')
             ->join('penggunas', 'penggunas.email', '=', 'pemesanans.penggunas_email')
             ->where('pemesanans.vendors_id', '=', $vendor_id)
-            ->where('notas.id', '=', $idnota)
-            ->select('notas.*', 'pemesanans.id as idpemesanans', 'penggunas.nama as nama')
+            ->where('notas.id', '=', $id_nota)
+            ->select('notas.*', 'pemesanans.id as id_pemesanans', 'penggunas.nama as nama')
             ->first();
 
-        $notaDetail = [];
+        $nota_detail = [];
 
-        $pemesanans = DB::table('pemesanans')
+        $pemesanan = DB::table('pemesanans')
             ->join('jenis_bahan_cetaks', 'jenis_bahan_cetaks.id', '=', 'pemesanans.jenis_bahan_cetaks_id')
             ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
             ->join('layanan_cetaks', 'layanan_cetaks.id', '=', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id')
-            ->where('pemesanans.notas_id', '=', $idnota)
+            ->where('pemesanans.notas_id', '=', $id_nota)
             ->select('pemesanans.*', 'layanan_cetaks.satuan as satuan', 'layanan_cetaks.nama as layanan')
             ->get();
-            
-            // dd($pemesanans);
 
-        $isVerifikasiSelesai = true;
-        $isMenungguSelesai = true; 
-        $isSelesai = true;
+        $is_verifikasi_selesai = true;
+        $is_menunggu_selesai = true; 
+        $is_selesai = true;
 
-        if(!$notaData->waktu_diantar && !$notaData->waktu_tunggu_diambil){
-            $isMenungguSelesai = false; 
+        if (!$nota_data->waktu_diantar && !$nota_data->waktu_tunggu_diambil) {
+            $is_menunggu_selesai = false; 
         }
 
-        if(!$notaData->waktu_selesai){
-            $isSelesai = false; 
+        if (!$nota_data->waktu_selesai) {
+            $is_selesai = false; 
         }
 
-            foreach ($pemesanans as $p) {
-                // Fetch harga_cetak for each pemesanan
-                $harga_cetak = DB::table('harga_cetaks')
-                    ->where('id', '=', $p->harga_cetaks_id) // Assuming harga_cetak_id exists in pemesanan
-                    ->select('harga_satuan')
-                    ->first();
+        foreach ($pemesanan as $p) {
+            $harga_cetak = DB::table('harga_cetaks')
+                ->where('id', '=', $p->harga_cetaks_id) // Assuming harga_cetak_id exists in pemesanan
+                ->select('harga_satuan')
+                ->first();
 
-                $notas_progress_latest = DB::table('notas_progress')
-                    ->where('pemesanans_id','=', $p->id)
-                    ->where('notas_id','=', $p->notas_id)
-                    ->orderBy('urutan_progress', 'desc')
-                    ->select('progress')
-                    ->first();
+            $notas_progress_latest = DB::table('notas_progress')
+                ->where('pemesanans_id', '=', $p->id)
+                ->where('notas_id', '=', $p->notas_id)
+                ->orderBy('urutan_progress', 'desc')
+                ->select('progress')
+                ->first();
             
-                if ($harga_cetak) {
-                    $p->harga_satuan = $harga_cetak->harga_satuan;
-                }
+            if ($harga_cetak) {
+                $p->harga_satuan = $harga_cetak->harga_satuan;
+            }
 
-                if($p->perlu_verifikasi == 1){
-                    if ($notas_progress_latest) {
-                        $p->latest_progress = $notas_progress_latest->progress;
-                        if($notas_progress_latest->progress != 'terverifikasi'){
-                            $isVerifikasiSelesai = false;
-                        }
+            if ($p->perlu_verifikasi == 1) {
+                if ($notas_progress_latest) {
+                    $p->latest_progress = $notas_progress_latest->progress;
+                    if ($notas_progress_latest->progress != 'terverifikasi') {
+                        $is_verifikasi_selesai = false;
                     }
                 }
-
-                
-
-                
-                
-            
-                if (!isset($notaDetail[$notaData->id])) {
-                    $notaDetail[$notaData->id] = [
-                        'nota' => $notaData,
-                        'pemesanans' => [],
-                    ];
-                }
-
-                array_push($notaDetail[$notaData->id]['pemesanans'], $p);
             }
-            
-            
 
-        $notaDetail = array_values($notaDetail);
+            if (!isset($nota_detail[$nota_data->id])) {
+                $nota_detail[$nota_data->id] = [
+                    'nota' => $nota_data,
+                    'pemesanans' => [],
+                ];
+            }
+
+            array_push($nota_detail[$nota_data->id]['pemesanans'], $p);
+        }
+
+        $nota_detail = array_values($nota_detail);
         
-            
-        // dd($isVerifikasiSelesai);
-        // dd($notaDetail);
-
-        return view('pesanan.orderdetail', compact('notaDetail', 'isVerifikasiSelesai','isMenungguSelesai','isSelesai'));
+        return view('pesanan.orderdetail', compact('nota_detail', 'is_verifikasi_selesai', 'is_menunggu_selesai', 'is_selesai'));
     }
 
     public function pilihpengantar(Request $request)
     {
-        $notaData = DB::table('notas')
+        $nota_data = DB::table('notas')
             ->where('id', '=', $request->idnota)
             ->select()
             ->first();
 
         $vendor = DB::table('pemesanans')
-        ->where('notas_id', '=', $request->idnota)
-        ->select('vendors_id')
-        ->first();
+            ->where('notas_id', '=', $request->idnota)
+            ->select('vendors_id')
+            ->first();
 
         $pengantar = DB::table('penggunas')
             ->where('vendors_id', '=', $vendor->vendors_id)
@@ -197,12 +177,9 @@ class PemesananController extends Controller
             ->where('pemesanans.notas_id', '=', $request->idnota)
             ->select('penggunas.nama', 'penggunas.email')
             ->first();
-        $notaData->namaPemesan = $data_pemesan->nama;
+        $nota_data->namaPemesan = $data_pemesan->nama;
 
-        // dd($notaData);
-        // dd($pengantar);
-
-        return view('pesanan.pilihpengantar', compact('notaData', 'pengantar'));
+        return view('pesanan.pilihpengantar', compact('nota_data', 'pengantar'));
     }
 
     public function tugaskanpengantar(Request $request)
@@ -217,65 +194,48 @@ class PemesananController extends Controller
             ->select('id', 'vendors_id')
             ->get();
 
-        // foreach($pemesanans as $p){
-        //     $pesanan = Pemesanan::findOrFail($p->id);
-
-        // }
-        // $pemesanan->pengantar = $emailpengantar;
-        // $pemesanan->save();
-
         $url = '/pesanancetak2/' . $pemesanans[0]->vendors_id;
         return redirect($url);
-        // return redirect()->route('pemesanans.index', [$pemesanans[0]->vendors_id]);
     }
 
-    public function requestambil(Request $request){
+    public function requestambil(Request $request)
+    {
         $nota = Nota::findOrFail($request->idnota);
         $nota->waktu_tunggu_diambil = Carbon::now('Asia/Jakarta');
         $nota->save();
 
         $_SESSION['message'] = 'Status pesanan saat ini berhasil diubah menjadi menunggu diambil';
 
-        return ['status'=>'done'];
+        return ['status' => 'done'];
     }
     
-    public function selesaikanpesanan(Request $request){
+    public function selesaikanpesanan(Request $request)
+    {
         $nota = Nota::findOrFail($request->idnota);
         $nota->waktu_selesai = Carbon::now('Asia/Jakarta');
         $nota->save();
 
         $_SESSION['message'] = 'Pesanan berhasil diselesaikan';
 
-        return ['status'=>'done'];
+        return ['status' => 'done'];
     }
 
-    public function lihatcatatan($idpemesanan) {
-        $pemesanan = Pemesanan::find($idpemesanan);
+    public function lihatcatatan($id_pemesanan) {
+        $pemesanan = Pemesanan::find($id_pemesanan);
         $layanan = DB::table('vendors_has_jenis_bahan_cetaks')
                 ->join('layanan_cetaks', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', 'layanan_cetaks.id')
                 ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $pemesanan->jenis_bahan_cetaks_id)
                 ->select('layanan_cetaks.nama as namalayanan', 'layanan_cetaks.satuan as satuanlayanan')
                 ->first();
-        return ["jumlah"=> $pemesanan->jumlah,"catatan"=>$pemesanan->catatan, "layanan" =>$layanan->namalayanan, "satuan" => $layanan->satuanlayanan];
+        return ["jumlah" => $pemesanan->jumlah, "catatan" => $pemesanan->catatan, "layanan" => $layanan->namalayanan, "satuan" => $layanan->satuanlayanan];
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         $notas = Nota::all();
         return view('pemesanans.create', compact('notas'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -293,39 +253,16 @@ class PemesananController extends Controller
         return redirect()->route('pemesanans.index');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
-        // Debugging to see if the method is hit
-        $url = '/pesanancetak/' . $id;
-        return redirect($url); // This will show the ID passed in the URL
+        return view('notas.show', compact('nota'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit($id)
     {
-        $notas = Nota::all();
-        return view('pemesanans.edit', compact('pemesanan', 'notas'));
+        return view('notas.edit', compact('nota'));
     }
 
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, Pemesanan $pemesanan)
     {
         $request->validate([
@@ -343,12 +280,6 @@ class PemesananController extends Controller
         return redirect()->route('pemesanans.index');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy(Pemesanan $pemesanan)
     {
         $pemesanan->delete();

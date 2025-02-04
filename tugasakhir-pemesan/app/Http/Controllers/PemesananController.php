@@ -116,8 +116,9 @@ class PemesananController extends Controller
             ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
             ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $idlayanan)
             ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $idjenisbahan)
-            ->select('detail_cetaks.*', 'opsi_details.id as idopsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan')
+            ->select('detail_cetaks.*', 'jenis_bahan_cetaks.nama' , 'opsi_details.id as idopsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan')
             ->get();
+            // dd($detailcetaks);
 
         $opsidetail = [];
         foreach ($detailcetaks as $detail) {
@@ -137,12 +138,73 @@ class PemesananController extends Controller
         }
 
         $opsidetail = array_values($opsidetail);
+        // dd($opsidetail);
 
         $hargacetaks = DB::table('harga_cetaks')
             ->where('id_bahan_cetaks', '=', $idjenisbahan)
             ->get();
 
         return view('pesanan.editpesanan', compact('pemesanan', 'jumlahcopy', 'idjenisbahan', 'jenisbahan', 'opsidetail', 'hargacetaks', 'layanan'));
+    }
+
+    public function load_editpesanan($idjenisbahan){
+
+        
+
+        $layanan = DB::table('vendors_has_jenis_bahan_cetaks')
+            ->join('layanan_cetaks', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', 'layanan_cetaks.id')
+            ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $idjenisbahan)
+            ->select('layanan_cetaks.id as id', 'layanan_cetaks.nama as nama', 'layanan_cetaks.satuan as satuan', 'layanan_cetaks.kesetaraan_pcs as kesetaraan_pcs','vendors_has_jenis_bahan_cetaks.vendors_id as idvendor')
+            ->first();
+
+        $vendor_id = $layanan->idvendor;
+        $idlayanan = $layanan->id;
+
+        $detailcetaks = DB::table('detail_cetaks')
+            ->join('jenis_bahan_cetaks', 'detail_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
+            ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
+            ->leftJoin('opsi_details', 'detail_cetaks.id', '=', 'opsi_details.detail_cetaks_id')
+            ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
+            ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $idlayanan)
+            ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $idjenisbahan)
+            ->select('detail_cetaks.*', 'jenis_bahan_cetaks.nama' , 'opsi_details.id as idopsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan')
+            ->get();
+            // dd($detailcetaks);
+
+        $opsidetail = [];
+        foreach ($detailcetaks as $detail) {
+            if (!isset($opsidetail[$detail->id])) {
+                $opsidetail[$detail->id] = [
+                    'detail' => $detail,
+                    'opsi' => [],
+                ];
+            }
+            if ($detail->idopsi) {
+                $opsidetail[$detail->id]['opsi'][] = [
+                    'id' => $detail->idopsi,
+                    'opsi' => $detail->opsi,
+                    'biaya_tambahan' => $detail->biaya_tambahan,
+                ];
+            }
+        }
+
+        $opsidetail = array_values($opsidetail);
+        // dd($opsidetail);
+
+        $hargacetaks = DB::table('harga_cetaks')
+            ->where('id_bahan_cetaks', '=', $idjenisbahan)
+            ->get();
+
+            $response = [
+                'result' => 'success',
+                'data' => [
+                    'opsidetail' => $opsidetail, // This should be an array of options details
+                    'listharga' => $hargacetaks, // This should be an array of price lists
+                    'deskripsi' => $layanan, // Description or any other relevant data
+                ],
+            ];
+
+            return response()->json($response);
     }
 
     public function submitpesanan(Request $request)
@@ -272,50 +334,50 @@ class PemesananController extends Controller
 
 
         $arrdetail = array();
-        $pees = DB::table('pemesanans')
-            ->where('id', '=', $request->input('idpemesanan'))
-            ->first();
+        // $pees = DB::table('pemesanans')
+        //     ->where('id', '=', $request->input('idpemesanan'))
+        //     ->first();
 
-        $jenisbahan = DB::table('jenis_bahan_cetaks')
-            ->where('id', '=', $pees->jenis_bahan_cetaks_id)
-            ->first();
-        array_push($arrdetail, "jenis:" . $jenisbahan->nama);
-        $layanan_id = DB::table('vendors_has_jenis_bahan_cetaks')
-            ->where('jenis_bahan_cetaks_id', '=', $jenisbahan->id)
-            ->first();
-        $layanan_nama = DB::table('layanan_cetaks')
-            ->where('id', '=', $layanan_id->layanan_cetaks_id)
-            ->first();
-        array_push($arrdetail, "layanan:" . $layanan_nama->nama);
-        dd($arrdetail);
+        // $jenisbahan = DB::table('jenis_bahan_cetaks')
+        //     ->where('id', '=', $request->input('jenis_bahan_cetaks_id'))
+        //     ->first();
+        // array_push($arrdetail, "jenis:" . $jenisbahan->nama);
+        // $layanan_id = DB::table('vendors_has_jenis_bahan_cetaks')
+        //     ->where('jenis_bahan_cetaks_id', '=', $request->input('jenis_bahan_cetaks_id'))
+        //     ->first();
+        // $layanan_nama = DB::table('layanan_cetaks')
+        //     ->where('id', '=', $layanan_id->layanan_cetaks_id)
+        //     ->first();
+        // array_push($arrdetail, "layanan:" . $layanan_nama->nama);
+        // dd($arrdetail);
 
         if ($idopsidetail) {
             foreach ($idopsidetail as $key => $id) {
                 // dd($id);
                 // cek info opsi
 
-                $p = DB::table('opsi_details')
-                    ->where('id', '=', $id)
-                    ->first();
-                // dd($p);
-                $detail = DB::table('detail_cetaks')
-                    ->where('id', '=', $p->detail_cetaks_id)
-                    ->first();
-                $jenisbahan = DB::table('jenis_bahan_cetaks')
-                    ->where('id', '=', $detail->jenis_bahan_cetaks_id)
-                    ->first();
-                $detail->jenisbahan = $jenisbahan->nama;
-                $layanan_id = DB::table('vendors_has_jenis_bahan_cetaks')
-                    ->where('jenis_bahan_cetaks_id', '=', $jenisbahan->id)
-                    ->first();
-                $layanan_nama = DB::table('layanan_cetaks')
-                    ->where('id', '=', $layanan_id->layanan_cetaks_id)
-                    ->first();
-                $detail->layanan = $layanan_nama->nama;
-                array_push($arrdetail, $detail);
-                // }
+                // $p = DB::table('opsi_details')
+                //     ->where('id', '=', $id)
+                //     ->first();
+                // // dd($p);
+                // $detail = DB::table('detail_cetaks')
+                //     ->where('id', '=', $p->detail_cetaks_id)
+                //     ->first();
+                // $jenisbahan = DB::table('jenis_bahan_cetaks')
+                //     ->where('id', '=', $detail->jenis_bahan_cetaks_id)
+                //     ->first();
+                // $detail->jenisbahan = $jenisbahan->nama;
+                // $layanan_id = DB::table('vendors_has_jenis_bahan_cetaks')
+                //     ->where('jenis_bahan_cetaks_id', '=', $jenisbahan->id)
+                //     ->first();
+                // $layanan_nama = DB::table('layanan_cetaks')
+                //     ->where('id', '=', $layanan_id->layanan_cetaks_id)
+                //     ->first();
+                // $detail->layanan = $layanan_nama->nama;
+                // array_push($arrdetail, $detail);
+                // // }
 
-                dd($arrdetail);
+                // dd($arrdetail);
 
                 $p = DB::table('opsi_details')
                     ->where('id', '=', $id)
@@ -357,6 +419,15 @@ class PemesananController extends Controller
         $pemesanan->updated_at = Carbon::now('Asia/Jakarta');
 
         $pemesanan->save();
+
+        // dd($pemesanan);
+
+        $opsidetail = DB::table('pemesanans_has_opsi_details')
+        ->where('pemesanans_id', '=', $request->input('idpemesanan'))
+        ->get();
+
+        // dd($opsidetail);
+
         return ["idpemesanan" => $request->input('idpemesanan'), "idvendor" => $request->input('vendors_id')];
     }
 

@@ -27,55 +27,50 @@ class PenggunaController extends Controller
         return view('penggunas.index', compact('penggunas'));
     }
 
-    public function indexPegawai($idvendor){
+    public function indexPegawai($id_vendor){
         $pegawais = DB::table('penggunas')
-        ->where('vendors_id', '=', $idvendor)
+        ->where('vendors_id', '=', $id_vendor)
         ->where('deleted_at', '=', null)
         ->where('role', '=', 'pegawai')
         ->select()
         ->get();
 
-        $datavendor = DB::table('vendors')
-        ->where('id','=',$idvendor)
+        $data_vendor = DB::table('vendors')
+        ->where('id','=',$id_vendor)
         ->select('nama' , 'id')
         ->first();
-
-        // dd($pegawais);
         
-        return view('pegawai.pegawai', compact('pegawais','datavendor'));
+        return view('pegawai.pegawai', compact('pegawais','data_vendor'));
     }
 
-    public function indexPengantar($idvendor){
+    public function indexPengantar($id_vendor){
         $pengantars = DB::table('penggunas')
-        ->where('vendors_id', '=', $idvendor)
+        ->where('vendors_id', '=', $id_vendor)
         ->where('deleted_at', '=', null)
         ->where('role', '=', 'pengantar')
         ->select()
         ->get();
 
-        $datavendor = DB::table('vendors')
-        ->where('id','=',$idvendor)
+        $data_vendor = DB::table('vendors')
+        ->where('id','=',$id_vendor)
         ->select('nama' , 'id')
         ->first();
-
-        // dd($pengantars);
         
-        return view('pengantar.pengantar', compact('pengantars','datavendor'));
+        return view('pengantar.pengantar', compact('pengantars','data_vendor'));
     }
 
-    public function createPegawai($idvendor){
-        $vendor = [$idvendor];
+    public function createPegawai($id_vendor){
+        $vendor = [$id_vendor];
         return view('pegawai.tambahpegawai',compact('vendor'));
     }
 
-    public function createPengantar($idvendor){
-        $vendor = [$idvendor];
+    public function createPengantar($id_vendor){
+        $vendor = [$id_vendor];
         return view('pengantar.tambahpengantar',compact('vendor'));
     }
 
     public function storePegawai(Request $request){
         try {
-
             $request->validate([
                 'nama' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
@@ -90,7 +85,6 @@ class PenggunaController extends Controller
         $user = Pengguna::where('email', '=',$request->input('email'))->first();
         if($user){
                 return redirect()->back()->withInput()->with('error', 'Email ini sudah terdaftar');
-
         }
         if($request->password == $request->confirmpassword){
             $pegawai = new Pengguna();
@@ -108,13 +102,10 @@ class PenggunaController extends Controller
         else{
             return redirect()->back()->with('error', 'Password dan Confirm Password harus sama');
         }
-        
-
     }
 
     public function storePengantar(Request $request){
         try {
-
             $request->validate([
                 'nama' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
@@ -129,7 +120,6 @@ class PenggunaController extends Controller
         $user = Pengguna::where('email', '=',$request->input('email'))->first();
         if($user){
                 return redirect()->back()->withInput()->with('error', 'Email ini sudah terdaftar');
-
         }
 
         if($request->password == $request->confirmpassword){
@@ -148,13 +138,11 @@ class PenggunaController extends Controller
         else{
             return redirect()->back()->with('error', 'Password dan Confirm Password harus sama');
         }
-        
-
     }
 
-    public function editPegawai($idpegawai){
+    public function editPegawai($id_pegawai){
         $pegawai = DB::table('penggunas')
-        ->where('id','=', $idpegawai)
+        ->where('id','=', $id_pegawai)
         ->where('vendors_id','=', Auth::user()->vendors_id)
         ->where('role','=', 'pegawai')
         ->first();
@@ -162,9 +150,8 @@ class PenggunaController extends Controller
         return view('pegawai.editpegawai', compact('pegawai') );
     }
 
-    public function updatePegawai(Request $request, $idpegawai){
+    public function updatePegawai(Request $request, $id_pegawai){
         try {
-
             $request->validate([
                 'nama' => 'required|string|max:255', //nanti disesuaikan dgn db
                 'nomor_telepon' => 'required|string|regex:/^08[0-9]{6,}$/',
@@ -173,18 +160,17 @@ class PenggunaController extends Controller
             return back()->withInput()->with('error', $e->getMessage());
         }
 
-        $pegawai = Pengguna::findOrFail($idpegawai);
+        $pegawai = Pengguna::findOrFail($id_pegawai);
         $pegawai->nama = $request->input('nama');
         $pegawai->nomor_telepon = $request->input('nomor_telepon');
         $pegawai->save();
 
         return redirect()->route('pegawai.index',[$request->idvendor]);
-
     }
 
-    public function editPengantar($idpengantar){
+    public function editPengantar($id_pengantar){
         $pengantar = DB::table('penggunas')
-        ->where('id','=', $idpengantar)
+        ->where('id','=', $id_pengantar)
         ->where('vendors_id','=', Auth::user()->vendors_id)
         ->where('role','=', 'pengantar')
         ->first();
@@ -192,9 +178,8 @@ class PenggunaController extends Controller
         return view('pengantar.editpengantar', compact('pengantar') );
     }
 
-    public function updatePengantar(Request $request, $idpengantar){
+    public function updatePengantar(Request $request, $id_pengantar){
         try {
-
             $request->validate([
                 'nama' => 'required|string|max:255', //nanti disesuaikan dgn db
                 'nomor_telepon' => 'required|string|regex:/^08[0-9]{6,}$/',
@@ -203,7 +188,7 @@ class PenggunaController extends Controller
             return back()->withInput()->with('error', $e->getMessage());
         }
 
-        $pengantar = Pengguna::findOrFail($idpengantar);
+        $pengantar = Pengguna::findOrFail($id_pengantar);
         $pengantar->nama = $request->input('nama');
         $pengantar->nomor_telepon = $request->input('nomor_telepon');
         $pengantar->save();
@@ -211,23 +196,11 @@ class PenggunaController extends Controller
         return redirect()->route('pengantar.index',[$request->idvendor]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
-        
         return view('penggunas.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -273,36 +246,16 @@ class PenggunaController extends Controller
         return redirect()->route('pengantar.index',[$request->idvendor]);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function show(Pengguna $pengguna)
     {
         return view('penggunas.show', compact('pengguna'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function edit(Pengguna $pengguna)
     {
         return view('penggunas.edit', compact('pengguna'));
     }
 
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, Pengguna $pengguna)
     {
         $request->validate([
@@ -316,12 +269,6 @@ class PenggunaController extends Controller
         return redirect()->route('penggunas.index');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy(Pengguna $pengguna)
     {
         $pengguna->delete();

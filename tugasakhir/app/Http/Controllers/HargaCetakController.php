@@ -20,14 +20,15 @@ class HargaCetakController extends Controller
         ->select('*')
         ->get();
 
-        // dd($hargas);
-
         $detail = DB::table('layanan_cetaks')
         ->join('vendors_has_jenis_bahan_cetaks','vendors_has_jenis_bahan_cetaks.layanan_cetaks_id','=','layanan_cetaks.id')
         ->join('jenis_bahan_cetaks','vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id','=','jenis_bahan_cetaks.id')
         ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id','=',$id)
-        ->select('layanan_cetaks.satuan as satuan','jenis_bahan_cetaks.nama as namajenisbahan', 'jenis_bahan_cetaks.id as idjenisbahan')
+        ->select('layanan_cetaks.satuan as satuan','jenis_bahan_cetaks.nama as nama_jenis_bahan', 'jenis_bahan_cetaks.id as id_jenis_bahan', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id as id_layanan_cetak', 'vendors_has_jenis_bahan_cetaks.vendors_id as id_vendor')
         ->first();
+
+
+
         return view('layanan.opsiharga', compact('hargas','detail'));
     }
 
@@ -54,25 +55,25 @@ class HargaCetakController extends Controller
      */
     public function store(Request $request)
     {
-        $hargaCetak = new HargaCetak();
+        $harga_cetak = new HargaCetak();
 
-        $hargaCetak->id_bahan_cetaks = $request->input('idjenisbahan');
-        $hargaCetak->jumlah_cetak_minimum = $request->input('min');
-        $hargaCetak->jumlah_cetak_maksimum =$request->input('max');
-        $hargaCetak->harga_satuan = $request->input('harga');
+        $harga_cetak->id_bahan_cetaks = $request->input('id_jenis_bahan');
+        $harga_cetak->jumlah_cetak_minimum = $request->input('min');
+        $harga_cetak->jumlah_cetak_maksimum = $request->input('max');
+        $harga_cetak->harga_satuan = $request->input('harga');
 
-        $hargaCetak->save();    
+        $harga_cetak->save();    
 
-        return redirect()->route('harga.index', $request->input('idjenisbahan'));
+        return redirect()->route('harga.index', $request->input('id_jenis_bahan'));
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\HargaCetak  $hargaCetak
+     * @param  \App\Models\HargaCetak  $harga_cetak
      * @return \Illuminate\Http\Response
      */
-    public function show(HargaCetak $hargaCetak)
+    public function show(HargaCetak $harga_cetak)
     {
         //
     }
@@ -80,7 +81,7 @@ class HargaCetakController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\HargaCetak  $hargaCetak
+     * @param  \App\Models\HargaCetak  $harga_cetak
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
@@ -102,34 +103,32 @@ class HargaCetakController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\HargaCetak  $hargaCetak
+     * @param  \App\Models\HargaCetak  $harga_cetak
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
     {
-        $hargaCetak = HargaCetak::findOrFail($id);
+        $harga_cetak = HargaCetak::findOrFail($id);
 
-        $hargaCetak->jumlah_cetak_minimum = $request->input('min');
-        $hargaCetak->jumlah_cetak_maksimum =$request->input('max');
-        $hargaCetak->harga_satuan = $request->input('harga');
+        $harga_cetak->jumlah_cetak_minimum = $request->input('min');
+        $harga_cetak->jumlah_cetak_maksimum = $request->input('max');
+        $harga_cetak->harga_satuan = $request->input('harga');
 
-        $hargaCetak->save();
+        $harga_cetak->save();
         
-        // dd($hargaCetak);
-
-        return redirect()->route('harga.index', $request->input('idjenisbahan'));
+        return redirect()->route('harga.index', $request->input('id_jenis_bahan'));
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\HargaCetak  $hargaCetak
+     * @param  \App\Models\HargaCetak  $harga_cetak
      * @return \Illuminate\Http\Response
      */
     public function destroy(Request $request)
     {
-        $hargaCetak = HargaCetak::findOrFail($request->input('idharga'));
-        $hargaCetak->delete();
-        return redirect()->route('harga.index', $request->input('idjenisbahan'));
+        $harga_cetak = HargaCetak::findOrFail($request->input('id_harga'));
+        $harga_cetak->delete();
+        return redirect()->route('harga.index', $request->input('id_jenis_bahan'));
     }
 }

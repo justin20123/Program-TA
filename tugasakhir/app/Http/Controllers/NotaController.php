@@ -17,8 +17,8 @@ class NotaController extends Controller
      * @return \Illuminate\Http\Response
      */
 
-    public function terimaPesanan($idnota){
-        $nota = Nota::findOrFail($idnota);
+    public function terimaPesanan($id_nota){
+        $nota = Nota::findOrFail($id_nota);
         $nota->waktu_menerima_pesanan = Carbon::now('Asia/Jakarta');
         $nota->save();
 
@@ -30,12 +30,12 @@ class NotaController extends Controller
             'fileperubahan' => 'required|file|mimes:pdf,jpg,jpeg,png,gif|max:20480',   
             'idpemesanan' => 'required',
         ]);
-        $idnota = DB::table('pemesanans')
+        $id_nota = DB::table('pemesanans')
         ->where('id','=', $request->idpemesanan)
         ->select('notas_id')
         ->first();
 
-        $id_nota = $idnota->notas_id;
+        $id_nota = $id_nota->notas_id;
 
         $notas_progress_latest = DB::table('notas_progress')
         ->where('pemesanans_id','=', $request->idpemesanan)
@@ -49,7 +49,7 @@ class NotaController extends Controller
 
         $existing_progress = DB::table('notas_progress')
             ->where('pemesanans_id', '=', $request->idpemesanan)
-            ->where('notas_id', '=', $request->idnota)
+            ->where('notas_id', '=', $id_nota)
             ->where('urutan_progress', '=', $latest_progress)
             ->exists();
 
@@ -58,16 +58,16 @@ class NotaController extends Controller
         }
 
         $file = $request->file('fileperubahan');
-        $fileName = $latest_progress . '.pdf';
+        $file_name = $latest_progress . '.pdf';
 
         $directory = base_path('../verifikasi_file/'. $request->idpemesanan);
 
         if (!file_exists($directory)) {
             mkdir($directory, 0755, true); //0755: pemilik = rwx; grup, lainnya = rx (tidak bisa write)
         }
-        $file->move($directory, $fileName);
+        $file->move($directory, $file_name);
 
-        $relativePath = 'verifikasi_file/' . $request->idpemesanan . '/' . $fileName;
+        $relative_path = 'verifikasi_file/' . $request->idpemesanan . '/' . $file_name;
 
         $nota_progress = new NotaProgress();
         $nota_progress->pemesanans_id = $request->idpemesanan;
@@ -75,7 +75,7 @@ class NotaController extends Controller
         $nota_progress->urutan_progress = $latest_progress;
         $nota_progress->waktu_progress = Carbon::now('Asia/Jakarta');
         $nota_progress->progress = 'menunggu verifikasi';
-        $nota_progress->url_ubah_file = $relativePath;
+        $nota_progress->url_ubah_file = $relative_path;
         
         $nota_progress->save();
 
@@ -84,12 +84,12 @@ class NotaController extends Controller
 
     public function lihatperubahan(Request $request){
 
-        $idnota = DB::table('pemesanans')
+        $id_nota = DB::table('pemesanans')
         ->where('id','=', $request->idpemesanan)
         ->select('notas_id')
         ->first();
 
-        $id_nota = $idnota->notas_id;
+        $id_nota = $id_nota->notas_id;
         
 
         $notas_progress_latest = DB::table('notas_progress')
@@ -202,7 +202,7 @@ class NotaController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\Models\Nota  $nota
      * @return \Illuminate\Http\Response
      */
     public function destroy(Nota $nota)
