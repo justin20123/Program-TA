@@ -36,7 +36,7 @@
     </div>
 </div>
 
-<h3 class="text-center p-4">Pengantar {{$datavendor->nama}}</h1>
+<h3 class="text-center p-4">Pengantar {{$data_vendor->nama}}</h1>
   
 <table class="table">
     <thead>
@@ -64,7 +64,7 @@
                     <a href="/editpengantar/{{$p->id}}" class="btn btn-primary">Edit Pengantar</a>
                     <button type="button" class="btn btn-danger btn-sm mx-2 delete-button" 
                     data-id="{{$p->id}}" 
-                    data-vendor="{{$datavendor->id }}"  
+                    data-vendor="{{$data_vendor->id }}"  
                     data-toggle="modal" 
                     data-target="#confirmDeleteModal">Delete
         </button>
@@ -75,7 +75,7 @@
     @endforeach
     </tbody>
 </table>
-<a href="/addpengantar/{{$datavendor->id}}" class="btn btn-success">Tambah Pengantar</a>
+<a href="/addpengantar/{{$data_vendor->id}}" class="btn btn-success">Tambah Pengantar</a>
 @endsection
 
 @section('script')

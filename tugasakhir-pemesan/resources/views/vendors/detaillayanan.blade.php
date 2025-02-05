@@ -75,6 +75,7 @@
                                 <div class="form-group">
                                     <label class="font-weight-bold">{{ $od['detail']->value }}</label>
                                     <div class="select-container">
+                                        @if(count($od['opsi'])> 0)
                                         <select class="form-control custom-select px-4"
                                             name="opsidetail-{{ $key }}" id="opsidetail-{{ $key }}">
                                             @foreach ($od['opsi'] as $o)
@@ -82,6 +83,9 @@
                                                     {{ $o['biaya_tambahan'] }})</option>
                                             @endforeach
                                         </select>
+                                        @else
+                                        <p>Tidak ada opsi yang tersedia</p>
+                                        @endif
                                         <span class="caret-down-icon"><i class="fas fa-caret-down"></i></span>
                                     </div>
                                 </div>
@@ -171,10 +175,10 @@
                             @if ($key < 3)
                                 <div class="mb-4 pb-3 border-bottom">
                                     <div class="d-flex justify-content-between">
-                                        <h6 class="fw-bold mb-0">{{ $review->pemesan }}</h6>
+                                        <h6 class="fw-bold mb-0">{{ $r->pemesan }}</h6>
                                         <span class="text-warning">
                                             @for ($i = 0; $i < 5; $i++)
-                                                @if ($i < round($review->rating))
+                                                @if ($i < round($r->rating))
                                                     &#9733;
                                                 @else
                                                     &#9734;
@@ -183,9 +187,9 @@
                                         </span>
                                     </div>
                                     <small
-                                        class="text-secondary d-block mb-2">{{ $review->waktu_selesai_formatted }}</small>
+                                        class="text-secondary d-block mb-2">{{ $r->waktu_selesai_formatted }}</small>
                                     <p style="line-height: 1.7;">
-                                        {{ $review->ulasan }}
+                                        {{ $r->ulasan }}
                                     </p>
                                 </div>
                             @endif

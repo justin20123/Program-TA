@@ -74,6 +74,15 @@
                 <tbody>
                     @foreach ($pemesanans as $p)
                         <tr>
+                            @if($p->status == 'deleted')
+                             <td colspan="9">
+                                    <div class="alert alert-warning" role="alert">
+                                        <p class="p">Jenis bahan {{$p->nama_jenis_bahan}} untuk pesanan {{ $p->layanan }} - {{ $p->jumlah }} {{$p->satuan}} sudah tidak tersedia</p>
+                                        <a href="/editpesanan/{{ $p->id }}" class="btn btn-link">Klik untuk ubah pesanan</a>
+                                    </div>
+                                </td>
+                            
+                            @else
                             <td>
                                 <input type="checkbox" id="item-{{ $p->id }}" value="{{ $p->id }}" checked />
                             </td>
@@ -115,11 +124,13 @@
                                     data-layanan="{{ $p->layanan }}" data-jumlah="{{ $p->jumlah }}"
                                     data-satuan="{{ $p->satuan }}" data-idvendor="{{ $p->vendors_id }}">Hapus</button>
                             </td>
-                        </tr>
+                        
                         <input type="hidden" name="biaya_tambahan-{{ $p->id }}"
                             id="biaya_tambahan-{{ $p->id }}" value="{{ $p->biaya_tambahan }}">
                         <input type="hidden" name="jumlah-{{ $p->id }}" id="jumlah-{{ $p->id }}"
                             value="{{ $p->jumlah }}">
+                            @endif
+                        </tr>
                     @endforeach
 
 

@@ -64,7 +64,7 @@
                     <button class="btn btn-primary close">Batalkan</button>
                     <form action="/pilihpengantar" method="POST">
                         @csrf
-                        <input type="hidden" name="idnota" id="idnota" value="{{ $notaDetail[0]['nota']->id }}">
+                        <input type="hidden" name="idnota" id="idnota" value="{{ $nota_detail[0]['nota']->id }}">
 
                         <input type="submit" value="Submit" class="btn btn-primary">
                     </form>
@@ -85,7 +85,7 @@
                     <p>Apakah anda sudah memastikan semua produk selesai?</p>
                     <button class="btn btn-primary close">Batalkan</button>
                     <button id="btnAmbilModal" class="btn btn-primary"
-                        data-idnota="{{ $notaDetail[0]['nota']->id }}">Sudah</button>
+                        data-idnota="{{ $nota_detail[0]['nota']->id }}">Sudah</button>
                 </div>
             </div>
         </div>
@@ -104,7 +104,7 @@
                         dapat menurunkan rating vendor anda bahkan membuat vendor anda diblokir</p>
                     <button class="btn btn-primary close">Batalkan</button>
                     <button id="btnSelesaiModal" class="btn btn-primary"
-                        data-idnota="{{ $notaDetail[0]['nota']->id }}">Sudah</button>
+                        data-idnota="{{ $nota_detail[0]['nota']->id }}">Sudah</button>
                 </div>
             </div>
         </div>
@@ -139,7 +139,7 @@
     @endif
 
     <h3 class="text-center p-4">Pesanan Vendor Anda</h1>
-        <h5 class="text-center">{{ $notaDetail[0]['nota']->nama }}</h2>
+        <h5 class="text-center">{{ $nota_detail[0]['nota']->nama }}</h2>
             <div class="stepper">
                 <div class="step-item active">
                     <div class="step">
@@ -153,21 +153,21 @@
                         <span class="step-title">Diproses</span>
                     </div>
                 </div>
-                @if (!$notaDetail[0]['nota']->waktu_tunggu_diambil && !$notaDetail[0]['nota']->waktu_diantar)
+                @if (!$nota_detail[0]['nota']->waktu_tunggu_diambil && !$nota_detail[0]['nota']->waktu_diantar)
                     <div class="step-item">
                     @else
                         <div class="step-item active">
                 @endif
                 <div class="step">
                     <span class="step-number">3</span>
-                    @if ($notaDetail[0]['nota']->opsi_pengambilan == 'diantar')
+                    @if ($nota_detail[0]['nota']->opsi_pengambilan == 'diantar')
                         <span class="step-title">Sedang Diantar</span>
-                    @elseif ($notaDetail[0]['nota']->opsi_pengambilan == 'diambil')
+                    @elseif ($nota_detail[0]['nota']->opsi_pengambilan == 'diambil')
                         <span class="step-title">Menunggu Diambil</span>
                     @endif
                 </div>
             </div>
-            @if (!$notaDetail[0]['nota']->waktu_selesai)
+            @if (!$nota_detail[0]['nota']->waktu_selesai)
                 <div class="step-item">
                 @else
                     <div class="step-item active">
@@ -180,9 +180,9 @@
             </div>
             <div class="container-xxl pb-container" style="width: 85%">
                 <div class="progress" style="width: 100%">
-                    @if (!$notaDetail[0]['nota']->waktu_tunggu_diambil && !$notaDetail[0]['nota']->waktu_diantar)
+                    @if (!$nota_detail[0]['nota']->waktu_tunggu_diambil && !$nota_detail[0]['nota']->waktu_diantar)
                         <div class="progress-bar" style="width: 35%"></div>
-                    @elseif (!$notaDetail[0]['nota']->waktu_selesai)
+                    @elseif (!$nota_detail[0]['nota']->waktu_selesai)
                         <div class="progress-bar" style="width: 65.75%"></div>
                     @else
                         <div class="progress-bar" style="width: 100%"></div>
@@ -196,7 +196,7 @@
                         <th>Image</th>
                         <th>Item</th>
                         <th>Catatan</th>
-                        @if (!$isVerifikasiSelesai)
+                        @if (!$is_verifikasi_selesai)
                             <th>Action</th>
                         @endif
 
@@ -204,7 +204,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($notaDetail[0]['pemesanans'] as $p)
+                    @foreach ($nota_detail[0]['pemesanans'] as $p)
                         <tr class="justify-content-between">
                             <td>
                                 <img class="od-image"
@@ -250,19 +250,19 @@
                     @endforeach
                 </tbody>
             </table>
-            @if ($isSelesai)
+            @if ($is_selesai)
                 <p class="text-center my-5">Pesanan Sudah Selesai</p>
-            @elseif ($isMenungguSelesai)
+            @elseif ($is_menunggu_selesai)
                 <button class="btn btn-primary text-center my-5" id="btnSelesai">Mark Selesai</button>
             @else
-                @if ($notaDetail[0]['nota']->opsi_pengambilan == 'diantar')
-                    @if ($isVerifikasiSelesai)
+                @if ($nota_detail[0]['nota']->opsi_pengambilan == 'diantar')
+                    @if ($is_verifikasi_selesai)
                         <button class="btn btn-primary text-center my-5" id="btnAntar">Antar</button>
                     @else
                         <button class="btn btn-primary text-center my-5 disabled">Antar</button>
                     @endif
                 @else
-                    @if ($isVerifikasiSelesai)
+                    @if ($is_verifikasi_selesai)
                         <button class="btn btn-primary text-center my-5" id="btnAmbil">Request Ambil</button>
                     @else
                         <button class="btn btn-primary text-center my-5 disabled">Request Ambil</button>

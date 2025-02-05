@@ -53,9 +53,14 @@ class LayananController extends Controller
         ->where('pemesanans.vendors_id', '=', $vendor_id)
         ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $layanan_id)
         ->whereNotNull('ratings.nilai')
-        ->count('notas.id');
-
-        return $notas;
+        ->select('notas.id')
+        ->distinct()
+        ->get();
+        $total = 0;
+        foreach($notas as $n){
+            $total++;
+        }
+        return $total;
     }
 
     public function index()
@@ -63,6 +68,7 @@ class LayananController extends Controller
         $layanans = DB::table('layanan_cetaks')
             ->join('vendors_has_jenis_bahan_cetaks', 'layanan_cetaks.id', '=', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id')
             ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', Auth::user()->vendors_id)
+
             ->select('layanan_cetaks.*')->distinct()
             ->get();
         if(count($layanans) == 0){
@@ -86,6 +92,7 @@ class LayananController extends Controller
         ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
         ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
         ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $id_layanan)
+        ->where('jenis_bahan_cetaks.deleted_at', '=', null)
         ->select('jenis_bahan_cetaks.id as id_jenis_bahan', 'jenis_bahan_cetaks.nama as nama_jenis_bahan', 'jenis_bahan_cetaks.deskripsi as deskripsi', 'vendors_has_jenis_bahan_cetaks.vendors_id as id_vendor', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id as id_layanan')
         ->get();
 
@@ -96,6 +103,7 @@ class LayananController extends Controller
         ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
         ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $id_layanan)
         ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $jenis_bahan[0]->id_jenis_bahan)
+        ->where('jenis_bahan_cetaks.deleted_at', '=', null)
         ->select('detail_cetaks.*', 'opsi_details.id as id_opsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan')
         ->get();
 
@@ -147,6 +155,7 @@ class LayananController extends Controller
         ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
         ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $id_layanan)
         ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $id_jenis_bahan)
+        ->where('jenis_bahan_cetaks.deleted_at', '=', null)
         ->select('detail_cetaks.*', 'opsi_details.id as id_opsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan')
         ->get();
 
@@ -184,6 +193,7 @@ class LayananController extends Controller
         ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
         ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $id_layanan)
         ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $id_jenis_bahan)
+        ->where('vendors_has_jenis_bahan_cetaks.deleted_at', '=', null)
         ->where('detail_cetaks.id', '=', $id_detail)
         ->where('opsi_details.id', '=', $id_opsi)
         ->select('detail_cetaks.*', 'opsi_details.id as id_opsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan', 'detail_cetaks.value as nama_detail')

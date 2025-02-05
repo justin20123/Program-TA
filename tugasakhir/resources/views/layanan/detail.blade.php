@@ -141,7 +141,7 @@
         </li>
         <li class="list-inline-item h6">({{ $layanan['total_nota'] }})</li>
     </ul>
-    <a class="px-4" href="/ulasan/{{ $jenis_bahan[0]->id_vendor }}/layanan/{{ $jenis_bahan[0]->id_layanan }}">Lihat review</a>
+    <a class="px-4" href="/ulasan/{{ $jenis_bahan[0]->id_vendor }}/layanan/{{ $jenis_bahan[0]->id_layanan }}">Lihat ulasan</a>
     <div class="form-group px-4 py-2 col-sm-5">
         <label for="pilihanjenisbahan">Pilihan dan Jenis Barang</label>
         <span>
@@ -192,12 +192,17 @@
                 <a href="/opsidetail/list/{{ $od['detail']->id }}" class="btn btn-primary btn-sm mx-2">Lihat Opsi</a>
             </div>
         @endforeach
+        @if(count($opsi_detail) == 0)
+        <div class="form-group px-4 py-2 col-sm-5">
+            <p>Belum ada detil tersedia</p>
+        </div>
+        @endif
     </div>
 
     <div class="px-4 py-2 d-flex justify-content-center">
         <div id="tambahdetail">
             <a href="/createdetail/{{ $jenis_bahan[0]->id_vendor }}/{{ $jenis_bahan[0]->id_layanan }}/{{ $jenis_bahan[0]->id_jenis_bahan }}"
-                class="btn btn-primary">Tambah Detail</a>
+                class="btn btn-primary">Tambah Detil</a>
         </div>
     </div>
 @endsection
@@ -243,10 +248,10 @@
                         // Append the constructed HTML to #listOpsi
                         $('#listOpsi').html(html);
                         $('#editHarga').html(
-                            `<a href="/layanancetak/editharga/${idjenisbahan}" class="btn btn-primary">Edit Harga</a>`
+                            `<a href="/layanancetak/editharga/${idjenisbahan}" class="btn btn-primary">Ubah Harga</a>`
                         );
                         $('#tambahdetail').html(
-                            `<a href="/createdetail/${idvendor}/${idlayanan}/${idjenisbahan}" class="btn btn-primary">Tambah Detail</a>`
+                            `<a href="/createdetail/${idvendor}/${idlayanan}/${idjenisbahan}" class="btn btn-primary">Tambah Detil</a>`
                         );
                         $('#opendelete').html(`
                             <button type="button" class="btn btn-danger btnopendelete" data-toggle="modal"

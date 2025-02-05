@@ -53,20 +53,39 @@ class PemesananController extends Controller
 
         $subtotal = 0;
         foreach ($pemesanans as $p) {
-            $harga_cetaks = DB::table('harga_cetaks')
-                ->where('id', '=', $p->harga_cetaks_id)
-                ->first();
-            $p->harga_satuan = $harga_cetaks->harga_satuan;
 
-            $layanan = DB::table('vendors_has_jenis_bahan_cetaks')
-                ->join('layanan_cetaks', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', 'layanan_cetaks.id')
-                ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $p->jenis_bahan_cetaks_id)
-                ->select('layanan_cetaks.nama as namalayanan', 'layanan_cetaks.satuan as satuanlayanan')
+            $jenisbahan = DB::table('jenis_bahan_cetaks')
+                ->where('id', '=', $p->jenis_bahan_cetaks_id)
+                ->select('nama', 'deleted_at')
                 ->first();
-            $p->layanan = $layanan->namalayanan;
-            $p->satuan = $layanan->satuanlayanan;
 
-            $subtotal += $p->subtotal_pesanan;
+            if ($jenisbahan->deleted_at) {
+                $p->status = 'deleted';
+                $layanan = DB::table('vendors_has_jenis_bahan_cetaks')
+                    ->join('layanan_cetaks', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', 'layanan_cetaks.id')
+                    ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $p->jenis_bahan_cetaks_id)
+                    ->select('layanan_cetaks.nama as namalayanan', 'layanan_cetaks.satuan as satuanlayanan')
+                    ->first();
+                $p->layanan = $layanan->namalayanan;
+                $p->satuan = $layanan->satuanlayanan;
+                $p->nama_jenis_bahan = $jenisbahan->nama;
+            } else {
+                $p->status = 'available';
+                $harga_cetaks = DB::table('harga_cetaks')
+                    ->where('id', '=', $p->harga_cetaks_id)
+                    ->first();
+                $p->harga_satuan = $harga_cetaks->harga_satuan;
+
+                $layanan = DB::table('vendors_has_jenis_bahan_cetaks')
+                    ->join('layanan_cetaks', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', 'layanan_cetaks.id')
+                    ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $p->jenis_bahan_cetaks_id)
+                    ->select('layanan_cetaks.nama as namalayanan', 'layanan_cetaks.satuan as satuanlayanan')
+                    ->first();
+                $p->layanan = $layanan->namalayanan;
+                $p->satuan = $layanan->satuanlayanan;
+
+                $subtotal += $p->subtotal_pesanan;
+            }
         }
         // dd($pemesanans);
 
@@ -107,6 +126,7 @@ class PemesananController extends Controller
             ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
             ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $idlayanan)
             ->select('jenis_bahan_cetaks.*', 'vendors_has_jenis_bahan_cetaks.vendors_id as idvendor')
+            ->where('jenis_bahan_cetaks.deleted_at', '=', null)
             ->get();
 
         $detailcetaks = DB::table('detail_cetaks')
@@ -116,9 +136,10 @@ class PemesananController extends Controller
             ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
             ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $idlayanan)
             ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $idjenisbahan)
-            ->select('detail_cetaks.*', 'jenis_bahan_cetaks.nama' , 'opsi_details.id as idopsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan')
+            ->where('jenis_bahan_cetaks.deleted_at', '=', null)
+            ->select('detail_cetaks.*', 'jenis_bahan_cetaks.nama', 'opsi_details.id as idopsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan')
             ->get();
-            // dd($detailcetaks);
+        // dd($detailcetaks);
 
         $opsidetail = [];
         foreach ($detailcetaks as $detail) {
@@ -147,14 +168,15 @@ class PemesananController extends Controller
         return view('pesanan.editpesanan', compact('pemesanan', 'jumlahcopy', 'idjenisbahan', 'jenisbahan', 'opsidetail', 'hargacetaks', 'layanan'));
     }
 
-    public function load_editpesanan($idjenisbahan){
+    public function load_editpesanan($idjenisbahan)
+    {
 
-        
+
 
         $layanan = DB::table('vendors_has_jenis_bahan_cetaks')
             ->join('layanan_cetaks', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', 'layanan_cetaks.id')
             ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $idjenisbahan)
-            ->select('layanan_cetaks.id as id', 'layanan_cetaks.nama as nama', 'layanan_cetaks.satuan as satuan', 'layanan_cetaks.kesetaraan_pcs as kesetaraan_pcs','vendors_has_jenis_bahan_cetaks.vendors_id as idvendor')
+            ->select('layanan_cetaks.id as id', 'layanan_cetaks.nama as nama', 'layanan_cetaks.satuan as satuan', 'layanan_cetaks.kesetaraan_pcs as kesetaraan_pcs', 'vendors_has_jenis_bahan_cetaks.vendors_id as idvendor')
             ->first();
 
         $vendor_id = $layanan->idvendor;
@@ -167,9 +189,10 @@ class PemesananController extends Controller
             ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
             ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $idlayanan)
             ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $idjenisbahan)
-            ->select('detail_cetaks.*', 'jenis_bahan_cetaks.nama' , 'opsi_details.id as idopsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan')
+            ->where('jenis_bahan_cetaks.deleted_at', '=', null)
+            ->select('detail_cetaks.*', 'jenis_bahan_cetaks.nama', 'opsi_details.id as idopsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan')
             ->get();
-            // dd($detailcetaks);
+        // dd($detailcetaks);
 
         $opsidetail = [];
         foreach ($detailcetaks as $detail) {
@@ -195,16 +218,16 @@ class PemesananController extends Controller
             ->where('id_bahan_cetaks', '=', $idjenisbahan)
             ->get();
 
-            $response = [
-                'result' => 'success',
-                'data' => [
-                    'opsidetail' => $opsidetail, // This should be an array of options details
-                    'listharga' => $hargacetaks, // This should be an array of price lists
-                    'deskripsi' => $layanan, // Description or any other relevant data
-                ],
-            ];
+        $response = [
+            'result' => 'success',
+            'data' => [
+                'opsidetail' => $opsidetail, // This should be an array of options details
+                'listharga' => $hargacetaks, // This should be an array of price lists
+                'deskripsi' => $layanan, // Description or any other relevant data
+            ],
+        ];
 
-            return response()->json($response);
+        return response()->json($response);
     }
 
     public function submitpesanan(Request $request)
@@ -423,8 +446,8 @@ class PemesananController extends Controller
         // dd($pemesanan);
 
         $opsidetail = DB::table('pemesanans_has_opsi_details')
-        ->where('pemesanans_id', '=', $request->input('idpemesanan'))
-        ->get();
+            ->where('pemesanans_id', '=', $request->input('idpemesanan'))
+            ->get();
 
         // dd($opsidetail);
 

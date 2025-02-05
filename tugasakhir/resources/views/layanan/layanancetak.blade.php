@@ -11,16 +11,11 @@
     <h1 class="text-center p-5">{{ $vendor->nama }}</h1>
 <div class="form-check pl-4">
   <label class="form-check-label">
-    <input type="checkbox" class="form-check-input" name="" id="" value="checkedValue" checked>
+    <input type="checkbox" class="form-check-input" name="ubahaktif" id="" value="checkedValue" checked>
     Menerima Pesanan
   </label>
 </div>
-<div class="input-group mb-3">
-    <input type="text" class="form-control" placeholder="Search" aria-label="Search" aria-describedby="basic-addon2">
-    <div class="input-group-append">
-      <span class="input-group-text" id="basic-addon2"><i class="fas fa-search"></i></span>
-    </div>
-  </div>
+
 @php
   $totalLayanan = count($layanans);
   $itemsPerRow = 4; 

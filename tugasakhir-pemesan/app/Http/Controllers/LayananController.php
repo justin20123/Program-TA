@@ -70,127 +70,133 @@ class LayananController extends Controller
     }
 
     public function getDetailLayanan($vendor_id, $idlayanan)
-    {         
+    {
         $jenisbahan = DB::table('vendors_has_jenis_bahan_cetaks')
-        ->join('jenis_bahan_cetaks', 'jenis_bahan_cetaks.id','=','vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id')
-        ->where('vendors_has_jenis_bahan_cetaks.vendors_id','=',$vendor_id)
-        ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id','=',$idlayanan)
-        ->select('jenis_bahan_cetaks.*', 'vendors_has_jenis_bahan_cetaks.vendors_id as idvendor')
-        ->get();
+            ->join('jenis_bahan_cetaks', 'jenis_bahan_cetaks.id', '=', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id')
+            ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
+            ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $idlayanan)
+            ->select('jenis_bahan_cetaks.*', 'vendors_has_jenis_bahan_cetaks.vendors_id as idvendor')
+            ->get();
 
         $detailcetaks = DB::table('detail_cetaks')
-        ->join('jenis_bahan_cetaks', 'detail_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
-        ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
-        ->leftJoin('opsi_details', 'detail_cetaks.id', '=', 'opsi_details.detail_cetaks_id') 
-        ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
-        ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $idlayanan)
-        ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $jenisbahan[0]->id)
-        ->select('detail_cetaks.*', 'opsi_details.id as idopsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan')
-        ->get();
+            ->join('jenis_bahan_cetaks', 'detail_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
+            ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
+            ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
+            ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $idlayanan)
+            ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $jenisbahan[0]->id)
+            ->select('detail_cetaks.*')
+            ->get();
+
+        // dd($detailcetaks);
 
         $opsidetail = [];
         foreach ($detailcetaks as $detail) {
-            if (!isset($opsidetail[$detail->id])) {
-                $opsidetail[$detail->id] = [
-                    'detail' => $detail,
-                    'opsi' => [],
+            $opsidetail[$detail->id] = [
+                'detail' => $detail,
+                'opsi' => [],
+            ];
+
+            $opsi = DB::table('opsi_details')
+                ->where('detail_cetaks_id', '=', $detail->id)
+                ->get();
+
+                // dd($detail->id);
+
+            $arr = array();
+
+            foreach ($opsi as $o) {
+                $arr = [
+                    'id' => $o->id,
+                    'opsi' => $o->opsi,
+                    'biaya_tambahan' => $o->biaya_tambahan,
                 ];
             }
-            if ($detail->idopsi) { 
-                $opsidetail[$detail->id]['opsi'][] = [
-                    'id' => $detail->idopsi,
-                    'opsi' => $detail->opsi, 
-                    'biaya_tambahan' => $detail->biaya_tambahan, 
-                ];
-            }
-        } 
+            $opsidetail[$detail->id]['opsi'][] = $arr;
+        }
 
         $opsidetail = array_values($opsidetail);
 
         $hargacetaks = DB::table('harga_cetaks')
-        ->where('id_bahan_cetaks','=',$jenisbahan[0]->id)
-        ->get();
+            ->where('id_bahan_cetaks', '=', $jenisbahan[0]->id)
+            ->get();
 
         $layanan = DB::table('layanan_cetaks')
-        ->where('id', '=', $idlayanan)
-        ->first();
+            ->where('id', '=', $idlayanan)
+            ->first();
 
         $review = [];
 
 
         $vendor_layanan_cetak = DB::table('vendors_has_jenis_bahan_cetaks')
-        ->where('layanan_cetaks_id', '=', $idlayanan)
-        ->where('vendors_id', '=', $vendor_id)
-        ->select('jenis_bahan_cetaks_id')
-        ->get();
+            ->where('layanan_cetaks_id', '=', $idlayanan)
+            ->where('vendors_id', '=', $vendor_id)
+            ->select('jenis_bahan_cetaks_id')
+            ->get();
 
         $idvendorlayanancetak = [];
-        foreach($vendor_layanan_cetak as $vl){
+        foreach ($vendor_layanan_cetak as $vl) {
             array_push($idvendorlayanancetak, $vl->jenis_bahan_cetaks_id);
         }
 
 
         $pemesanans = DB::table('pemesanans')
-        ->whereIn('jenis_bahan_cetaks_id', $idvendorlayanancetak)
-        ->select('notas_id')
-        ->get();
+            ->whereIn('jenis_bahan_cetaks_id', $idvendorlayanancetak)
+            ->select('notas_id')
+            ->get();
 
         $idnotas = [];
-        foreach($pemesanans as $p){
+        foreach ($pemesanans as $p) {
             $currentidnota = $idnotas;
             $isinserted = false;
-            foreach($currentidnota as $id){              
-                if($id == $p->notas_id){
+            foreach ($currentidnota as $id) {
+                if ($id == $p->notas_id) {
                     $isinserted = true;
                 }
             }
-            if(!$isinserted){
+            if (!$isinserted) {
                 array_push($idnotas, $p->notas_id);
             }
-            
         }
-         $avgrating = 0;
-        
+        $avgrating = 0;
 
-        if(count($pemesanans) > 0){
+
+        if (count($pemesanans) > 0) {
             $totalrating = 0;
             $notas = DB::table('notas')
-            ->leftJoin('ratings', 'notas.id', '=', 'ratings.notas_id')
-            ->whereIn('notas.id', $idnotas)
-            ->where('notas.waktu_selesai', '!=', null)
-            ->where('notas.ulasan','!=', "")
-            ->select('notas.id', 'notas.ulasan','notas.waktu_selesai')
-            ->get();
+                ->leftJoin('ratings', 'notas.id', '=', 'ratings.notas_id')
+                ->whereIn('notas.id', $idnotas)
+                ->where('notas.waktu_selesai', '!=', null)
+                ->where('notas.ulasan', '!=', "")
+                ->select('notas.id', 'notas.ulasan', 'notas.waktu_selesai')
+                ->distinct()
+                ->get();
 
-            if(count($notas) > 0){
-                foreach($notas as $n){
-                    $totalrating++;
+            if (count($notas) > 0) {
+                foreach ($notas as $n) {
+                    
                     $rating = DB::table('ratings')
-                    ->where('notas_id', '=', $n->id)
-                    ->average('nilai');
+                        ->where('notas_id', '=', $n->id)
+                        ->average('nilai');
                     $n->rating = $rating;
-    
+                    $totalrating += $rating;
                     $pemesanan = DB::table('pemesanans')
-                    ->where('notas_id', $n->id)
-                    ->select('penggunas_email')
-                    ->first();
-    
+                        ->where('notas_id', $n->id)
+                        ->select('penggunas_email')
+                        ->first();
+
                     $pemesan = DB::table('penggunas')
-                    ->where('email', '=', $pemesanan->email)
-                    ->select('nama')
-                    ->first();
-    
+                        ->where('email', '=', $pemesanan->penggunas_email)
+                        ->select('nama')
+                        ->first();
+
                     $n->pemesan = $pemesan->nama;
-    
+
                     $n->waktu_selesai_formatted = $this->formatDate($n->waktu_selesai);
                 }
                 $review = $notas;
 
-                $avgrating = $totalrating/count($notas);
+                $avgrating = $totalrating / count($notas);
             }
-
-            
-            
         }
 
         // dd($review);
@@ -200,16 +206,17 @@ class LayananController extends Controller
         return view('vendors.detaillayanan', compact('jenisbahan', 'opsidetail', 'hargacetaks', 'layanan', 'review', 'avgrating'));
     }
 
-    public function detail_layanan_load($vendor_id, $idlayanan, $idjenisbahan){
+    public function detail_layanan_load($vendor_id, $idlayanan, $idjenisbahan)
+    {
         $detailcetaks = DB::table('detail_cetaks')
-        ->join('jenis_bahan_cetaks', 'detail_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
-        ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
-        ->leftJoin('opsi_details', 'detail_cetaks.id', '=', 'opsi_details.detail_cetaks_id') 
-        ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
-        ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $idlayanan)
-        ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $idjenisbahan)
-        ->select('detail_cetaks.*', 'opsi_details.id as idopsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan')
-        ->get();
+            ->join('jenis_bahan_cetaks', 'detail_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
+            ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
+            ->leftJoin('opsi_details', 'detail_cetaks.id', '=', 'opsi_details.detail_cetaks_id')
+            ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
+            ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $idlayanan)
+            ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $idjenisbahan)
+            ->select('detail_cetaks.*', 'opsi_details.id as idopsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan')
+            ->get();
 
         $opsiDetail = [];
         foreach ($detailcetaks as $detail) {
@@ -219,41 +226,41 @@ class LayananController extends Controller
                     'opsi' => [],
                 ];
             }
-            if ($detail->idopsi) { 
+            if ($detail->idopsi) {
                 $opsiDetail[$detail->id]['opsi'][] = [
                     'id' => $detail->idopsi,
-                    'opsi' => $detail->opsi, 
-                    'biaya_tambahan' => $detail->biaya_tambahan, 
+                    'opsi' => $detail->opsi,
+                    'biaya_tambahan' => $detail->biaya_tambahan,
                 ];
             }
-        } 
+        }
 
         $opsiDetail = array_values($opsiDetail);
 
         $listharga = DB::table('harga_cetaks')
-        ->where('id_bahan_cetaks','=',$idjenisbahan)
-        ->get();
+            ->where('id_bahan_cetaks', '=', $idjenisbahan)
+            ->get();
 
         $layanan = DB::table('vendors_has_jenis_bahan_cetaks')
-        ->join('layanan_cetaks','layanan_cetaks.id','=','vendors_has_jenis_bahan_cetaks.layanan_cetaks_id')
-        ->where('jenis_bahan_cetaks_id','=',$idjenisbahan)
-        ->select('layanan_cetaks.satuan')
-        ->first();
+            ->join('layanan_cetaks', 'layanan_cetaks.id', '=', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id')
+            ->where('jenis_bahan_cetaks_id', '=', $idjenisbahan)
+            ->select('layanan_cetaks.satuan')
+            ->first();
 
-        foreach($listharga as $l){
+        foreach ($listharga as $l) {
             $l->satuan = $layanan->satuan;
         }
 
-       $jenisbahan = DB::table('jenis_bahan_cetaks')
-       ->where('id', '=', $idjenisbahan)
-       ->select('deskripsi')
-       ->first();
-       $deskripsi = $jenisbahan->deskripsi;
+        $jenisbahan = DB::table('jenis_bahan_cetaks')
+            ->where('id', '=', $idjenisbahan)
+            ->select('deskripsi')
+            ->first();
+        $deskripsi = $jenisbahan->deskripsi;
 
-        return json_encode(['result'=>'success', 'data'=>['opsidetail'=>$opsiDetail , 'listharga'=>$listharga, 'deskripsi'=>$deskripsi]]);
+        return json_encode(['result' => 'success', 'data' => ['opsidetail' => $opsiDetail, 'listharga' => $listharga, 'deskripsi' => $deskripsi]]);
     }
 
-    
+
 
     /**
      * Show the form for creating a new resource.
@@ -275,10 +282,10 @@ class LayananController extends Controller
     {
         $vendorid = $request->input('idvendor');
         $layananid = $request->input('idlayanan');
-        
+
         $layanan = new Layanan();
         $layanan->nama = $request->input('nama');
-        if($request->input('deskripsi')){
+        if ($request->input('deskripsi')) {
             $layanan->deskripsi = $request->input('deskripsi');
         }
         $layanan->biaya_tambahan = $request->input('biaya_tambahan');
@@ -315,10 +322,7 @@ class LayananController extends Controller
      * @param  \App\Models\Layanan  $layanan
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Layanan $layanan)
-    {
-        
-    }
+    public function update(Request $request, Layanan $layanan) {}
 
     /**
      * Remove the specified resource from storage.

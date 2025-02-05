@@ -28,7 +28,7 @@ class PemesananController extends Controller
                 $status_nota = "Menunggu diambil";
             }
         }
-        elseif ($nota->wakti_menerima_pesanan) {
+        elseif ($nota->waktu_menerima_pesanan) {
             $status_nota = "Pesanan diterima";
         } 
         else {
