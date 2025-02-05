@@ -48,7 +48,6 @@ class NotaController extends Controller
         ->select('nama')
         ->first();
 
-        dd($ulasan);
         return view('notas.tinjau', compact('ulasan', 'vendor'));
     }
 }

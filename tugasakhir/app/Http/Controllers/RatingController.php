@@ -41,8 +41,14 @@ class RatingController extends Controller
             ->where('email', '=', $p->penggunas_email)
             ->first();
             $p->nama_pemesan = $pemesan->nama;
-
         }
+
+        $layanan = DB::table('layanan_cetaks')
+        ->where('id', '=', $layanan_id)
+        ->first();
+
+        return view('layanan.rating', compact('pemesanan', 'layanan'));
+
     }
 
     /**

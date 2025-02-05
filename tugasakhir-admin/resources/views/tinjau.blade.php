@@ -8,7 +8,7 @@
 </ol>
 @endsection
 
-@section('content')
+@section('menu')
 <div class="container">
     <h2 class="mt-4">Vendor 3</h2>
     <h4 class="mt-4">Comments</h4>
