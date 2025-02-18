@@ -31,7 +31,7 @@ use Illuminate\Support\Facades\Route;
 //login
 Route::get('login', [LoginController::class, 'bukalogin'])->name('login');
 Route::post('login', [LoginController::class, 'login']);
-Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+Route::get('logout', [LoginController::class, 'logout'])->name('logout');
 
 //register
 Route::get('register', [RegisterController::class, 'bukaregister'])->name('register');
@@ -41,6 +41,8 @@ Route::post('register', [RegisterController::class, 'register']);
 Route::get('/', [VendorController::class, 'index']);
 
 Route::middleware(['auth'])->group(function () {
+
+
     //tambah vendor
     Route::post('/tambahvendor', [VendorController::class, 'tambahvendor'])->name('tambahvendor');
     Route::get('/setup/{vendorid}', [VendorController::class, 'opensetup'])->name('opensetup');
@@ -76,15 +78,15 @@ Route::middleware(['auth'])->group(function () {
 
     //detail
     Route::put('/detail/{iddetail}', [DetailCetaksController::class, 'update'])->name('detail.update');
-    Route::get('/createdetail/{idvendor}/{idlayanan}/{idjenisbahan}', [DetailCetaksController::class, 'create']);
     Route::put('/createdetail', [DetailCetaksController::class, 'store'])->name('detail.store');
     Route::delete('/deletedetail', [DetailCetaksController::class, 'destroy'])->name('detail.destroy');
-    Route::post('/layanancetak/detail/{idjenisbahan}/create', [DetailCetaksController::class, 'create']);
+    Route::get('/layanancetak/detail/{idjenisbahan}/create', [DetailCetaksController::class, 'create']);
 
     //Jenis bahan
     Route::get('/vendors/{idvendor}/layanan/{idlayanan}/edit/{idjenisbahan}', [JenisBahanController::class, 'edit'])->name('layanan.edit');
     Route::post('/jenisbahan/store', [JenisBahanController::class, 'store'])->name('jenisbahan.store');
     Route::put('/jenisbahan/update', [JenisBahanController::class, 'update'])->name('jenisbahan.update');
+    Route::put('/uploadfotojenisbahan', [JenisBahanController::class, 'uploadfotojenisbahan']);
     Route::delete('/jenisbahan/delete', [JenisBahanController::class, 'destroy'])->name('jenisbahan.destroy');
 
     //harga

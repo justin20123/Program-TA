@@ -121,6 +121,8 @@ class PemesananController extends Controller
         $idlayanan = $layanan->id;
         $idjenisbahan = $pemesanan->jenis_bahan_cetaks_id;
 
+        $jb = JenisBahanCetak::find($idjenisbahan);
+
         $jenisbahan = DB::table('vendors_has_jenis_bahan_cetaks')
             ->join('jenis_bahan_cetaks', 'jenis_bahan_cetaks.id', '=', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id')
             ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
@@ -129,16 +131,59 @@ class PemesananController extends Controller
             ->where('jenis_bahan_cetaks.deleted_at', '=', null)
             ->get();
 
-        $detailcetaks = DB::table('detail_cetaks')
+        $jenisbahanfiltered = array();
+
+        foreach ($jenisbahan as $jb) {
+            $jumlahhargacetaks = DB::table('harga_cetaks')
+                ->where('id_bahan_cetaks', $jb->id)
+                ->count();
+                
+            if($jumlahhargacetaks > 0){
+                array_push($jenisbahanfiltered, $jb);
+            }
+            
+        }
+        $jenisbahan = $jenisbahanfiltered;
+
+        $detailcetaks = [];
+        $is_deleted = false;
+        // dd(($jenisbahan));
+
+        if($jb->deleted_at == null){
+            $detailcetaks = DB::table('detail_cetaks')
+            ->join('jenis_bahan_cetaks', 'detail_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
+            ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
+            ->leftJoin('opsi_details', 'detail_cetaks.id', '=', 'opsi_details.detail_cetaks_id')
+            ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $idjenisbahan)
+            ->where('jenis_bahan_cetaks.deleted_at', '=', null)
+            ->select('detail_cetaks.*', 'jenis_bahan_cetaks.nama', 'opsi_details.id as idopsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan')
+            ->get();
+
+            $count = 0;
+            foreach($jenisbahan as $jbn){
+                if($jbn->id == $idjenisbahan){
+                    break;
+                }
+                $count++;
+            }
+            // dd($count);
+        }
+        else{
+            $detailcetaks = DB::table('detail_cetaks')
             ->join('jenis_bahan_cetaks', 'detail_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
             ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
             ->leftJoin('opsi_details', 'detail_cetaks.id', '=', 'opsi_details.detail_cetaks_id')
             ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
             ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $idlayanan)
-            ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $idjenisbahan)
+            ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $jenisbahan[0]->id)
             ->where('jenis_bahan_cetaks.deleted_at', '=', null)
             ->select('detail_cetaks.*', 'jenis_bahan_cetaks.nama', 'opsi_details.id as idopsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan')
             ->get();
+            $is_deleted = true;
+        }
+
+        
+        
         // dd($detailcetaks);
 
         $opsidetail = [];
@@ -165,13 +210,11 @@ class PemesananController extends Controller
             ->where('id_bahan_cetaks', '=', $idjenisbahan)
             ->get();
 
-        return view('pesanan.editpesanan', compact('pemesanan', 'jumlahcopy', 'idjenisbahan', 'jenisbahan', 'opsidetail', 'hargacetaks', 'layanan'));
+        return view('pesanan.editpesanan', compact('pemesanan', 'jumlahcopy', 'idjenisbahan', 'jenisbahan', 'opsidetail', 'hargacetaks', 'layanan','is_deleted','count'));
     }
 
     public function load_editpesanan($idjenisbahan)
     {
-
-
 
         $layanan = DB::table('vendors_has_jenis_bahan_cetaks')
             ->join('layanan_cetaks', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', 'layanan_cetaks.id')

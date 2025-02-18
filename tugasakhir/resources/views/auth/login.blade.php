@@ -7,9 +7,12 @@
     <title>Login - Printaja Vendor</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 
+    <style>
+    </style>
 </head>
 
 <body class="bg-light">
+   
     <div class="container d-flex justify-content-center align-items-center" style="height: 100vh;">
         <div class="card shadow p-4" style="width: 400px;">
             <h3 class="text-center mb-4">Printaja Vendor</h3>

@@ -16,16 +16,15 @@
     </div>
     <div class="navbar-brand">Saldo: Rp 500.000</div>
     <form class="form-inline">
-        <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              Keuangan
-            </button>
-            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-              <a class="dropdown-item" href="#">Top Up</a>
-              <a class="dropdown-item" href="#">Transfer Bank</a>
-              <a class="dropdown-item" href="#">History Keuangan</a>
-            </div>
-          </div>
+      <div class="dd">
+        <span>Menu</span>
+        <div class="dd-content">
+          <ul>
+            <li><a href="/masukdana">Masukkan Dana</a></li>
+            <li><a href="/logout">Keluar</a></li>
+          </ul>
+        </div>
+      </div>
       </form>
     <a class="navbar-link">&ensp;</a>
 </nav>

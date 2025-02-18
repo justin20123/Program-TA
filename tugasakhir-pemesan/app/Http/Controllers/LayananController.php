@@ -76,7 +76,20 @@ class LayananController extends Controller
             ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
             ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $idlayanan)
             ->select('jenis_bahan_cetaks.*', 'vendors_has_jenis_bahan_cetaks.vendors_id as idvendor')
+            ->where('jenis_bahan_cetaks.deleted_at', '=', null)
             ->get();
+        $jenisbahanfiltered = array();
+
+        foreach ($jenisbahan as $jb) {
+            $jumlahhargacetaks = DB::table('harga_cetaks')
+                ->where('id_bahan_cetaks', $jb->id)
+                ->count();
+
+            if ($jumlahhargacetaks > 0) {
+                array_push($jenisbahanfiltered, $jb);
+            }
+        }
+        $jenisbahan = $jenisbahanfiltered;
 
         $detailcetaks = DB::table('detail_cetaks')
             ->join('jenis_bahan_cetaks', 'detail_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
@@ -100,7 +113,7 @@ class LayananController extends Controller
                 ->where('detail_cetaks_id', '=', $detail->id)
                 ->get();
 
-                // dd($detail->id);
+            // dd($detail->id);
 
             $arr = array();
 
@@ -173,7 +186,7 @@ class LayananController extends Controller
 
             if (count($notas) > 0) {
                 foreach ($notas as $n) {
-                    
+
                     $rating = DB::table('ratings')
                         ->where('notas_id', '=', $n->id)
                         ->average('nilai');
@@ -253,11 +266,12 @@ class LayananController extends Controller
 
         $jenisbahan = DB::table('jenis_bahan_cetaks')
             ->where('id', '=', $idjenisbahan)
-            ->select('deskripsi')
+            ->select('deskripsi','gambar')
             ->first();
         $deskripsi = $jenisbahan->deskripsi;
+        $gambar = $jenisbahan->gambar;
 
-        return json_encode(['result' => 'success', 'data' => ['opsidetail' => $opsiDetail, 'listharga' => $listharga, 'deskripsi' => $deskripsi]]);
+        return json_encode(['result' => 'success', 'data' => ['opsidetail' => $opsiDetail, 'listharga' => $listharga, 'deskripsi' => $deskripsi, 'gambar' => $gambar]]);
     }
 
 

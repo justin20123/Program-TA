@@ -98,15 +98,6 @@
                   </select>
               </div>
           </div>
-          <div class="h3 px-4 py-2">
-              <div class="form-group">
-                  <input type="checkbox" name="khusus">
-                  <label>
-                      <h6>Ubah hanya untuk jenis bahan ini</h6>
-                  </label>
-
-              </div>
-          </div>
 
 
           <input type="hidden" name="id_detail" value="{{ $opsi_detail->detail_cetaks_id }}">

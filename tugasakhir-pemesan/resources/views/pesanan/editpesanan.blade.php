@@ -52,10 +52,18 @@
                         <div class="select-container">
                             <select class="form-control custom-select px-4" name="jenisbahan" id="jenisbahan">
                                 @foreach ($jenisbahan as $key => $jb)
-                                    @if ($key == $idjenisbahan - 1)
-                                        <option value="{{ $jb->id }}" selected>{{ $jb->nama }}</option>
+                                    @if ($is_deleted)
+                                        @if ($key == 0)
+                                            <option value="{{ $jb->id }}" selected>{{ $jb->nama }}</option>
+                                        @else
+                                            <option value="{{ $jb->id }}">{{ $jb->nama }}</option>
+                                        @endif
                                     @else
-                                        <option value="{{ $jb->id }}">{{ $jb->nama }}</option>
+                                        @if ($key == $count)
+                                            <option value="{{ $jb->id }}" selected>{{ $jb->nama }}</option>
+                                        @else
+                                            <option value="{{ $jb->id }}">{{ $jb->nama }}</option>
+                                        @endif
                                     @endif
                                 @endforeach
                             </select>

@@ -92,37 +92,37 @@
           display: flex;
           justify-content: center;
           padding: 20px;
-          width: 100%; 
+          width: 100%;
       }
 
       .search-form {
-          display: flex; 
-          width: 100%; 
-          max-width: 1350px; 
+          display: flex;
+          width: 100%;
+          max-width: 1350px;
       }
 
       .input-container {
-          position: relative; 
-          width: 100%; 
+          position: relative;
+          width: 100%;
       }
 
       .search-input {
-          padding: 10px 40px 10px 40px; 
-          width: 100%; 
+          padding: 10px 40px 10px 40px;
+          width: 100%;
           border: 1px solid #ccc;
           border-radius: 5px;
-          outline: none; 
+          outline: none;
       }
 
       .search-button {
-          position: absolute; 
-          left: 10px; 
-          top: 50%; 
-          transform: translateY(-50%); 
+          position: absolute;
+          left: 10px;
+          top: 50%;
+          transform: translateY(-50%);
           border: none;
           background: transparent;
           cursor: pointer;
-          padding: 0; 
+          padding: 0;
       }
 
       .form-container {
@@ -306,7 +306,50 @@
         .star.selected {
             color: gold; /* Selected color */
         }
+        .dd {
+  position: relative;
+  display: inline-block;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  background-color: #4CAF50;
+  color: #fff;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
 
+.dd-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  padding: 12px 16px;
+  z-index: 1;
+}
+
+.dd-content ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dd-content li {
+  margin-bottom: 10px;
+}
+
+.dd-content a {
+  text-decoration: none;
+  color: #333;
+}
+
+.dd:hover .dd-content {
+        display: block;
+      }
+
+.dd.show .dd-content {
+  display: block;
+}
     </style>
     
     <meta charset="utf-8" />

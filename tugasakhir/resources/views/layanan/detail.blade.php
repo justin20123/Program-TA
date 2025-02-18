@@ -8,6 +8,42 @@
     </ol>
 @endsection
 @section('menu')
+    <div class="modal fade" id="modalUploadFotoJenisBahan" tabindex="-1" role="dialog"
+        aria-labelledby="modalKirimContohLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalKirimContohLabel">Kirim Data</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="uploadjenisbahan" action="/uploadfotojenisbahan" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    @method("PUT")
+                    <div class="modal-body">
+
+                        <div class="form-group">
+                            <label for="filefoto">Unggah Foto</label>
+                            <br>
+                            <input type="file" class="form-control-file" name="file_foto" id="file_foto"
+                                accept="image/jpeg, image/jpg, image/png, image/gif" required>
+                        </div>
+
+
+
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary close">Batalkan</button>
+                        <div id="hiddenFoto">
+
+                        </div>
+                        <button type="button" id="btnsubmitfoto" class="btn btn-primary">Kirim</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -28,7 +64,33 @@
                         <div id="hiddens">
 
                         </div>
-                        <button type="submit" class="btn btn-danger" id="btnhapus">Hapus</button>
+                        <button type="submit" class="btn btn-danger" id="btndelete">Hapus</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="confirmDeleteDetailModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmDeleteModalLabel">Konfirmasi Hapus</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="messagedetail">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
+                    <form id="deleteDetailForm" action="{{ route('detail.destroy') }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <div id="hiddensdetail">
+
+                        </div>
+                        <button type="submit" class="btn btn-danger" id="btndeletedetail">Hapus</button>
                     </form>
                 </div>
             </div>
@@ -51,7 +113,8 @@
                             <div class="form-group">
                                 <label for="">Nama</label>
                                 <input type="text" class="form-control" name="nama" id="inputnama"
-                                    aria-describedby="helpId" placeholder="" value="{{ $jenis_bahan[0]->nama_jenis_bahan }}">
+                                    aria-describedby="helpId" placeholder=""
+                                    value="{{ $jenis_bahan[0]->nama_jenis_bahan }}">
                             </div>
                         </div>
                         <div class="h3 px-4 py-2">
@@ -63,7 +126,7 @@
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
 
 
-                        
+
                         <div id="hiddenEdit">
 
                         </div>
@@ -141,7 +204,8 @@
         </li>
         <li class="list-inline-item h6">({{ $layanan['total_nota'] }})</li>
     </ul>
-    <a class="px-4" href="/ulasan/{{ $jenis_bahan[0]->id_vendor }}/layanan/{{ $jenis_bahan[0]->id_layanan }}">Lihat ulasan</a>
+    <a class="px-4" href="/ulasan/{{ $jenis_bahan[0]->id_vendor }}/layanan/{{ $jenis_bahan[0]->id_layanan }}">Lihat
+        ulasan</a>
     <div class="form-group px-4 py-2 col-sm-5">
         <label for="pilihanjenisbahan">Pilihan dan Jenis Barang</label>
         <span>
@@ -173,11 +237,20 @@
                 </div>
                 <div class="col-sm-4" id="opendelete">
                     <button type="button" class="btn btn-danger btnopendelete" data-toggle="modal"
-                        data-id="{{ $jenis_bahan[0]->id_jenis_bahan }}" data-nama="{{ $jenis_bahan[0]->nama_jenis_bahan }}">
+                        data-id="{{ $jenis_bahan[0]->id_jenis_bahan }}"
+                        data-nama="{{ $jenis_bahan[0]->nama_jenis_bahan }}">
                         Hapus Jenis Bahan
                     </button>
                 </div>
             </div>
+        </div>
+        <div id="gambar">
+
+            <button id="btnopenupload" class="btn btn-primary my-2 btnopenupload"
+                data-id="{{ $jenis_bahan[0]->id_jenis_bahan }}">
+                Unggah Foto Jenis Bahan
+            </button>
+
         </div>
         <div id="editHarga">
             <a href="/layanancetak/editharga/{{ $jenis_bahan[0]->id_jenis_bahan }}" class="btn btn-primary">Ubah
@@ -190,19 +263,21 @@
             <div class="form-group px-4 py-2 col-sm-5">
                 <label id="detail-{{ $od['detail']->id }}">{{ $od['detail']->value }}</label>
                 <a href="/opsidetail/list/{{ $od['detail']->id }}" class="btn btn-primary btn-sm mx-2">Lihat Opsi</a>
+                <button class="btn btn-danger btn-sm mx-2 btnopendeletedetail" data-id="{{ $od['detail']->id }}"
+                    data-value="{{ $od['detail']->value }}">Hapus Opsi</button>
             </div>
         @endforeach
-        @if(count($opsi_detail) == 0)
-        <div class="form-group px-4 py-2 col-sm-5">
-            <p>Belum ada detil tersedia</p>
-        </div>
+        @if (count($opsi_detail) == 0)
+            <div class="form-group px-4 py-2 col-sm-5">
+                <p>Belum ada detil tersedia</p>
+            </div>
         @endif
     </div>
 
     <div class="px-4 py-2 d-flex justify-content-center">
         <div id="tambahdetail">
-            <a href="/createdetail/{{ $jenis_bahan[0]->id_vendor }}/{{ $jenis_bahan[0]->id_layanan }}/{{ $jenis_bahan[0]->id_jenis_bahan }}"
-                class="btn btn-primary">Tambah Detil</a>
+            <a href="/layanancetak/detail/{{ $jenis_bahan[0]->id_jenis_bahan }}/create" class="btn btn-primary">Tambah
+                Detil</a>
         </div>
     </div>
 @endsection
@@ -213,11 +288,12 @@
         $(document).ready(function() {
 
             $('#pilihanjenisbahan').on('change', function() {
-                updateOpsiDetail({{ $jenis_bahan[0]->id_vendor }}, {{ $jenis_bahan[0]->id_layanan }}, $(this).val());
+                updateOpsiDetail({{ $jenis_bahan[0]->id_vendor }}, {{ $jenis_bahan[0]->id_layanan }}, $(
+                    this).val());
             });
 
             function updateOpsiDetail(idvendor, idlayanan, idjenisbahan) {
-                
+
                 $.ajax({
                     url: `/layanans/${idvendor}/details/${idlayanan}/${idjenisbahan}`,
                     type: 'GET',
@@ -241,6 +317,7 @@
                                 <div class="form-group px-4 py-2 col-sm-5">
                                     <label id="detail-${detail.id}">${detail.value}</label>
                                     <a href="/opsidetail/list/${detail.id}" class="btn btn-primary btn-sm mx-2">Lihat Opsi</a>
+                                    <button class="btn btn-danger btn-sm mx-2 btnopendeletedetail" data-id="${detail.id}" data-value="${detail.value}">Hapus Opsi</button>
                                 </div>
                             `;
                         });
@@ -251,7 +328,7 @@
                             `<a href="/layanancetak/editharga/${idjenisbahan}" class="btn btn-primary">Ubah Harga</a>`
                         );
                         $('#tambahdetail').html(
-                            `<a href="/createdetail/${idvendor}/${idlayanan}/${idjenisbahan}" class="btn btn-primary">Tambah Detil</a>`
+                            `<a href="/layanancetak/detail/${idjenisbahan}/create" class="btn btn-primary">Tambah Detil</a>`
                         );
                         $('#opendelete').html(`
                             <button type="button" class="btn btn-danger btnopendelete" data-toggle="modal"
@@ -261,12 +338,34 @@
                         `);
                         $('#inputnama').val(response.jenis_bahan.nama);
                         $('#deskripsistore').val(response.jenis_bahan.deskripsi);
+                        $('#gambar').html(`
+                        <button id="btnopenupload" class="btn btn-primary my-2 btnopenupload" data-id="${idjenisbahan}">
+                            Unggah Foto Jenis Bahan
+                        </button>
+                        `);
                     },
                     error: function() {
                         console.error('Error fetching opsi details');
                     }
                 });
             }
+
+            $(document).on('click', '.btnopenupload', function() {
+                var id = $(this).data('id');
+                $('#hiddenFoto').html(`
+                    <input type="hidden" name="id_jenis_bahan" value="${id}">
+                `);
+                $('#modalUploadFotoJenisBahan').modal('show');
+            });
+            $(document).on('click', '.btnopendeletedetail', function() {
+                var id = $(this).data('id');
+                var value = $(this).data('value');
+                $('#messagedetail').html(`Apakah anda yakin ingin menghapus detail ${value}?`);
+                $('#hiddensdetail').html(`
+                    <input type="hidden" name="id_detail" value="${id}">
+                `);
+                $('#confirmDeleteDetailModal').modal('show');
+            });
 
             $(document).on('click', '.btnopendelete', function() {
                 var id = $('#pilihanjenisbahan').val();
@@ -291,11 +390,14 @@
                 $('#tambahJenisBahanModal').modal('show');
 
             });
-
-
-
+            $('#btnsubmitfoto').click(function() {
+                $('#uploadjenisbahan').submit();
+            });
             $('#btndelete').click(function() {
                 $('#deleteForm').submit();
+            });
+            $('#btndeletedetail').click(function() {
+                $('#deleteDetailForm').submit();
             });
             $('#btnupdate').click(function() {
                 $('#updateForm').submit();

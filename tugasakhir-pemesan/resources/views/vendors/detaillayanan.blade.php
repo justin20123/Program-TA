@@ -11,16 +11,23 @@
         <div class="row">
             <div class="col-md-4">
                 <div class="mb-4">
-                    <img src="https://picsum.photos/300/200" alt="Main Product" class="img-fluid rounded">
+                    <div id="gambarjenisbahan">
+                        @if ($jenisbahan[0]->gambar)
+                            <img src="{{ url($jenisbahan[0]->gambar) }}" alt="Main Product" class="img-fluid rounded">
+                        @else
+                            <img src="{{ url('jenisbahan/noimg.png') }}" alt="Main Product" class="img-fluid rounded">
+                        @endif
+                    </div>
+
                 </div>
-                <div class="d-flex mb-4">
+                {{-- <div class="d-flex mb-4">
                     <img src="https://picsum.photos/300/200" class="img-thumbnail px-2" style="width: 75px; height: 75px;"
                         alt="Thumbnail 1">
                     <img src="https://picsum.photos/300/200" class="img-thumbnail px-2" style="width: 75px; height: 75px;"
                         alt="Thumbnail 2">
                     <img src="https://picsum.photos/300/200" class="img-thumbnail px-2" style="width: 75px; height: 75px;"
                         alt="Thumbnail 3">
-                </div>
+                </div> --}}
 
 
                 <h2 class="h4 font-weight-bold">Harga (1 {{ $layanan->satuan }} = {{ $layanan->kesetaraan_pcs }} pcs)</h2>
@@ -75,16 +82,16 @@
                                 <div class="form-group">
                                     <label class="font-weight-bold">{{ $od['detail']->value }}</label>
                                     <div class="select-container">
-                                        @if(count($od['opsi'])> 0)
-                                        <select class="form-control custom-select px-4"
-                                            name="opsidetail-{{ $key }}" id="opsidetail-{{ $key }}">
-                                            @foreach ($od['opsi'] as $o)
-                                                <option value="{{ $o['id'] }}">{{ $o['opsi'] }} (+Rp.
-                                                    {{ $o['biaya_tambahan'] }})</option>
-                                            @endforeach
-                                        </select>
+                                        @if (count($od['opsi']) > 0)
+                                            <select class="form-control custom-select px-4"
+                                                name="opsidetail-{{ $key }}" id="opsidetail-{{ $key }}">
+                                                @foreach ($od['opsi'] as $o)
+                                                    <option value="{{ $o['id'] }}">{{ $o['opsi'] }} (+Rp.
+                                                        {{ $o['biaya_tambahan'] }})</option>
+                                                @endforeach
+                                            </select>
                                         @else
-                                        <p>Tidak ada opsi yang tersedia</p>
+                                            <p>Tidak ada opsi yang tersedia</p>
                                         @endif
                                         <span class="caret-down-icon"><i class="fas fa-caret-down"></i></span>
                                     </div>
@@ -186,8 +193,7 @@
                                             @endfor
                                         </span>
                                     </div>
-                                    <small
-                                        class="text-secondary d-block mb-2">{{ $r->waktu_selesai_formatted }}</small>
+                                    <small class="text-secondary d-block mb-2">{{ $r->waktu_selesai_formatted }}</small>
                                     <p style="line-height: 1.7;">
                                         {{ $r->ulasan }}
                                     </p>
@@ -227,6 +233,17 @@
 
 
                     if (response.result == 'success') {
+                        var gambar = response.data.gambar;
+                        if (gambar == '') {
+                            gambar = 'jenisbahan/noimg.png';
+                        }
+
+                        let baseUrl = "{{ url('/') }}";
+let gambarUrl = baseUrl + '/' + gambar;
+
+                        $('#gambarjenisbahan').html(`
+                        <img src="${gambarUrl}" alt="Main Product" class="img-fluid rounded">
+                        `);
                         $('#listdetail').html('<p>Tidak ada opsi yang perlu ditambahkan</p>');
                         if (response.data.opsidetail > 0) {
                             let opsiDetail = {};
@@ -285,14 +302,14 @@
                         }
 
                         $('#listharga').html('');
-                        $html = '';
+                        html = '';
                         // console.table(response.data.listharga);
                         response.data.listharga.forEach(function(item) {
                             if (item.jumlah_cetak_maksimum == null) {
-                                $html +=
+                                html +=
                                     `<li>&gt;${item.jumlah_cetak_minimum - 1} ${item.satuan} = Rp. ${item.harga_satuan}/${item.satuan}</li>`;
                             } else {
-                                $html +=
+                                html +=
                                     `<li>${item.jumlah_cetak_minimum}–${item.jumlah_cetak_maksimum} ${item.satuan} = Rp. ${item.harga_satuan}/${item.satuan}</li>`;
                             }
 
@@ -300,7 +317,7 @@
                         var deskripsi = response.data.deskripsi;
 
                         $('#deskripsi').html(`<p>${deskripsi}</p>`);
-                        $('#listharga').html($html);
+                        $('#listharga').html(html);
                     }
                 },
                 error: function(xhr, status, error) {

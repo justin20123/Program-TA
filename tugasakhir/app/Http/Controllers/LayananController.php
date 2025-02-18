@@ -1258,21 +1258,4 @@ class LayananController extends Controller
         $layanan->save();
         return redirect()->route('layanan.detail_layanan', [$vendor_id, $layanan_id]);
     }
-
-    public function show(Layanan $layanan) {
-        return view('layanans.show', compact('layanan'));
-    }
-
-    public function edit(Layanan $layanan) {
-        return view('layanans.edit', compact('layanan'));
-    }
-
-    public function update(Request $request, Layanan $layanan) {
-        // Update logic...
-    }
-
-    public function destroy(Layanan $layanan) {
-        $layanan->delete();
-        return redirect()->route('layanans.index');
-    }
 }

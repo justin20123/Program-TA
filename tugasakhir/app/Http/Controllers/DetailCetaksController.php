@@ -29,24 +29,29 @@ class DetailCetaksController extends Controller
         return false;
     }
 
-    public function create($id_vendor, $id_layanan, $id_jenis_bahan){
+    public function create($id_jenis_bahan){
+        $vendorlayanan = DB::table('vendors_has_jenis_bahan_cetaks')
+        ->where('jenis_bahan_cetaks_id','=',$id_jenis_bahan)
+        ->first();
+        $jenis_bahan = JenisBahanCetak::find($id_jenis_bahan);
         $layanan = [
-            "id_vendor" => $id_vendor,
-            "id_layanan" => $id_layanan,
-            "id_jenis_bahan" => $id_jenis_bahan,
+            "idvendor" => $vendorlayanan->vendors_id,
+            "idlayanan" => $vendorlayanan->layanan_cetaks_id,
+            "idjenisbahan" => $id_jenis_bahan,
         ];
 
-        return view('layanan.createdetail', compact('layanan'));    
+        return view('layanan.createdetail', compact('layanan', 'jenis_bahan'));    
     }
 
     public function store(Request $request){
         $id_vendor = $request->input('id_vendor');
         $id_layanan = $request->input('id_layanan');
 
-        if($request->input('khusus')){
+        if(!$request->input('ubah_semua')){
             if($this->cekDupikatNama($request->input('value'),$request->input('id_jenis_bahan'))){
                 return redirect()->back()->with('error', 'Nama sudah ada');
             }
+
 
             $detail_cetaks = new DetailCetaks();
 
@@ -91,28 +96,36 @@ class DetailCetaksController extends Controller
         $details->value = $request->input('value');
         $details->save();
 
+        $this->updateJenisBahan($details->jenis_bahan_cetaks_id);
+
         return response()->json(['success' => 'Detail with id ' . $id. ' updated successfully.']);
     }
 
     public function destroy(Request $request){
         $opsi_detail = DB::table('opsi_details')
-        ->where('detail_cetaks_id','=',$request->id_detail)
+        ->where('detail_cetaks_id','=',$request->input('id_detail'))
         ->get();
         $gambar = DB::table('gambars')
-        ->where('detail_cetaks_id','=',$request->id_detail)
+        ->where('detail_cetaks_id','=',$request->input('id_detail'))
         ->get();
-        
-        $id_vendor = $request->id_vendor;
-        $id_layanan = $request->id_layanan;
 
-        $details = DetailCetaks::findOrFail($request->id_detail);
+        $details = DetailCetaks::findOrFail($request->input('id_detail'));
+
+        $vendorlayanan = DB::table('vendors_has_jenis_bahan_cetaks')
+        ->where('jenis_bahan_cetaks_id','=',$details->jenis_bahan_cetaks_id)
+        ->first();
+
+        $id_vendor = $vendorlayanan->vendors_id;
+        $id_layanan = $vendorlayanan->layanan_cetaks_id;
+
         foreach($opsi_detail as $od){
-            DB::table('opsi_details')->where('id', '=', $od->id)->delete();
+            DB::table('opsi_details')->where('id', '=', $od->id)->update(['deleted_at' => null]);
         }
         foreach($gambar as $g){
-            DB::table('gambars')->where('id', '=', $g->id)->delete();
+            DB::table('gambars')->where('id', '=', $g->id)->update(['deleted_at' => null]);
         }
-        $details->delete();
+        $details->deleted_at = Carbon::now('Asia/Jakarta');
+        $details->save();
 
         return redirect()->route('layanan.detail_layanan', [$id_vendor, $id_layanan]);
     }

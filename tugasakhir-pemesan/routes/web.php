@@ -68,6 +68,15 @@ Route::get('/vendors/{filename}', function ($filename) {
 });
 
  //fotolayanan
+ Route::get('/jenisbahan/{filename}', function ($filename) {
+    $path = base_path('../jenisbahan/' . $filename);
+
+    if (file_exists($path)) {
+        return response()->file($path);
+    }
+
+    abort(404);
+});
  Route::get('/imagelayanan/{filename}', function ($filename) {
     $path = base_path('../imagelayanan/' . $filename);
 
@@ -98,7 +107,7 @@ Route::get('/vendor/{idvendor}', [LayananController::class, 'index']);;
 //detail layanan
 Route::get('/vendor/{idvendor}/layanan/{idlayanan}', [LayananController::class, 'getDetailLayanan']);;
 Route::get('/loadlayanan/{idvendor}/{idlayanan}/{idjenisbahan}', [LayananController::class, 'detail_layanan_load']);
-Route::middleware(['web'])->group(function () {
+Route::middleware(['auth'])->group(function () {
 
     Route::delete("/deletepesanan", [PemesananController::class, 'deletepesanan']);
     //proses pemesanan

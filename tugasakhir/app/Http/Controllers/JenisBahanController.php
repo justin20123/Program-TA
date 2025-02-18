@@ -38,25 +38,7 @@ class JenisBahanController extends Controller
 
         return redirect()->route('layanan.detail_layanan', [$request->input('id_vendor'), $request->input('id_layanan')]);
     }
-    public function edit($vendor_id, $idlayanan, $idjenisbahan)
-    {
-        // $jenisbahan = DB::table('jenis_bahan_cetaks')
-        // ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
-        // ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
-        // ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $idlayanan)
-        // ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $idjenisbahan)
 
-        // ->select('jenis_bahan_cetaks.*')
-        // ->first();
-
-        // $layanan = [
-        //     "idvendor" => $vendor_id,
-        //     "idlayanan" => $idlayanan,
-        // ];
-
-
-        // return view('layanan.editoptionjenisbahan', compact('jenisbahan', 'layanan'));
-    }
 
     public function update(Request $request)
     {
@@ -101,6 +83,45 @@ class JenisBahanController extends Controller
         DB::table('vendors_has_jenis_bahan_cetaks')
             ->where('jenis_bahan_cetaks_id', '=', $id)
             ->update(['deleted_at' => now()]);
+
+        return redirect()->route('layanan.detail_layanan', [$vendorlayanan->vendors_id, $vendorlayanan->layanan_cetaks_id]);
+    }
+
+    public function uploadfotojenisbahan(Request $request)
+    {
+        $request->validate([
+            'file_foto' => 'required|file|mimes:jpg,jpeg,png,gif|max:20480',
+            'id_jenis_bahan' => 'required',
+        ]);
+        $id = $request->input('id_jenis_bahan');
+        $file = $request->file('file_foto');
+
+        $vendorlayanan = DB::table('vendors_has_jenis_bahan_cetaks')
+            ->where('jenis_bahan_cetaks_id', '=', $id)
+            ->first();
+
+
+
+
+
+            $file_name = $id . '.jpg';
+
+            $directory = base_path('../jenisbahan');
+
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true); //0755: pemilik = rwx; grup, lainnya = rx (tidak bisa write)
+            }
+            $file->move($directory, $file_name);
+
+            $relative_path = 'jenisbahan/' . $file_name;
+
+            $jenisbahan = JenisBahanCetak::find($id);
+            $jenisbahan->gambar = $relative_path;
+            $jenisbahan->save();
+        
+
+
+
 
         return redirect()->route('layanan.detail_layanan', [$vendorlayanan->vendors_id, $vendorlayanan->layanan_cetaks_id]);
     }
