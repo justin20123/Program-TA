@@ -8,18 +8,7 @@
 @endsection
 @section('menu')
 <section class="p-4">
-  <div class="input-group-prepend">
-    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-      Action
-    </button>
-    <div class="dropdown-menu" style="">
-      <a class="dropdown-item" href="#">Action</a>
-      <a class="dropdown-item" href="#">Another action</a>
-      <a class="dropdown-item" href="#">Something else here</a>
-      <div class="dropdown-divider"></div>
-      <a class="dropdown-item" href="#">Separated link</a>
-    </div>
-  </div>
+  
     <h1 class="text-center p-5">{{ $vendor->nama }}</h1>
 <div class="form-check pl-4">
   <label class="form-check-label">

@@ -10,6 +10,7 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class PenggunaController extends Controller
 {
@@ -90,7 +91,7 @@ class PenggunaController extends Controller
             $pegawai = new Pengguna();
             $pegawai->nama = $request->input('nama');
             $pegawai->email = $request->input('email');
-            $pegawai->password = $request->input('password');
+            $pegawai->password = Hash::make($request->input('password'));
             $pegawai->role = 'pegawai';
             $pegawai->saldo = 0;
             $pegawai->nomor_telepon = $request->input('nomor_telepon');
@@ -126,7 +127,7 @@ class PenggunaController extends Controller
             $pengantar = new Pengguna();
             $pengantar->nama = $request->input('nama');
             $pengantar->email = $request->input('email');
-            $pengantar->password = $request->input('password');
+            $pengantar->password = Hash::make($request->input('password'));
             $pengantar->role = 'pengantar';
             $pengantar->saldo = 0;
             $pengantar->nomor_telepon = $request->input('nomor_telepon');

@@ -10,9 +10,9 @@
 @endsection
 @section('menu')
 <h3 class="text-center p-4">Pesanan Vendor Anda</h1>
-<h5 class="text-center">{{$notaData->namaPemesan}}</h2>
+<h5 class="text-center">{{$nota_data->namaPemesan}}</h2>
 <p class="text-center">Lokasi:</p>
-<p><a href="https://www.openstreetmap.org/?mlat={{$notaData->latitude_pengambilan}}&mlon={{$notaData->longitude_pengambilan}}#map=15/{{$notaData->latitude_pengambilan}}/{{$notaData->longitude_pengambilan}}" target="_blank">Lihat di map</a></p>
+<p><a href="https://www.openstreetmap.org/?mlat={{$nota_data->latitude_pengambilan}}&mlon={{$nota_data->longitude_pengambilan}}#map=15/{{$nota_data->latitude_pengambilan}}/{{$nota_data->longitude_pengambilan}}" target="_blank">Lihat di map</a></p>
 <br>
 <div class="stepper">
     <div class="step-item active">
@@ -50,7 +50,7 @@
     <thead>
         <tr>
             <th>Image</th>
-            <th>Item</th>
+            <th>Pengantar</th>
             <th>Action</th>
         </tr>
     </thead>
@@ -72,7 +72,7 @@
                   <form action="/tugaskanpengantar" method="POST">
                     @csrf
                     <input type="hidden" name="idpengantar" value="{{$p->id}}">
-                    <input type="hidden" name="idnota" value="{{$notaData->id}}">
+                    <input type="hidden" name="idnota" value="{{$nota_data->id}}">
                     <input type="submit" value="Pilih Pengantar" class="btn btn-primary">
                   </form>
                 </li>

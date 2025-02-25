@@ -31,7 +31,7 @@ use Illuminate\Support\Facades\Route;
 //login
 Route::get('login', [LoginController::class, 'bukalogin'])->name('login');
 Route::post('login', [LoginController::class, 'login']);
-Route::get('logout', [LoginController::class, 'logout'])->name('logout');
+Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
 //register
 Route::get('register', [RegisterController::class, 'bukaregister'])->name('register');

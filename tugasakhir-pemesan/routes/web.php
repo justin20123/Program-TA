@@ -24,19 +24,17 @@ use Illuminate\Support\Facades\Route;
 //login
 Route::get('login', [LoginController::class, 'bukalogin'])->name('login');
 Route::post('login', [LoginController::class, 'login']);
-Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+Route::get('logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('/', function () {
-    $user = Auth::user();
     if (Auth::user()) {
-        if (Auth::user()->role == 'pemesan') {
-            return redirect()->route('home');
-        } else if ((Auth::user()->role == 'admin') || (Auth::user()->role == 'manajer') || (Auth::user()->role == 'pengantar') || (Auth::user()->role == 'pegawai')) {
+        if (Auth::user()->role != 'pemesan') {
             Auth::logout();
             return redirect()->route('login')->with('error', 'User  ini tidak tercatat sebagai pemesan, silahkan login menggunakan aplikasi yang sesuai.');
         }
-    } else if (!Auth::user()) {
-        return redirect()->route('login');
+
+        
     }
+    return redirect()->route('home');
 });
 //register
 

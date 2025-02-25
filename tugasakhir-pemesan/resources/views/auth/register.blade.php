@@ -42,12 +42,15 @@
 
     <div class="register-container">
         <div class="register-form">
-            <h2 class="text-center mb-4">Create an Account</h2>
-            <p class="text-center">It takes a few seconds to create an account.</p>
+            <h2 class="text-center mb-4">Buat Akun</h2>
+
+            <p class="text-center">Membutuhkan beberapa detik untuk membuat akun.</p>
+
             <form method="POST" action="{{ route('register') }}">
                 @csrf
                 <div class="form-group">
-                    <label for="nama">Full Name</label>
+                    <label for="nama">Nama Lengkap</label>
+
                     <input type="text" class="form-control" id="nama" name="nama" value="{{ old('nama') }}" required>
                 </div>
                 <div class="form-group">
@@ -55,24 +58,30 @@
                     <input type="tel" name="nomor_telepon" class="form-control" value="{{ old('nomor_telepon') }}"  required  pattern="[0-9]*" inputmode="numeric">
                 </div>
                 <div class="form-group">
-                    <label>Email Address</label>
+                    <label>Alamat Email</label>
+
                     <input type="email" class="form-control" id="email" name="email" value="{{ old('email') }}" required>
                 </div>
                 <div class="form-group">
-                    <label>Password</label>
+                    <label>Kata Sandi</label>
+
                     <input type="password" class="form-control" id="password" name="password" required>
                 </div>
                 <div class="form-group">
-                    <label>Confirm Password</label>
+                    <label>Konfirmasi Kata Sandi</label>
+
                     <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
                 </div>
                 <div class="form-check mb-3">
                     <input type="checkbox" class="form-check-input" id="terms" name="terms" required>
-                    <label class="form-check-label" for="terms">I have read and accept the Terms and Conditions</label>
+                    <label class="form-check-label" for="terms">Saya telah membaca dan menerima Syarat dan Ketentuan</label>
+
                 </div>
-                <button type="submit" class="btn btn-primary btn-block">Create an Account</button>
+                <button type="submit" class="btn btn-primary btn-block">Buat Akun</button>
+
                 <p class="text-center mt-3">
-                    Already have an account? <a href="{{ route('login') }}">Log in</a>
+                    Sudah punya akun? <a href="{{ route('login') }}">Masuk</a>
+
                 </p>
             </form>
             @if (session('error'))

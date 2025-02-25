@@ -22,50 +22,14 @@
 >
   <head>
     <style>
-      .dd {
-  position: relative;
-  display: inline-block;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  background-color: #4CAF50;
-  color: #fff;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.dd-content {
-  display: none;
-  position: absolute;
-  background-color: #f9f9f9;
-  min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  padding: 12px 16px;
-  z-index: 1;
-}
-
-.dd-content ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.dd-content li {
-  margin-bottom: 10px;
-}
-
-.dd-content a {
-  text-decoration: none;
-  color: #333;
-}
-
-.dd:hover .dd-content {
-        display: block;
-      }
-
-.dd.show .dd-content {
-  display: block;
-}
+    .btn-logout {
+      display: inline-block;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      background-color: #4CAF50;
+      color: #fff;
+    }
     </style>
     
     <meta charset="utf-8" />
@@ -80,7 +44,7 @@
     <meta name="description" content="" />
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('../assets/img/favicon/favicon.ico')}}" />
+    <link rel="icon" type="image/x-icon" href="{{ asset('../assets/img/favicon/favicon.ico') }}" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -95,26 +59,26 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
 
     <!-- Icons. Uncomment required icon fonts -->
-    <link rel="stylesheet" href="{{ asset('../assets/vendor/fonts/boxicons.css')}}" />
+    <link rel="stylesheet" href="{{ asset('../assets/vendor/fonts/boxicons.css') }}" />
 
     <!-- Core CSS -->
-    <link rel="stylesheet" href="{{ asset('../assets/vendor/css/core.css')}}" class="template-customizer-core-css" />
-    <link rel="stylesheet" href="{{ asset('../assets/vendor/css/theme-default.css')}}" class="template-customizer-theme-css" />
-    <link rel="stylesheet" href="{{ asset('../assets/css/demo.css')}}" />
+    <link rel="stylesheet" href="{{ asset('../assets/vendor/css/core.css') }}" class="template-customizer-core-css" />
+    <link rel="stylesheet" href="{{ asset('../assets/vendor/css/theme-default.css') }}" class="template-customizer-theme-css" />
+    <link rel="stylesheet" href="{{ asset('../assets/css/demo.css') }}" />
 
     <!-- Vendors CSS -->
-    <link rel="stylesheet" href="{{ asset('../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css')}}" />
+    <link rel="stylesheet" href="{{ asset('../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.css') }}" />
 
-    <link rel="stylesheet" href="{{ asset('../assets/vendor/libs/apex-charts/apex-charts.css')}}" />
+    <link rel="stylesheet" href="{{ asset('../assets/vendor/libs/apex-charts/apex-charts.css') }}" />
 
     <!-- Page CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <!-- Helpers -->
-    <script src="{{ asset('../assets/vendor/js/helpers.js')}}"></script>
+    <script src="{{ asset('../assets/vendor/js/helpers.js') }}"></script>
     <!--! Template customizer & Theme config files MUST be included after core stylesheets and helpers.js in the <head> section -->
     <!--? Config:  Mandatory theme config file contain global vars & default theme options, Set your preferred theme option in this file.  -->
-    <script src="{{ asset('../assets/js/config.js')}}"></script>
+    <script src="{{ asset('../assets/js/config.js') }}"></script>
 
     
 
@@ -138,7 +102,7 @@
         <!-- Layout container -->
         <div class="layout-page">
           <!-- Navbar -->
-          @include("layout.navbar")
+          @include('layout.navbar')
           <!-- / Navbar -->
 
           <!-- Content wrapper -->
@@ -147,7 +111,7 @@
               <div class="text-end" style="margin-right: 25px;">
                 <span id="current-time">
                     @php
-                    echo now()->format("d-M-Y H:i:s");
+                        echo now()->format('d-M-Y H:i:s');
                     @endphp
                 </span>
               </div>
@@ -175,22 +139,22 @@
 
     <!-- Core JS -->
     <!-- build:js assets/vendor/js/core.js -->
-    <script src="{{ asset('../assets/vendor/libs/jquery/jquery.js')}}"></script>
-    <script src="{{ asset('../assets/vendor/libs/popper/popper.js')}}"></script>
-    <script src="{{ asset('../assets/vendor/js/bootstrap.js')}}"></script>
-    <script src="{{ asset('../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js')}}"></script>
+    <script src="{{ asset('../assets/vendor/libs/jquery/jquery.js') }}"></script>
+    <script src="{{ asset('../assets/vendor/libs/popper/popper.js') }}"></script>
+    <script src="{{ asset('../assets/vendor/js/bootstrap.js') }}"></script>
+    <script src="{{ asset('../assets/vendor/libs/perfect-scrollbar/perfect-scrollbar.js') }}"></script>
 
-    <script src="{{ asset('../assets/vendor/js/menu.js')}}"></script>
+    <script src="{{ asset('../assets/vendor/js/menu.js') }}"></script>
     <!-- endbuild -->
 
     <!-- Vendors JS -->
-    <script src="{{ asset('../assets/vendor/libs/apex-charts/apexcharts.js')}}"></script>
+    <script src="{{ asset('../assets/vendor/libs/apex-charts/apexcharts.js') }}"></script>
 
     <!-- Main JS -->
-    <script src="{{ asset('../assets/js/main.js')}}"></script>
+    <script src="{{ asset('../assets/js/main.js') }}"></script>
 
     <!-- Page JS -->
-    <script src="{{ asset('../assets/js/dashboards-analytics.js')}}"></script>
+    <script src="{{ asset('../assets/js/dashboards-analytics.js') }}"></script>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -201,14 +165,21 @@
         function updateCurrentTime() {
             var currentTimeElement = document.getElementById('current-time');
 
-            var options = { year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric',second: 'numeric'};
+            var options = {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+                second: 'numeric'
+            };
             var currentTime = new Date().toLocaleString('id-ID', options);
             currentTimeElement.innerText = currentTime;
         }
 
         setInterval(updateCurrentTime, 1000);
     </script>
-    <script src="{{ asset('../assets/js/select2.js')}}"></script>
+    <script src="{{ asset('../assets/js/select2.js') }}"></script>
     @yield('script')
   </body>
 </html>

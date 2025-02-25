@@ -66,9 +66,9 @@
                         </div>
                     </div>
                     <div class="col-md-2 text-end">
-                        @if ($v->rating > 0 && $v->rating < 3)
-                            <a href="{{ route('tinjau') }}" class="btn btn-primary">Tinjau</a>
-                        @endif
+                        {{-- @if ($v->rating > 0 && $v->rating < 3) --}}
+                            <a href="{{ route('tinjau', $v->id) }}" class="btn btn-primary">Tinjau</a>
+                        {{-- @endif --}}
                         <button class="btn btn-danger" id="btnopenblokir" data-id="{{ $v->id }}">Blokir Vendor</button>
                     </div>
                 </div>

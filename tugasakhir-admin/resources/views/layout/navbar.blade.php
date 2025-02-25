@@ -16,17 +16,10 @@
       @endif
     </div>
     <div class="navbar-brand">Saldo: Rp 500.000</div>
-    <form class="form-inline">
-      <div class="dd">
-        <span>Menu</span>
-        <div class="dd-content">
-          <ul>
-            <li><a href="/masukdana">Masukkan Dana</a></li>
-            <li><a href="/logout">Keluar</a></li>
-          </ul>
-        </div>
-      </div>
-      </form>
+    <div class="navbar-item">
+      <a href="/logout" class="btn-logout">Logout</a>
+    </div>
+
     <a class="navbar-link">&ensp;</a>
 </nav>
 

@@ -6,6 +6,7 @@
     </ol>
 @endsection
 @section('menu')
+
     <div id="loading">
         <div class="d-flex align-items-center justify-content-center" style="height: 100vh; display: flex;">
             <strong>Memuat...</strong>
@@ -18,7 +19,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 @if(Auth::user())
                 <h5>Selamat datang {{Auth::user()->nama}}</h5>
-                @endif
+
                 <div class="form-inline">
                     <label class="mr-2">Perbandingan Harga:</label>
                     <div class="input-group">
@@ -30,6 +31,8 @@
                         </div>
                     </div>
                 </div>
+                @endif
+                
             </div>
         </div>
 
@@ -40,9 +43,21 @@
     <div id="tidak-ada-vendor" class="px-5 pt-4"></div>
 
     <p id="status" class="px-5"></p>
+    @auth
+    <script>
+        var isLoggedIn = true;
+    </script>
+@endauth
+@guest
+    <script>
+        var isLoggedIn = false;
+    </script>
+@endguest
+    
 @endsection
 
 @section('script')
+
     <script>
         var isLoaded;
         //ambil lokasi sekarang
@@ -329,7 +344,12 @@
                     statusTerdekat = await pageLoadTerdekat(latitude, longitude);
 
                 }
-                statusUntukAnda = await pageLoadUntukAnda(latitude, longitude, idlayanan);
+                if (isLoggedIn) {
+                    statusUntukAnda = await pageLoadUntukAnda(latitude, longitude, idlayanan);
+                }   
+                else{
+                    statusUntukAnda = "done";
+                }             
                 if (!isLoaded) {
                     if (statusDropDown == "done" && statusLayananTerdekat == "done" && statusUntukAnda == "done" &&
                         statusTerdekat == "done") {

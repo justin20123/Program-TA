@@ -8,24 +8,43 @@
         <a class="navbar-link">&ensp;</a>
         <a href="/pesanan" class="navbar-link">Pesanan</a>
     </div>
-    <div class="navbar-brand">Hak Akses: 
-      @if(Auth::check())
-      {{ ucfirst(Auth::user()->role) }}
-  
-      @endif
+
+    <div class="navbar-brand">
+        @if (Auth::user())
+            <div>
+                Hak Akses:
+                @if (Auth::check())
+                    {{ ucfirst(Auth::user()->role) }}
+                @endif
+            </div>
+        @endif
     </div>
-    <div class="navbar-brand">Saldo: Rp 500.000</div>
-    <form class="form-inline">
-      <div class="dd">
-        <span>Menu</span>
-        <div class="dd-content">
-          <ul>
-            <li><a href="/masukdana">Masukkan Dana</a></li>
-            <li><a href="/logout">Keluar</a></li>
-          </ul>
+
+
+    <div class="navbar-brand">
+      @if (Auth::user())
+        <div>
+            Saldo: Rp 500.000
         </div>
-      </div>
-      </form>
+        @endif
+    </div>
+
+    @if (Auth::user())
+        <form class="form-inline">
+
+            <div class="dd">
+                <span>Menu</span>
+                <div class="dd-content">
+                    <ul>
+                        <li><a href="/masukdana">Masukkan Dana</a></li>
+                        <li><a href="/logout">Keluar</a></li>
+                    </ul>
+                </div>
+            </div>
+        </form>
+    @else
+        <a class="btn btn-primary" href="/login">Masuk</a>
+    @endif
     <a class="navbar-link">&ensp;</a>
 </nav>
 

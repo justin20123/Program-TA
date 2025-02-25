@@ -41,25 +41,31 @@
     <div class="login-image"></div>
     <div class="login-form">
         <h2 class="text-center mb-4">PRINTAJA WEB</h2>
-        <p class="text-center">Nice to see you again</p>
+        <p class="text-center">Senang bertemu lagi dengan anda</p>
+
         <form method="POST" action="{{ route('login') }}">
             @csrf
             <div class="form-group">
-                <label for="email">Email</label>
+                    <label for="email">Email</label>
+
                 <input type="email" class="form-control" id="email" name="email" required autofocus>
             </div>
             <div class="form-group">
-                <label for="password">Password</label>
+                    <label for="password">Kata Sandi</label>
+
                 <input type="password" class="form-control" id="password" name="password" required>
             </div>
             <div class="form-check mb-3">
                 <input type="checkbox" class="form-check-input" id="remember" name="remember">
-                <label class="form-check-label" for="remember">Remember me</label>
+                    <label class="form-check-label" for="remember">Ingat saya</label>
+
             </div>
-            <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+            <button type="submit" class="btn btn-primary btn-block">Masuk</button>
+
             <div class="text-center mt-3">
-                <button type="button" class="btn btn-outline-dark btn-block">Sign in with Google</button>
-                <p class="mt-3"><a href="{{ route('register') }}">Don't have an account? Register here</a></p>
+                <button type="button" class="btn btn-outline-dark btn-block">Masuk dengan Google</button>
+                <p class="mt-3"><a href="{{ route('register') }}">Belum punya akun? Daftar di sini</a></p>
+
             </div>
         </form>
         @if (session('error'))

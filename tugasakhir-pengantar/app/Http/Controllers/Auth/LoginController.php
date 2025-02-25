@@ -38,18 +38,22 @@ class LoginController extends Controller
         }
 
 
-        if($user->role != 'pegawai' && $user->role != 'manajer'){
-            return back()->with('error', 'Anda bukan pegawai maupun manajer, silahkan login menggunakan akun yang bersangkutan')->withInput($request->all());
-        }
-
-
-        if ($user) {
+        if($user->role == 'pengantar'){
             if (Hash::check($password, $user->password)) {
+
                 Auth::login($user);
+                
                 $request->session()->regenerate();
+                
                 return redirect()->route('home'); 
+                
             }
+            
         }
+        else{
+            return back()->with('error', 'Anda bukan pengantar, silahkan login menggunakan akun yang bersangkutan')->withInput($request->all());
+        }
+
 
         return back()->with('error', 'Email atau password salah')->withInput($request->all());
     }

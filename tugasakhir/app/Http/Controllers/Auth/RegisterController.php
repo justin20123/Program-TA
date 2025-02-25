@@ -50,11 +50,11 @@ class RegisterController extends Controller
         }
 
         $manajer = Pengguna::create([
-            'nama' => $request->nama,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'nama' => $request->input('nama'),
+            'email' => $request->input('email'),
+            'password' => Hash::make($request->input('password')),
             'role' => 'manajer',
-            'nomor_telepon' => $request->nomor_telepon,
+            'nomor_telepon' => $request->input('nomor_telepon'),
             'saldo' => 0
         ]);
 

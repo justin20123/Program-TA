@@ -30,7 +30,7 @@ use Illuminate\Support\Facades\Route;
 //login
 Route::get('login', [LoginController::class, 'bukalogin'])->name('login');
 Route::post('login', [LoginController::class, 'login']);
-Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+Route::get('logout', [LoginController::class, 'logout'])->name('logout');
 //buka app
 
 

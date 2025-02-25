@@ -19,13 +19,13 @@ class PemesananController extends Controller
     public function getStatus($nota)
     {
         if ($nota->waktu_selesai) {
-            $status_nota = "Selesai";
+            $status_nota = "Pesanan Selesai";
         }
         else if ($nota->waktu_diantar || $nota->waktu_tunggu_diambil) {
             if ($nota->waktu_diantar) {
-                $status_nota = "Diantar";
+                $status_nota = "Sedang Diantar";
             } else {
-                $status_nota = "Menunggu diambil";
+                $status_nota = "Menunggu Diambil";
             }
         }
         elseif ($nota->waktu_menerima_pesanan) {
@@ -185,17 +185,15 @@ class PemesananController extends Controller
     public function tugaskanpengantar(Request $request)
     {
         $nota = Nota::findOrFail($request->idnota);
+
+        
         $nota->waktu_diantar = Carbon::now('Asia/Jakarta');
-        $nota->idpengantar = $request->idpengantar;
+        $nota->idpengantar = $request->input('idpengantar');
         $nota->save();
 
-        $pemesanans = DB::table('pemesanans')
-            ->where('notas_id', '=', $request->idnota)
-            ->select('id', 'vendors_id')
-            ->get();
+        // dd($nota);
 
-        $url = '/pesanancetak2/' . $pemesanans[0]->vendors_id;
-        return redirect($url);
+        return redirect()->route('pesanan.index');
     }
 
     public function requestambil(Request $request)

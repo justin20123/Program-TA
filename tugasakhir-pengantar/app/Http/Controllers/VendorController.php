@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Pengguna;
 use App\Models\Vendor;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
@@ -25,160 +26,117 @@ class VendorController extends Controller
         if (!Auth::user()) {
             return redirect()->route('login');
         }
-        if (Auth::user()->role == "manajer" && Auth::user()->vendors_id) {
-            $layananController = new LayananController();
-            return $layananController->index();
-        } elseif (Auth::user()->role != "manajer" && Auth::user()->role != "pegawai") {
+        
+        if (Auth::user()->role == "admin") {
+            $vendors = DB::table('vendors')
+                ->where('status', '=', 'active')
+                ->get();
+            $startOfWeek = now()->startOfWeek();
+            $endOfWeek = now()->endOfWeek();
+            $rating_rendah = 0;
+            foreach ($vendors as $key => $v) {
+                $ratings = DB::table('notas')
+                    ->join('pemesanans', 'pemesanans.notas_id', '=', 'notas.id')
+                    ->join('ratings', 'ratings.notas_id', '=', 'notas.id')
+                    ->where('pemesanans.vendors_id', '=', $v->id)
+                    ->whereNotNull('ratings.nilai')
+                    ->whereBetween('notas.created_at', [$startOfWeek, $endOfWeek]) // Filter by current week
+                    ->select('notas.id', DB::raw('avg(ratings.nilai) as average_rating'))
+                    ->groupBy('notas.id')
+                    ->get();
+
+                if ($ratings->isNotEmpty()) {
+                    $totalRating = 0;
+                    $totalNota = DB::table('notas')
+                        ->join('pemesanans', 'pemesanans.notas_id', '=', 'notas.id')
+                        ->where('pemesanans.vendors_id', '=', $v->id)
+                        ->whereBetween('notas.created_at', [$startOfWeek, $endOfWeek]) // Filter by current week
+                        ->distinct('notas.id') // Ensure distinct count
+                        ->count('notas.id');
+
+                    foreach ($ratings as $r) {
+                        if($r->average_rating < 3.0){
+                            $rating_rendah++;
+                        }
+                        $totalRating += $r->average_rating;
+                    }
+
+                    $vendor_rating = $totalRating / $totalNota;
+                    $v->jumlah_pesanan = $totalNota;
+                    $v->rating = $vendor_rating;
+                } else {
+                    $v->jumlah_pesanan = 0;
+                    $v->rating = 0;
+                }
+                
+            }
+            $jumlah_vendor = count($vendors);
+            // dd($jumlah_vendor);
+            return view('home', compact('vendors', 'rating_rendah', 'jumlah_vendor'));
             Auth::logout();
             return redirect()->route('login')->with('error', 'Anda bukan manajer maupun pegawai, silahkan login menggunakan akun yang bersangkutan.');
         } else {
-            return view('vendor.tambah');
+            Auth::logout();
+            return redirect()->route('login');
         }
 
 
         return view('home', compact('vendors'));
     }
-    public function indexOrders()
-    {
+
+    public function bukalepasblokir(){
         $vendors = DB::table('vendors')
-            ->join('penggunas', 'penggunas.vendors_id', '=', 'vendors.id')
-            ->where('penggunas.id', '=', Auth::user()->id)
-            ->get();
-
-
-        $pemesanans = DB::table('pemesanans')->get();
-
-        $vendorpemesanan = [];
-
-        foreach ($vendors as $v) {
-            foreach ($pemesanans as $p) {
-                if ($p->vendors_id == $v->id) {
-                    array_push($vendorpemesanan, $v);
-                    break;
-                }
-            }
-        }
-
-        
-
-        foreach ($vendorpemesanan as $key => $v) {
-            $ratings = DB::table('notas')
-            ->join('pemesanans','pemesanans.notas_id','=','notas.id')
+        ->where('status', '=', 'diblokir')
+        ->get();
+        foreach($vendors as $v){
+            $manajer = DB::table('penggunas')
+            ->where('vendors_id', '=', $v->id)
+            ->where('role', '=', 'manajer')
+            ->first();
+            $v->nama = $manajer->nama;
+            $v->email = $manajer->email;
+            $v->tanggal_diblokir = date('d/m/Y', strtotime($v->updated_at));
             
-            ->join('ratings','ratings.notas_id','=','notas.id')
-            ->where('pemesanans.vendors_id','=', $v->id)
-            ->whereNotNull('ratings.nilai')
-            ->select('notas.id',
-                DB::raw('avg(ratings.nilai) as average_rating'),
-            )
-            ->groupBy('notas.id')
-            ->get();
-            if($ratings->isNotEmpty()){
-                $totalRating = 0;
-                $totalNota = DB::table('notas')
-                ->join('pemesanans', 'pemesanans.notas_id', '=', 'notas.id')
-                ->where('pemesanans.vendors_id', '=', $v->id)
-                ->distinct('notas.id') // Ensure distinct count
-                ->count('notas.id');
-        
-                foreach ($ratings as $r) {
-                    $totalRating += $r->average_rating;
-
-                }        
-                $vendor_rating = $totalRating / $totalNota;
-                $v->jumlah_pesanan = $totalNota;
-                $v->rating = $vendor_rating;            
-            }
-            else{
-                $v->jumlah_pesanan = 0;
-                $v->rating = 0; 
-            }
         }
-
-        // dd($vendorpemesanan);
-
-        return view('pesanan.home', compact('vendorpemesanan'));
+        // dd($vendors);
+        return view('lepasblokir', compact('vendors'));
     }
-
-    public function indexPegawai()
-    {
-
-
-        $id = Auth::user()->vendors_id;
-        return redirect()->to("/pegawai/$id");
-
-    }
-
-    public function indexPengantar()
-    {
-        $id = Auth::user()->vendors_id;
-        return redirect()->to("/pengantar/$id");
-    }
-
-
-    public function tambahvendor(Request $request)
-    {
-        try {
-            $request->validate([
-                'nama' => 'required',
-                'fotopercetakan' => 'required|file|mimes:jpeg,jpg,png,gif,|max:20480',
-                'latitude' => 'required|between:-90,90',
-                'longitude' => 'required|between:-180,180'
-            ]);
-        } catch (Exception $e) {
-            return back()->with('error', 'Gagal menambah vendor. ' . $e->getMessage());
+    public function bukaverifikasi(){
+        $vendors = DB::table('vendors')
+        ->where('status', '=', 'menunggu verifikasi')
+        ->get();
+        foreach($vendors as $v){
+            $manajer = DB::table('penggunas')
+            ->where('vendors_id', '=', $v->id)
+            ->where('role', '=', 'manajer')
+            ->first();
+            $v->nama = $manajer->nama;
+            $v->email = $manajer->email;
+            $v->tanggal_daftar = date('d/m/Y', strtotime($v->created_at));
+            
         }
-
-        $idvendor = DB::table('vendors')->insertGetId([
-            'nama' => $request->nama,
-            'status' => 'active',
-            'foto_lokasi' => '',
-            'longitude' => $request->longitude,
-            'latitude' => $request->latitude,
-        ]);
-
-        $file = $request->file('fotopercetakan');
-        $fileExtension = $file->getClientOriginalExtension();
-        $fileName = "$idvendor.$fileExtension";
-
-        $directory = base_path('../vendors');
-
-        $file->move($directory, $fileName);
-
-        $relativePath = 'vendors/' . $fileName;
-
+        // dd($vendors);
+        return view('verifikasi', compact('vendors'));
+    }
+    public function blokir(Request $request)
+    {
+        $idvendor = $request->input('idvendor');
         $vendor = Vendor::findOrFail($idvendor);
-        $vendor->foto_lokasi = $relativePath;
+        $vendor->status = "diblokir";
+        $vendor->updated_at =  Carbon::now('Asia/Jakarta');;
         $vendor->save();
-
-        $pengguna = Pengguna::findOrFail(Auth::user()->id);
-        $pengguna->vendors_id = $idvendor;
-        $pengguna->save();
-
-        return redirect()->route('opensetup', ['vendorid' => $idvendor]);;
+        return redirect()->route('home')->with('success', 'Vendor berhasil diblokir');
     }
 
-    public function opensetup($idvendor)
+    public function aktifkan(Request $request)
     {
-        $layananvendor = DB::table('vendors_has_jenis_bahan_cetaks')
-            ->where('vendors_id', '=', $idvendor)
-            ->select('layanan_cetaks_id')
-            ->get();
-        $layananvendorid = [];
-        foreach ($layananvendor as $lv) {
-            array_push($layananvendorid, $lv->layanan_cetaks_id);
-        }
-        $layanans = DB::table('layanan_cetaks')
-            ->get();
-        $setup_layanans = [];
-        foreach ($layanans as $l) {
-            if (!in_array($l->id, $layananvendorid)) {
-                array_push($setup_layanans, $l);
-            }
-        }
-
-        return view('vendor.setup', compact('setup_layanans', 'idvendor'));
+        $idvendor = $request->input('idvendor');
+        $vendor = Vendor::findOrFail($idvendor);
+        $vendor->status = "active";
+        $vendor->save();
+        return redirect()->route('home')->with('success', 'Vendor berhasil diblokir');
     }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -223,7 +181,7 @@ class VendorController extends Controller
 
             $directory = base_path('../vendors');
             $file->move($directory, $fileName);
-            Cache::flush(); 
+            Cache::flush();
             Artisan::call('view:clear');
         }
         $vendor->longitude = $request->input('longitude');

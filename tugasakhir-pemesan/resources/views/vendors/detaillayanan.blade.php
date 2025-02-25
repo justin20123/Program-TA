@@ -239,7 +239,7 @@
                         }
 
                         let baseUrl = "{{ url('/') }}";
-let gambarUrl = baseUrl + '/' + gambar;
+                        let gambarUrl = baseUrl + '/' + gambar;
 
                         $('#gambarjenisbahan').html(`
                         <img src="${gambarUrl}" alt="Main Product" class="img-fluid rounded">
@@ -480,8 +480,11 @@ let gambarUrl = baseUrl + '/' + gambar;
 
                         },
                         error: function(xhr, status, error) {
-                            console.log(xhr.responseText);
-                            $('#response').text('Error: ' + error);
+                            if (xhr.status == 401) {
+                                window.location.href = '/login';
+                            } else {
+                                console.log("Error:", error);
+                            }
                         }
                     });
                 } else {

@@ -1241,21 +1241,4 @@ class LayananController extends Controller
         return redirect()->route('layananindex', [$idvendor]);
     }
 
-    public function create() {
-        return view('layanans.create');
-    }
-
-    public function store(Request $request) {
-        $vendor_id = $request->input('id_vendor');
-        $layanan_id = $request->input('id_layanan');
-        
-        $layanan = new Layanan();
-        $layanan->nama = $request->input('nama');
-        if($request->input('deskripsi')){
-            $layanan->deskripsi = $request->input('deskripsi');
-        }
-        $layanan->biaya_tambahan = $request->input('biaya_tambahan');
-        $layanan->save();
-        return redirect()->route('layanan.detail_layanan', [$vendor_id, $layanan_id]);
-    }
 }
