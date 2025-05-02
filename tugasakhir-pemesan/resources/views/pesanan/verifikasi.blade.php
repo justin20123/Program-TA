@@ -2,13 +2,12 @@
 
 @section('breadcrumb')
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="#">Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Verification</li>
+        <li class="breadcrumb-item"><a href="#">Beranda</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Verifikasi</li>
     </ol>
 @endsection
 
 @section('menu')
-    <!-- Confirmation Modal -->
     <div class="modal fade" id="modalKonfirmasi" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -61,14 +60,14 @@
 
         <div class="card">
             <div class="card-body">
-                <h5 class="font-weight-bold text-center">File Verification</h5>
+                <h5 class="font-weight-bold text-center">Verifikasi</h5>
 
                 <div class="file-preview mb-4">
                     <div class="h5">File Pemesanan</div>
                     <iframe src="/{{ $pemesanan->url_file }}"
                         style="width: 100px; height: 100px; border: none; overflow: hidden;"></iframe>
                     <br>
-                    <a class="btn btn-primary" href="/{{ $pemesanan->url_file }}" target="_blank">Preview File</a>
+                    <a class="btn btn-primary" href="/{{ $pemesanan->url_file }}" target="_blank">Lihat File</a>
 
                 </div>
 
@@ -79,8 +78,7 @@
                         style="width: 100px; height: 100px; border: none; overflow: hidden;"></iframe>
                     <br>
                     <div class="text-right mt-2">
-                        <a class="btn btn-primary" href="/{{ $notaProgress->url_ubah_file }}" target="_blank">Preview
-                            File</a>
+                        <a class="btn btn-primary" href="/{{ $notaProgress->url_ubah_file }}" target="_blank">Lihat file</a>
                         <button class="btn btn-primary" id="btnKonfirmasiHasil"
                             data-idnota=" {{ $notaProgress->notas_id }} "
                             data-idpemesanan=" {{ $notaProgress->pemesanans_id }} ">Konfirmasi Hasil</button>
@@ -92,12 +90,11 @@
                     @csrf
                     <div class="form-group">
                         <label for="changeRequest">Ajukan Perubahan</label>
-                        <textarea class="form-control" name="textperubahan" id="textperubahan" rows="3"
-                            placeholder="Enter your changes here..."></textarea>
+                        <textarea class="form-control" name="textperubahan" id="textperubahan" rows="3" required></textarea>
                         <input type="hidden" name="idnota" value="{{ $notaProgress->notas_id }}">
                         <input type="hidden" name="idpemesanan" value=" {{ $notaProgress->pemesanans_id }} ">
                         <input type="hidden" name="perubahan" id="perubahan" value=" {{ $notaProgress->pemesanans_id }} ">
-                        <button type="button" class="btn btn-primary" id="btnSubmit">Submit</button>
+                        <button type="button" class="btn btn-primary" id="btnSubmit">Kirim</button>
 
                     </div>
                 </form>
@@ -129,11 +126,10 @@
             $('#submitChangeRequest').on('click', function() {
                 const changes = $('#changeRequest').val();
                 if (changes) {
-                    // Send changes to the server
-                    alert('Change request submitted: \n' + changes);
-                    $('#changeRequest').val(''); // Clear the textarea
+                    alert('Perubahan dikirimkan: \n' + changes);
+                    $('#changeRequest').val(''); 
                 } else {
-                    alert('Please enter your changes before submitting.');
+                    alert('Silahkan masukkan perubahan sebelum mengajukan perubahan.');
                 }
             });
 
@@ -142,7 +138,6 @@
             });
 
             $('#btnSubmit').click(function() {
-                console.log('aa')
                 var textperubahan = $("#textperubahan").val();
                 $('#perubahan').val(textperubahan);
                 $('#formajukanperubahan').submit();

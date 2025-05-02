@@ -541,68 +541,88 @@ class VendorController extends Controller
         return $layanans;
     }
 
-    public function index($idlayanan = 1)
+    public function index($layanan_id = 1)
     {
-        $vendors = Vendor::all();
-        $layananvendor = DB::table('layanan_cetaks')
-        ->where('layanan_cetaks.id','=',$idlayanan)
-        ->first();
-
-
-        foreach($vendors as $key=>$v){
-
-            $pengantars = DB::table('penggunas')
-            ->where('vendors_id','=',$v->id)
-            ->where('role','=','pengantar')
-            ->count();
-
-            if($pengantars>0){
-                $v->statusantar = "Tersedia pengantaran";
-            }
-            else{
-                $v->statusantar = "";
-            }
-
-            $ratings = DB::table('notas')
-            ->join('pemesanans','pemesanans.notas_id','=','notas.id')
-            ->join('ratings','ratings.notas_id','=','notas.id')
-            ->where('pemesanans.vendors_id','=', $v->id)
-            ->whereNotNull('ratings.nilai')
-            ->select('notas.id',
-                DB::raw('avg(ratings.nilai) as average_rating'),
-            )
-            ->groupBy('notas.id')
+        $listvendor = DB::table("vendors_has_jenis_bahan_cetaks")
+            ->where('layanan_cetaks_id', '=', $layanan_id)
             ->get();
-            if($ratings->isNotEmpty()){
+        
+        $vendors = [];
+        
+        foreach ($listvendor as $lv) {
+            $vendor = DB::table("vendors")
+                ->where('id', '=', $lv->vendors_id)
+                ->first();
+        
+            if ($vendor->status == "active") {
+                if (!isset($vendors[$vendor->id])) {
+                    
+                    $vendors[$vendor->id] = $vendor;
+                }
+            }
+        }
+    
+        $layananvendor = DB::table('layanan_cetaks')
+            ->where('id', '=', $layanan_id)
+            ->first();
+    
+        foreach ($vendors as $key => $v) {
+            $fileName = $v->foto_lokasi;
+            $extension = pathinfo($fileName, PATHINFO_EXTENSION);
+        
+            $v->file_extension = $extension;
+        
+            $pengantars = DB::table('penggunas')
+                ->where('vendors_id', '=', $v->id)
+                ->where('role', '=', 'pengantar')
+                ->count();
+        
+            $v->statusantar = $pengantars > 0 ? "Tersedia pengantaran" : "";
+        
+            $ratings = DB::table('notas')
+                ->join('pemesanans', 'pemesanans.notas_id', '=', 'notas.id')
+                ->join('ratings', 'ratings.notas_id', '=', 'notas.id')
+                ->where('pemesanans.vendors_id', '=', $v->id)
+                ->whereNotNull('ratings.nilai')
+                ->select('notas.id', DB::raw('avg(ratings.nilai) as average_rating'))
+                ->groupBy('notas.id')
+                ->get();
+        
+            if ($ratings->isNotEmpty()) {
                 $totalRating = 0;
                 $totalNota = DB::table('notas')
                 ->join('pemesanans', 'pemesanans.notas_id', '=', 'notas.id')
                 ->where('pemesanans.vendors_id', $v->id)
                 ->count();
-        
+
                 foreach ($ratings as $r) {
                     $totalRating += $r->average_rating;
-
-                }        
+                }
+            
                 $vendor_rating = $totalRating / $totalNota;
                 $v->vendor_rating = $vendor_rating;
-                $v->total_nota = $totalNota;               
-            }
-            else{
+                $v->total_nota = $totalNota;
+            } else {
                 $v->vendor_rating = null;
                 $v->total_nota = 0;
             }
-            $hargaCetakController = new HargaCetakController();
-            $v->hargamin = $hargaCetakController->getMinValue($v->id,$idlayanan);
-            $v->hargamaks = $hargaCetakController->getMaxValue($v->id,$idlayanan);
-
-             
-            
-        }
         
-        return view('vendors.vendors', compact('vendors', 'layananvendor'));
+            $hargaCetakController = new HargaCetakController();
+            $v->hargamin = $hargaCetakController->getMinValue($v->id, $layanan_id);
+            $v->hargamaks = $hargaCetakController->getMaxValue($v->id, $layanan_id);
+        }
+    
+        $vendors = array_values($vendors);
+    
+        $layanan_cetaks = DB::table('layanan_cetaks')
+        ->select('id','nama')
+        ->get();
+    
+    
+        // dd($vendors);
+    
+        return view('vendors.vendors', compact('vendors', 'layananvendor', 'layanan_cetaks', 'layanan_id'));
     }
-
     public function isvendorada(){
         $vendors = DB::table('vendors')
         ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.vendors_id', '=', 'vendors.id')

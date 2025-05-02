@@ -1,12 +1,14 @@
 @extends('layout.sneat')
 @section('breadcrumb')
 <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="#">Home</a></li>
-    <li class="breadcrumb-item"><a href="#">Vendors</a></li>
+    <li class="breadcrumb-item"><a href="#">Beranda</a></li>
     <li class="breadcrumb-item active" aria-current="page">Layanan</li>
   </ol>
 @endsection
 @section('menu')
+@if($vendor->status == 'menunggu verifikasi')
+Vendor Anda Belum Terverifikasi, Namun Anda Dapat Mengatur Vendor Anda Sekarang!
+@endif
 <section class="p-4">
   
     <h1 class="text-center p-5">{{ $vendor->nama }}</h1>
@@ -66,7 +68,7 @@
 </ul>
 <div class="text-center">
   <a href="/setup/{{$vendor->id}}" class="btn btn-primary m-2">Tambah Layanan</a><br>
-  <a href="/editvendor/{{$vendor->id}}" class="btn btn-primary m-2">Edit Vendor</a>
+  <a href="/editvendor/{{$vendor->id}}" class="btn btn-primary m-2">Ubah Vendor</a>
 </div>    
 </section>
 

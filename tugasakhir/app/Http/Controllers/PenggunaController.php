@@ -17,16 +17,11 @@ class PenggunaController extends Controller
     
     public function ceklogin()
     {
-        if(!Auth::user()){
+        if(!Auth::user()){ 
             return redirect()->route('login');
         }
     }
 
-    public function index()
-    {
-        $penggunas = Pengguna::all();
-        return view('penggunas.index', compact('penggunas'));
-    }
 
     public function indexPegawai($id_vendor){
         $pegawais = DB::table('penggunas')

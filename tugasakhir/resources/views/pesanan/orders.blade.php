@@ -1,9 +1,8 @@
 @extends('layout.sneat')
 @section('breadcrumb')
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="#">Home</a></li>
-        <li class="breadcrumb-item" aria-current="page">Vendors</li>
-        <li class="breadcrumb-item active" aria-current="page">Orders</li>
+        <li class="breadcrumb-item"><a href="#">Beranda</a></li>
+        <li class="breadcrumb-item active" aria-current="page">List Pesanan</li>
     </ol>
 @endsection
 @section('menu')
@@ -48,7 +47,7 @@
                                 <a href="/terimapesanan/{{ $nd['nota']->id }}" class="btn btn-primary">Terima Pesanan</a>
                             @else
                                 <a href="/pesanancetak/{{ $nd['pemesanans'][0]->vendors_id }}/detail/{{ $nd['nota']->id }}"
-                                    class="btn btn-primary">Details</a>
+                                    class="btn btn-primary">Detail Pesanan</a>
                             @endif
 
                         </div>

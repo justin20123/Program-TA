@@ -105,9 +105,6 @@ class DetailCetaksController extends Controller
         $opsi_detail = DB::table('opsi_details')
         ->where('detail_cetaks_id','=',$request->input('id_detail'))
         ->get();
-        $gambar = DB::table('gambars')
-        ->where('detail_cetaks_id','=',$request->input('id_detail'))
-        ->get();
 
         $details = DetailCetaks::findOrFail($request->input('id_detail'));
 
@@ -120,9 +117,6 @@ class DetailCetaksController extends Controller
 
         foreach($opsi_detail as $od){
             DB::table('opsi_details')->where('id', '=', $od->id)->update(['deleted_at' => null]);
-        }
-        foreach($gambar as $g){
-            DB::table('gambars')->where('id', '=', $g->id)->update(['deleted_at' => null]);
         }
         $details->deleted_at = Carbon::now('Asia/Jakarta');
         $details->save();

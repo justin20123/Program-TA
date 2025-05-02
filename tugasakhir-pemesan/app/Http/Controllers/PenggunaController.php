@@ -7,6 +7,7 @@ use App\Models\VendorHasPengguna;
 use Carbon\Carbon;
 use Database\Seeders\VendorHasPenggunaSeeder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class PenggunaController extends Controller
@@ -167,6 +168,19 @@ class PenggunaController extends Controller
         $pengantar->save();
 
         return redirect()->route('pengantar.index',[$request->idvendor]);
+    }
+
+    public function openmasukdana(){
+        return view('masukdana');
+    }
+
+    public function masukdana(Request $request){
+        $user = Pengguna::findOrFail(Auth::user()->id);
+        $saldo = $user->saldo;
+        $saldo += $request->input('nominal');
+        $user->saldo += $saldo;
+        $user->save();
+        return redirect()->route('home');
     }
 
     /**

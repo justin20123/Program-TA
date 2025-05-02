@@ -1,8 +1,7 @@
 @extends ("layanan.optiontemplate")
 @section ("breadcrumb")
 <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="#">Home</a></li>
-    <li class="breadcrumb-item"><a href="#">Vendors</a></li>
+    <li class="breadcrumb-item"><a href="#">Beranda</a></li>
     <li class="breadcrumb-item" aria-current="page">Layanan</li>
     <li class="breadcrumb-item" aria-current="page">Detail Layanan</li>
     <li class="breadcrumb-item active" aria-current="page">Opsi Layanan</li>
@@ -54,14 +53,14 @@
         <td>
             <ul class="list-inline">
                 <li class="list-inline-item">
-                    <a href="../../opsiharga/edit/{{$h->id}}" class="btn btn-primary">Edit Opsi</a>
+                    <a href="../../opsiharga/edit/{{$h->id}}" class="btn btn-primary">Ubah Opsi</a>
                 </li>
                 <li class="list-inline-item">
                     <button type="button" class="btn btn-danger btn-sm mx-2 delete-button" 
                         data-id="{{$h->id}}" 
                         data-jenisbahan="{{ $detail->id_jenis_bahan }}" 
                         data-toggle="modal" 
-                        data-target="#confirmDeleteModal">Delete
+                        data-target="#confirmDeleteModal">Hapus
                     </button>
                 </li>
             </ul>

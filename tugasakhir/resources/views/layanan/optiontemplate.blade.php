@@ -11,7 +11,7 @@
     <thead>
         <tr>
             <th>Opsi</th>
-            <th>Action</th>
+            <th>Aksi</th>
         </tr>
     </thead>
     <tbody>

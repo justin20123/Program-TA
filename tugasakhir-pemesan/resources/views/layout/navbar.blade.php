@@ -1,8 +1,8 @@
 <nav class="navbar navbar-light bg-light w-100">
     <a class="navbar-link">&ensp;</a>
-    <a class="navbar-brand">Logo</a>
+    <div class="navbar-brand"><img src="{{ asset('assets/logo/printajalogo.png') }}" width="75px" height="75px"></div>
     <div class="navbar-item justify-content-between">
-        <a href="/" class="navbar-link">Home</a>
+        <a href="/" class="navbar-link">Beranda</a>
         <a class="navbar-link">&ensp;</a>
         <a href="/cart" class="navbar-link">Keranjang</a>
         <a class="navbar-link">&ensp;</a>
@@ -24,7 +24,7 @@
     <div class="navbar-brand">
       @if (Auth::user())
         <div>
-            Saldo: Rp 500.000
+            Saldo: Rp. {{ number_format(Auth::user()->saldo, 0, '.', ',') }}
         </div>
         @endif
     </div>

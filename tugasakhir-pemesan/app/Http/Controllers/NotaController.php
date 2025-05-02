@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Nota;
 use App\Models\NotaProgress;
 use App\Models\Pemesanan;
+use App\Models\Pengguna;
 use Carbon\Carbon;
 use DateTime;
 use Illuminate\Http\Request;
@@ -47,13 +48,10 @@ class NotaController extends Controller
         $pemesanan = Pemesanan::findOrFail($idpemesanans[0]);
         $vendorid = $pemesanan->vendors_id;
 
-
         if ($request->opsiantar == "diambil") {
             $request->validate([
                 'idpemesanans' => 'required',
             ]);
-
-
 
             $idnota = DB::table('notas')->insertGetid([
                 'harga_total' => $request->harga_total,
@@ -110,6 +108,12 @@ class NotaController extends Controller
                 'progress' => "proses",
             ]);
         }
+
+        $pengguna = Pengguna::findOrFail(Auth::user()->id);
+        $saldo = $pengguna->saldo;
+        $saldobaru = $saldo - $request->harga_total;
+        $pengguna->saldo = $saldobaru;
+        $pengguna->save();
 
         return ["idnota" => $idnota, "idvendor" => $vendorid, "message" => "Pesanan berhasil dibuat, silahkan menunggu diproses"];
     }
@@ -271,7 +275,7 @@ class NotaController extends Controller
         $jumlah_selesai = 0;
         foreach ($notas_progress as $key => $np) {
             if ($key == 0) {
-                continue;
+                $jumlah_selesai++;
             } else if ($np->progress == 'menunggu verifikasi') {
                 $array = [
                     'waktu_progress_format' => $this->formatDateTime($np->waktu_progress),
@@ -411,7 +415,7 @@ class NotaController extends Controller
             ->exists();
 
         if ($existing_progress) {
-            return response()->json(['message' => 'Progress sudah ditangani'], 409); // Conflict status
+            return redirect()->to('/pesanan/'. $request->idnota);
         }
 
         $nota_progress = new NotaProgress();
@@ -423,7 +427,7 @@ class NotaController extends Controller
 
         $nota_progress->save();
 
-        return $this->showDetailPesanan($request->idnota);
+        return redirect()->to('/pesanan/'. $request->idnota);
     }
     public function ajukanperubahan(Request $request)
     {

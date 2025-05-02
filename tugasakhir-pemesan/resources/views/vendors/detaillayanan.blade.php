@@ -1,13 +1,16 @@
 @extends('layout.sneat')
 @section('breadcrumb')
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="#">Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Vendors</li>
+        <li class="breadcrumb-item"><a href="#">Beranda</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Vendor</li>
     </ol>
 @endsection
 @section('menu')
     <div class="container py-5">
         <div id="error-message"></div>
+        <a href="../" class="px-4 pt-3 text-black">
+            <i class="fas fa-arrow-left"></i>
+        </a>    
         <div class="row">
             <div class="col-md-4">
                 <div class="mb-4">
@@ -229,7 +232,7 @@
                 dataType: 'json',
                 success: function(response) {
                     $('#listOpsi').html('');
-                    let html = '';
+                    
 
 
                     if (response.result == 'success') {
@@ -244,8 +247,9 @@
                         $('#gambarjenisbahan').html(`
                         <img src="${gambarUrl}" alt="Main Product" class="img-fluid rounded">
                         `);
-                        $('#listdetail').html('<p>Tidak ada opsi yang perlu ditambahkan</p>');
-                        if (response.data.opsidetail > 0) {
+
+                        if (response.data.opsidetail.length > 0) {
+                            let html = '';
                             let opsiDetail = {};
                             response.data.opsidetail.forEach(function(item) {
                                 const detailid = item.detail.id;
@@ -281,7 +285,7 @@
                                                  id="opsidetail-${key}">`
                                     detail.opsi.forEach(function(option) {
                                         html += `
-                                                <option value="${option.idopsi}">${option.opsi}(+Rp. 
+                                                <option value="${option.idopsi}">${option.opsi} (+Rp. 
                                                 ${option.biaya_tambahan})</option>
                                             `;
                                     });
@@ -294,11 +298,10 @@
                             `;
 
                                 } else {
-                                    html = '<p>No Options required.</p>';
+                                    html += '<p>Tidak ada opsi diperlukan .</p>';
                                 }
-
-                                $('#listdetail').html(html);
                             }
+                            $('#listdetail').html(html);
                         }
 
                         $('#listharga').html('');
@@ -455,8 +458,6 @@
                     formData.append('idopsidetail', idopsidetail);
                     formData.append('catatan', catatan);
 
-
-                    // Make the AJAX POST request
                     $.ajax({
                         url: '/submitpesanan',
                         type: 'POST',
@@ -468,7 +469,7 @@
                         },
                         success: function(response) {
                             Swal.fire({
-                                title: 'Success!',
+                                title: 'Berhasil!',
                                 text: response.message,
                                 icon: 'success',
                                 confirmButtonText: 'OK'

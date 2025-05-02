@@ -109,7 +109,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/pesanancetak/{idvendor}/detail/{idnota}', [PemesananController::class, 'detailPesanan'])->name('pesanan.detailPesanan');
 
     //download
-    Route::get('/pemesanan/{filename}', function ($filename) {
+Route::get('/pemesanan/{filename}/download', function ($filename) {
         $path = base_path('../pemesanan/' . $filename);
 
         if (file_exists($path)) {
@@ -118,6 +118,17 @@ Route::middleware(['auth'])->group(function () {
         }
 
         abort(404);
+    });
+    Route::get('/pemesanan/{filename}', function ($filename) {
+        $path = base_path('../pemesanan/' . $filename);
+    
+        if (file_exists($path)) {
+            //ambil lokasi file pemesanan
+            // Serve file inline for preview in iframe
+            return response()->file($path);
+        }
+    
+        abort(404); 
     });
 
     //fotolayanan

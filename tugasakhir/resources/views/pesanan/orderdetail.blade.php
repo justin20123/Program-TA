@@ -1,10 +1,9 @@
 @extends('layout.sneat')
 @section('breadcrumb')
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="#">Home</a></li>
-        <li class="breadcrumb-item" aria-current="page">Vendors</li>
-        <li class="breadcrumb-item" aria-current="page">Orders</li>
-        <li class="breadcrumb-item active" aria-current="page">Order Detail</li>
+        <li class="breadcrumb-item"><a href="#">Beranda</a></li>
+        <li class="breadcrumb-item" aria-current="page">Pesanan</li>
+        <li class="breadcrumb-item active" aria-current="page">Detail Pesanan</li>
     </ol>
 @endsection
 @section('menu')
@@ -193,11 +192,11 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Image</th>
-                        <th>Item</th>
-                        <th>Catatan</th>
+                        <th>File</th>
+                        <th>Produk</th>
+                        <th>Detail dan Catatan</th>
                         @if (!$is_verifikasi_selesai)
-                            <th>Action</th>
+                            <th>Aksi</th>
                         @endif
 
 
@@ -205,22 +204,27 @@
                 </thead>
                 <tbody>
                     @foreach ($nota_detail[0]['pemesanans'] as $p)
+                        <input type="hidden" name="detail-pesanan-{{ $p->id }}" value="{{ $p->detail_pesanan }}">
                         <tr class="justify-content-between">
                             <td>
-                                <img class="od-image"
-                                    src="data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22286%22%20height%3D%22180%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20286%20180%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_1925379617b%20text%20%7B%20fill%3Argba(255%2C255%2C255%2C.75)%3Bfont-weight%3Anormal%3Bfont-family%3AHelvetica%2C%20monospace%3Bfont-size%3A14pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_1925379617b%22%3E%3Crect%20width%3D%22286%22%20height%3D%22180%22%20fill%3D%22%23777%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%22107.1937484741211%22%20y%3D%2296.24000034332275%22%3E286x180%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E"
-                                    alt="" srcset="">
+                                <div>
+                                    <iframe src="/{{ $p->url_file }}"
+                                        style="width: 100px; height: 100px; border: none; overflow: hidden;"></iframe>
+                                    <br>
+                                    <a class="btn btn-primary" href="/{{ $p->url_file }}" target="_blank">Lihat
+                                        File</a>
+                                </div>
                             </td>
                             <td scope="row">
                                 <div>{{ $p->layanan }}</div>
                                 <div>{{ $p->jumlah . ' ' . $p->satuan }}</div>
                                 <div>Rp. {{ number_format($p->harga_satuan * $p->jumlah, 0, ',', '.') }}</div>
-                                <a href="/{{ $p->url_file }}" class="btn btn-primary py-2" target="_blank">Download
+                                <a href="/{{ $p->url_file }}/download" class="btn btn-primary py-2" target="_blank">Unduh
                                     File</a>
                             </td>
                             <td>
                                 <button class="btn btn-link bukacatatan" data-idpemesanan="{{ $p->id }}">Lihat
-                                    Catatan
+                                    Detail dan Catatan
                                 </button>
                             </td>
                             <td>
@@ -252,20 +256,26 @@
             </table>
             @if ($is_selesai)
                 <p class="text-center my-5">Pesanan Sudah Selesai</p>
-            @elseif ($is_menunggu_selesai)
-                <button class="btn btn-primary text-center my-5" id="btnSelesai">Mark Selesai</button>
             @else
-                @if ($nota_detail[0]['nota']->opsi_pengambilan == 'diantar')
-                    @if ($is_verifikasi_selesai)
-                        <button class="btn btn-primary text-center my-5" id="btnAntar">Antar</button>
+                @if($nota_detail[0]['nota']->opsi_pengambilan == 'diambil')
+                    @if($is_menunggu_selesai)
+                        <button class="btn btn-primary text-center my-5" id="btnSelesai">Selesaikan Pesanan</button>
                     @else
-                        <button class="btn btn-primary text-center my-5 disabled">Antar</button>
+                        @if ($is_verifikasi_selesai)
+                            <button class="btn btn-primary text-center my-5" id="btnAmbil">Ajukan Pengambilan</button>
+                        @else
+                            <button class="btn btn-primary text-center my-5 disabled">Ajukan Pengambilan</button>
+                        @endif
                     @endif
                 @else
-                    @if ($is_verifikasi_selesai)
-                        <button class="btn btn-primary text-center my-5" id="btnAmbil">Request Ambil</button>
+                    @if($is_menunggu_selesai)
+                        <p class="text-center my-5">Pesanan sedang diantar dan akan diselesaikan oleh pengantar</p>
                     @else
-                        <button class="btn btn-primary text-center my-5 disabled">Request Ambil</button>
+                        @if ($is_verifikasi_selesai)
+                            <button class="btn btn-primary text-center my-5" id="btnAntar">Antar</button>
+                        @else
+                            <button class="btn btn-primary text-center my-5 disabled">Antar</button>
+                        @endif
                     @endif
                 @endif
             @endif
@@ -278,37 +288,33 @@
                 $(document).ready(function() {
                     $('.download-btn').click(function() {
                         var filename = $(this).data('url');
-                        var fileUrl = '/file/' + filename; // Construct the URL
+                        var fileUrl = '/file/' + filename; 
                         alert('File URL: ' + fileUrl);
-                        console.log('Fetching URL:', fileUrl); // Log the URL
+                        console.log('Fetching URL:', fileUrl); 
 
-                        // Use fetch to download the file
                         fetch(fileUrl)
                             .then(response => {
                                 if (!response.ok) {
                                     throw new Error('Network response was not ok: ' + response.statusText);
                                 }
-                                return response.blob(); // Convert the response to a Blob
+                                return response.blob(); 
                             })
                             .then(blob => {
                                 if (blob.size === 0) {
-                                    throw new Error('The file is empty.'); // Handle empty file case
+                                    throw new Error('The file is empty.');
                                 }
 
-                                // Create a temporary URL for the Blob
                                 var url = window.URL.createObjectURL(blob);
 
-                                // Create a link element
                                 var a = document.createElement('a');
                                 a.href = url;
-                                a.download = filename; // Use the filename for the download
+                                a.download = filename; 
                                 document.body.appendChild(a);
-                                a.click(); // Trigger the click
-                                a.remove(); // Clean up the link
-                                window.URL.revokeObjectURL(url); // Release the Blob URL
+                                a.click(); 
+                                a.remove();
+                                window.URL.revokeObjectURL(url); 
                             })
                             .catch(error => {
-                                // Display the error message to the user
                                 $('#error-message').text('There was a problem with the fetch operation: ' +
                                     error.message).show();
                                 console.error('Fetch error:', error);
@@ -326,10 +332,9 @@
                     $(document).on('click', '.lihatperubahan', function() {
                         var idpemesanan = $(this).data('idpemesanan');
 
-                        // Check if idpemesanan is valid
                         if (!idpemesanan) {
                             console.error('ID Pemesanan is not found.');
-                            return; // Exit if idpemesanan is not valid
+                            return; 
                         }
 
                         const formData = new FormData();
@@ -345,7 +350,6 @@
                                 'X-CSRF-TOKEN': '{{ csrf_token() }}'
                             },
                             success: function(response) {
-                                // Check if response is valid
                                 if (response && response.perubahan) {
                                     $('#detail-perubahan').html('<p>' + response.perubahan + '</p>');
                                     $('#modalperubahan').modal('show');
@@ -354,8 +358,9 @@
                                 }
                             },
                             error: function(xhr) {
-                                console.error('AJAX Error:', xhr.responseJSON ? xhr.responseJSON.error :
-                                    'Unknown error occurred');
+                                $('#detail-perubahan').html(
+                                    '<p>Belum ada detail perubahan yang dikirimkan</p>');
+                                $('#modalperubahan').modal('show');
                             }
                         });
                     });
@@ -467,8 +472,32 @@
                                     text = "Catatan: " + catatan;
                                 }
 
+                                var htmlCatatanDetail = "";
+
+                                var detailPesanan = $(`input[name="detail-pesanan-${idpemesanan}"]`)
+                                    .val();
+                                var detailItem = detailPesanan.split(';');
+                                detailItem.pop();
+
+                                var detailHtml = "Detail: ";
+                                for (var i = 0; i < detailItem.length; i++) {
+                                    detailHtml += "<p>" + (i + 1) + ". " + detailItem[i] + "</p>";
+                                }
+                                if (detailItem.length == 0) {
+                                    detailHtml += "<p>Tidak ada detail yang diperlukan dalam pesanan ini</p>"
+                                }
+                                else{
+                                    detailHtml += "<br>";
+                                }
+
+                                htmlCatatanDetail = detailHtml;
+                                htmlCatatanDetail += "<p>Catatan: " + text + "</p>";
+
+
+                                $("#modalcatatantext").html(detailHtml);
+
                                 $("#modalcatatantitle").text(title);
-                                $("#modalcatatantext").text(text);
+                                $("#modalcatatantext").html(htmlCatatanDetail);
                                 $('#modalcatatan').modal('show');
                             }
                         });

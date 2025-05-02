@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\JenisBahanCetak;
 use App\Models\Nota;
 use App\Models\Pemesanan;
+use App\Models\Pengguna;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -52,6 +53,7 @@ class PemesananController extends Controller
         }
 
         $subtotal = 0;
+        $detail_pesanan = "";
         foreach ($pemesanans as $p) {
 
             $jenisbahan = DB::table('jenis_bahan_cetaks')
@@ -96,11 +98,29 @@ class PemesananController extends Controller
                     $p->satuan = $layanan->satuanlayanan;
 
                     $subtotal += $p->subtotal_pesanan;
+                    $pemesanan_opsi_detail = DB::table('pemesanans_has_opsi_details')
+                        ->where('pemesanans_id', '=', $p->id)
+                        ->get();
+                        
+                    foreach($pemesanan_opsi_detail as $pod){
+                        $opsi_detail = DB::table('opsi_details')
+                        ->where('id', '=', $pod->opsi_details_id)
+                        ->first();
+
+                        $detail = DB::table('detail_cetaks')
+                        ->where('id', '=', $opsi_detail->detail_cetaks_id)
+                        ->first();
+
+                        $detail_opsi = $detail->value . ": " . $opsi_detail->opsi. ';';
+                        $detail_pesanan = $detail_pesanan . $detail_opsi;
+                    }
+                    $p->detail_pesanan = $detail_pesanan;
+                    $detail_pesanan = "";
                 }
             }
         }
-        // dd($pemesanans);
 
+        // dd($pemesanans);
 
         return view('cart.pesanan', compact('pemesanans', 'subtotal'));
     }
@@ -383,10 +403,6 @@ class PemesananController extends Controller
 
         copy($filePath, $uploadDirectory . '/' . $fileName);
 
-
-
-
-
         return ["idpemesanan" => $id, "idvendor" => $request->input('vendors_id'), 'message' => "Pesanan dimasukkan ke dalam cart"];
     }
 
@@ -418,52 +434,9 @@ class PemesananController extends Controller
             ->where('pemesanans_id', '=', $request->input('idpemesanan'))
             ->delete();
 
-
-        $arrdetail = array();
-        // $pees = DB::table('pemesanans')
-        //     ->where('id', '=', $request->input('idpemesanan'))
-        //     ->first();
-
-        // $jenisbahan = DB::table('jenis_bahan_cetaks')
-        //     ->where('id', '=', $request->input('jenis_bahan_cetaks_id'))
-        //     ->first();
-        // array_push($arrdetail, "jenis:" . $jenisbahan->nama);
-        // $layanan_id = DB::table('vendors_has_jenis_bahan_cetaks')
-        //     ->where('jenis_bahan_cetaks_id', '=', $request->input('jenis_bahan_cetaks_id'))
-        //     ->first();
-        // $layanan_nama = DB::table('layanan_cetaks')
-        //     ->where('id', '=', $layanan_id->layanan_cetaks_id)
-        //     ->first();
-        // array_push($arrdetail, "layanan:" . $layanan_nama->nama);
-        // dd($arrdetail);
-
         if ($idopsidetail) {
             foreach ($idopsidetail as $key => $id) {
-                // dd($id);
-                // cek info opsi
 
-                // $p = DB::table('opsi_details')
-                //     ->where('id', '=', $id)
-                //     ->first();
-                // // dd($p);
-                // $detail = DB::table('detail_cetaks')
-                //     ->where('id', '=', $p->detail_cetaks_id)
-                //     ->first();
-                // $jenisbahan = DB::table('jenis_bahan_cetaks')
-                //     ->where('id', '=', $detail->jenis_bahan_cetaks_id)
-                //     ->first();
-                // $detail->jenisbahan = $jenisbahan->nama;
-                // $layanan_id = DB::table('vendors_has_jenis_bahan_cetaks')
-                //     ->where('jenis_bahan_cetaks_id', '=', $jenisbahan->id)
-                //     ->first();
-                // $layanan_nama = DB::table('layanan_cetaks')
-                //     ->where('id', '=', $layanan_id->layanan_cetaks_id)
-                //     ->first();
-                // $detail->layanan = $layanan_nama->nama;
-                // array_push($arrdetail, $detail);
-                // // }
-
-                // dd($arrdetail);
 
                 $p = DB::table('opsi_details')
                     ->where('id', '=', $id)
@@ -505,14 +478,6 @@ class PemesananController extends Controller
         $pemesanan->updated_at = Carbon::now('Asia/Jakarta');
 
         $pemesanan->save();
-
-        // dd($pemesanan);
-
-        $opsidetail = DB::table('pemesanans_has_opsi_details')
-            ->where('pemesanans_id', '=', $request->input('idpemesanan'))
-            ->get();
-
-        // dd($opsidetail);
 
         return ["idpemesanan" => $request->input('idpemesanan'), "idvendor" => $request->input('vendors_id')];
     }

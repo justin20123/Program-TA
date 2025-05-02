@@ -1,8 +1,8 @@
 @extends('layout.sneat')
 @section('breadcrumb')
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="#">Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">notas</li>
+        <li class="breadcrumb-item"><a href="#">Beranda</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Proses Pemesanan</li>
     </ol>
 @endsection
 @section('menu')
@@ -125,56 +125,59 @@
 
 
             
-            <div class="progress-container">
-                <div class="progress-bar"></div>
-                <div class="progress-bar-filled"></div>
-    
-                <div class="progress-row">
-                    <!-- Step 1 -->
+            <div class="stepper">
+                <div class="step-item active">
                     <div class="step">
-                        <div class="step-circle active">
-                            <i class="fas fa-file-alt"></i>
-                        </div>
-                        <p class="step-label active">Pesanan Dibuat</p>
+                        <span class="step-number">1</span>
+                        <span class="step-title">Pesanan Dibuat</span>
                     </div>
-    
-                    <!-- Step 2 -->
+                </div>
+                <div class="step-item active">
                     <div class="step">
-                        <div class="step-circle active">
-                            <i class="fas fa-box"></i>
-                        </div>
-                        <p class="step-label active">Diproses</p>
+                        <span class="step-number">2</span>
+                        <span class="step-title">Diproses</span>
                     </div>
-    
-                    <!-- Step 3 -->
-                    <div class="step">
-                        
-                        @if ($status_antar == 'diambil')
-                        <div class="step-circle">
-                            <i class="fas fa-gift"></i>
-                        </div>
-                        <p class="step-label">Menunggu diambil</p>
-                        @else
-                        <div class="step-circle">
-                            <i class="fas fa-truck"></i>
-                        </div>
-                        <p class="step-label">Sedang Diantar</p>
-                        @endif
-                    </div>
-    
-                    <!-- Step 4 -->
-                    <div class="step">
-                        <div class="step-circle">
-                            <i class="fas fa-handshake"></i>
-                        </div>
-                        <p class="step-label">Selesai</p>
-                    </div>
+                </div>
+                @if (!$nota->waktu_tunggu_diambil && !$nota->waktu_diantar)
+                    <div class="step-item">
+                    @else
+                        <div class="step-item active">
+                @endif
+                <div class="step">
+                    <span class="step-number">3</span>
+                    @if ($status_antar == 'diantar')
+                        <span class="step-title">Sedang Diantar</span>
+                    @elseif ($status_antar == 'diambil')
+                        <span class="step-title">Menunggu Diambil</span>
+                    @endif
+                </div>
+            </div>
+            @if (!$nota->waktu_selesai)
+                <div class="step-item">
+                @else
+                    <div class="step-item active">
+            @endif
+            <div class="step">
+                <span class="step-number">4</span>
+                <span class="step-title">Selesai</span>
+            </div>
+            </div>
+            </div>
+            <div class="container-xxl pb-container" style="width: 85%">
+                <div class="progress" style="width: 100%">
+                    @if (!$nota->waktu_tunggu_diambil && !$nota->waktu_diantar)
+                        <div class="progress-bar" style="width: 35%"></div>
+                    @elseif (!$nota->waktu_selesai)
+                        <div class="progress-bar" style="width: 65.75%"></div>
+                    @else
+                        <div class="progress-bar" style="width: 100%"></div>
+                    @endif
                 </div>
             </div>
 
             <!-- Order Info -->
             <div class="mt-4">
-                <h5 class="font-weight-bold">Order Activity</h5>
+                <h5 class="font-weight-bold">Proses Pemesanan</h5>
                 <ul class="list-group list-group-flush">
                     @foreach ($arrProgressReverse as $key=>$ap)
                         <li class="list-group-item">

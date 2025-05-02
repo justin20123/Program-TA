@@ -112,7 +112,7 @@ class VendorController extends Controller
             ->first();
             $v->nama = $manajer->nama;
             $v->email = $manajer->email;
-            $v->tanggal_daftar = date('d/m/Y', strtotime($v->created_at));
+            $v->tanggal_daftar = date('d/m/Y', strtotime($v->updated_at));
             
         }
         // dd($vendors);
@@ -137,69 +137,4 @@ class VendorController extends Controller
         return redirect()->route('home')->with('success', 'Vendor berhasil diblokir');
     }
 
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        $vendor = Vendor::findOrFail($id);
-        return view('vendor.edit', compact('vendor'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request)
-    {
-        try {
-            $request->validate([
-                'nama' => 'required|string|max: 50',
-                'fotopercetakan' => 'file|mimes:jpeg,jpg,png,gif,|max:20480',
-                'longitude' => 'required',
-                'latitude' => 'required',
-            ]);
-        } catch (Exception $e) {
-            return back()->withInput()->with('error', 'Gagal menambah vendor. ' . $e->getMessage());
-        }
-
-        $idvendor = $request->input('vendorid');
-
-        $vendor = Vendor::findOrFail($idvendor);
-        $vendor->nama = $request->input('nama');
-        if ($request->file('fotopercetakan')) {
-            $file = $request->file('fotopercetakan');
-            $fileExtension = $file->getClientOriginalExtension();
-            $fileName = "$idvendor.$fileExtension";
-
-            $directory = base_path('../vendors');
-            $file->move($directory, $fileName);
-            Cache::flush();
-            Artisan::call('view:clear');
-        }
-        $vendor->longitude = $request->input('longitude');
-        $vendor->latitude = $request->input('latitude');
-        $vendor->save();
-
-        return redirect()->route('home');
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Vendor $vendor)
-    {
-        $vendor->delete();
-        return redirect()->route('vendors.index');
-    }
 }

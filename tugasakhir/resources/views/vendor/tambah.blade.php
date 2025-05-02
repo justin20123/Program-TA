@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Detail Percetakan</title>
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="{{ asset('../assets/vendor/libs/jquery/jquery.js')}}"></script>
 </head>
 <body class="bg-light">
@@ -30,11 +30,11 @@
                     <!-- Lokasi Percetakan -->
                     <div class="mb-3">
                         <label for="latitude" class="form-label">Lintang</label>
-                        <input type="text" class="form-control" id="latitude" name="latitude" placeholder="Latitude" required>
+                        <input type="text" class="form-control" id="latitude" name="latitude" placeholder="Lintang" required>
                     </div>
                     <div class="mb-3">
                         <label for="longitude" class="form-label">Bujur</label>
-                        <input type="text" class="form-control" id="longitude" name="longitude" placeholder="Longitude" required>
+                        <input type="text" class="form-control" id="longitude" name="longitude" placeholder="Bujur" required>
                     </div>
                     <button type="button" class="btn btn-primary w-100 mb-3" onclick="getCurrentLocation()">Gunakan Lokasi Anda</button>
 

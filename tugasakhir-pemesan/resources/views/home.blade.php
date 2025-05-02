@@ -19,7 +19,7 @@
             <div class="d-flex justify-content-between align-items-center">
                 @if(Auth::user())
                 <h5>Selamat datang {{Auth::user()->nama}}</h5>
-
+                @endif
                 <div class="form-inline">
                     <label class="mr-2">Perbandingan Harga:</label>
                     <div class="input-group">
@@ -31,7 +31,7 @@
                         </div>
                     </div>
                 </div>
-                @endif
+                
                 
             </div>
         </div>
@@ -102,7 +102,7 @@
             $('#vendors-terdekat').html(`
             <div class="d-flex justify-content-between align-items-center px-4 pt-3">
                 <div class="h5 p-2">Daftar Penyedia</div>
-                <a href="/vendor" class="text-danger h5 p-2">Lihat Semua</a></div>
+                <a href="/vendor/layanan/1" class="text-danger h5 p-2">Lihat Semua</a></div>
                 <div class="container mt-5">
                 <div class="row" id="vendorsJarak">
                 </div>
@@ -133,7 +133,7 @@
             $('#layanan-terdekat').html(`
             <div class="d-flex justify-content-between align-items-center px-4 pt-3">
                 <div class="h5 p-2">Jenis Layanan</div>
-                <a href="/vendor" class="text-danger h5 p-2">Lihat Semua</a></div>
+                <a href="/vendor/layanan/1" class="text-danger h5 p-2">Lihat Semua</a></div>
                 <div class="container mt-5">
                 <div class="row" id="layananJarak">
                 </div>
@@ -342,10 +342,10 @@
                 if (!isLoaded) {
                     statusLayananTerdekat = await pageLoadLayananTerdekat(latitude, longitude);
                     statusTerdekat = await pageLoadTerdekat(latitude, longitude);
-
+                    statusUntukAnda = await pageLoadUntukAnda(latitude, longitude, idlayanan);
                 }
                 if (isLoggedIn) {
-                    statusUntukAnda = await pageLoadUntukAnda(latitude, longitude, idlayanan);
+                    
                 }   
                 else{
                     statusUntukAnda = "done";
@@ -420,7 +420,6 @@
                 console.error('Error:', error);
             }
         }
-        // Automatically get the location when the document is fully loaded
         $(document).ready(async function() {
             isLoaded = false;
             $('#loading').show();

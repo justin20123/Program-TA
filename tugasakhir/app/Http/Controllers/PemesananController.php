@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Nota;
 use App\Models\Pemesanan;
+use App\Models\Pengguna;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -138,6 +139,25 @@ class PemesananController extends Controller
                     }
                 }
             }
+            $detail_pesanan = "";
+            $pemesanan_opsi_detail = DB::table('pemesanans_has_opsi_details')
+                        ->where('pemesanans_id', '=', $p->id)
+                        ->get();
+                        
+                    foreach($pemesanan_opsi_detail as $pod){
+                        $opsi_detail = DB::table('opsi_details')
+                        ->where('id', '=', $pod->opsi_details_id)
+                        ->first();
+
+                        $detail = DB::table('detail_cetaks')
+                        ->where('id', '=', $opsi_detail->detail_cetaks_id)
+                        ->first();
+
+                        $detail_opsi = $detail->value . ": " . $opsi_detail->opsi. ';';
+                        $detail_pesanan = $detail_pesanan . $detail_opsi;
+                    }
+                    $p->detail_pesanan = $detail_pesanan;
+                    $detail_pesanan = "";
 
             if (!isset($nota_detail[$nota_data->id])) {
                 $nota_detail[$nota_data->id] = [
@@ -212,6 +232,19 @@ class PemesananController extends Controller
         $nota = Nota::findOrFail($request->idnota);
         $nota->waktu_selesai = Carbon::now('Asia/Jakarta');
         $nota->save();
+
+        $idvendor = Auth::user()->vendors_id;
+
+        $idmanajer = DB::table('penggunas')
+        ->where('vendors_id', '=', $idvendor)
+        ->where('role', '=', 'manajer')
+        ->first();
+
+        $manajer = Pengguna::find($idmanajer->id);
+        $saldo = $manajer->saldo;
+        $saldobaru = $saldo + $nota->harga_total;
+        $manajer->saldo = $saldobaru;
+        $manajer->save();
 
         $_SESSION['message'] = 'Pesanan berhasil diselesaikan';
 

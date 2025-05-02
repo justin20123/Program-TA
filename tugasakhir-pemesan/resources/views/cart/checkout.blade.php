@@ -1,8 +1,9 @@
 @extends('layout.sneat')
 @section('breadcrumb')
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="#">Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Cart</li>
+        <li class="breadcrumb-item"><a href="#">Beranda</a></li>
+        <li class="breadcrumb-item"><a href="#">Keranjang</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Checkout</li>
     </ol>
 @endsection
 @section('menu')
@@ -11,12 +12,12 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="mapModalLabel">Select Location</h5>
+                    <h5 class="modal-title" id="mapModalLabel">Pilih Lokasi</h5>
                 </div>
                 <div class="modal-body">
-                    <label for="latitude" class="form-label">Latitude</label>
+                    <label for="latitude" class="form-label">Lintang</label>
                     <input type="number" class="form-control form-input" name="setlatitude" id="setlatitude">
-                    <label for="longitude" class="form-label">Longitude</label>
+                    <label for="longitude" class="form-label">Bujur</label>
                     <input type="number" class="form-control form-input" name="setlongitude" id="setlongitude">
                 </div>
                 <div class="modal-footer">
@@ -30,7 +31,7 @@
         <div class="row">
             <!-- Billing Information Section -->
             <div class="col-md-8">
-                <h4 class="form-title">Billing Information</h4>
+                <h4 class="form-title">Informasi Pengantaran</h4>
                 <form id="formBuatNota" method="POST">
                     @csrf        
 
@@ -76,7 +77,7 @@
             <!-- Order Summary Section -->
             <div class="col-md-4">
                 <div class="order-summary-container border rounded p-3">
-                    <h5 class="order-summary-title mb-3">Order Summary</h5>
+                    <h5 class="order-summary-title mb-3">Ringkasan Pemesanan</h5>
                     <!-- Order Items -->
                     <div class="accordion accordion-flush" id="accordionFlushExample">
                         @foreach ($pemesanans as $p)
@@ -116,31 +117,30 @@
 
 
                     <hr>
-                    <!-- Subtotal and Shipping -->
                     <div class="order-summary-info d-flex justify-content-between">
                         <span>Sub-total</span>
                         <span>Rp. <span id="subtotal">{{ number_format($subtotal, 0, '.', ',') }}</span></span>
                     </div>
                     <div class="delivery">
                         <div class="order-summary-info d-flex justify-content-between">
-                            <span>Shipping</span>
+                            <span>Biaya Pengantaran</span>
                             <span>Rp. <span id="biayaAntar">0</span></span>
                         </div>
                     </div>
 
                     <hr>
-                    <!-- Total -->
+
+                    <div class="order-total d-flex justify-content-between font-weight-bold">
+                        <span>Saldo</span>
+                        <span>Rp. <span id="saldo">{{ number_format(Auth::user()->saldo, 0, '.', ',') }}</span></span>
+                    </div>
+
                     <div class="order-total d-flex justify-content-between font-weight-bold">
                         <span>Total</span>
                         <span>Rp. <span id="totalBiaya">{{ number_format($subtotal, 0, '.', ',') }}</span></span>
                     </div>
 
-                    <div class="order-total d-flex justify-content-between font-weight-bold">
-                        <span>Saldo</span>
-                        <span>Rp. <span id="saldo">500.000</span></span>
-                    </div>
-                    <!-- Place Order Button -->
-                    <button class="btn btn-warning btn-block mt-3" id="btnPlaceOrder" type="submit">PLACE ORDER</button>
+                    <button class="btn btn-warning btn-block mt-3" id="btnPlaceOrder" type="submit">LAKUKAN PESANAN</button>
                 </div>
             </div>
         </div>
@@ -320,7 +320,7 @@
                     },
                     success: function(response) {
                         Swal.fire({
-                            title: 'Success!',
+                            title: 'Berhasil!',
                             text: response.message,
                             icon: 'success',
                             confirmButtonText: 'OK'

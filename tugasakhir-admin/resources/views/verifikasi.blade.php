@@ -1,12 +1,5 @@
 @extends('layout.sneat')
 
-@section('breadcrumb')
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="#">Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Cart</li>
-    </ol>
-@endsection
-
 @section('menu')
     <div class="modal fade" id="confirmTolakModal" tabindex="-1" role="dialog" aria-labelledby="confirmTolakModalLabel"
         aria-hidden="true">
@@ -39,7 +32,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="confirmTerimaModalLabel">Konfirmasi Persetujuan Vendor</h5>
+                    <h5 class="modal-title" id="confirmTerimaModalLabel">Konfirmasi Penerimaan Vendor</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>

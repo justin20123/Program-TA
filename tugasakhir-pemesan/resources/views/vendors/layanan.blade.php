@@ -6,8 +6,14 @@
     </ol>
 @endsection
 @section('menu')
-    {{-- banner --}}
+   
     <div class="container-fluid p-0">
+        <div class="px-5 pt-5">
+            <a href="/vendor/layanan/1" class="px-4 pt-3 text-black">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+        </div>
+         
         <div class="vendor-banner py-5"
             style="background-image: url('{{ $vendor->foto_lokasi }}'); background-color: rgba(255, 255, 255, 0.54);">
 

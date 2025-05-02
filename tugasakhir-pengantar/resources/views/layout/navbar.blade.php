@@ -1,6 +1,6 @@
 <nav class="navbar navbar-light bg-light w-100">
   <a class="navbar-link">&ensp;</a>
-  <a class="navbar-brand">Logo</a>
+  <div class="navbar-brand"><img src="{{ asset('assets/logo/printajalogo.png') }}" width="75px" height="75px"></div>
 
   <div class="navbar-brand">Hak Akses: Pengantar
   </div>

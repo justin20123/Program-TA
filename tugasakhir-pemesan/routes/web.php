@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\LayananController;
 use App\Http\Controllers\NotaController;
 use App\Http\Controllers\PemesananController;
+use App\Http\Controllers\PenggunaController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\VendorController;
 use Illuminate\Support\Facades\Auth;
@@ -32,9 +33,12 @@ Route::get('/', function () {
             return redirect()->route('login')->with('error', 'User  ini tidak tercatat sebagai pemesan, silahkan login menggunakan aplikasi yang sesuai.');
         }
 
-        
+        return redirect()->route('home');
     }
-    return redirect()->route('home');
+    else{
+        return redirect()->route('home');
+    }
+    
 });
 //register
 
@@ -93,11 +97,11 @@ Route::get('/pemesanan/{filename}', function ($filename) {
         return response()->file($path);
     }
 
-    abort(404);
+    abort(404); 
 });
 
 //semua vendor
-Route::get('/vendor', [VendorController::class, 'index'])->name('vendors');
+Route::get('/vendor/layanan/{idlayanan}', [VendorController::class, 'index'])->name('vendors');
 
 //vendor semua layanan
 Route::get('/vendor/{idvendor}', [LayananController::class, 'index']);;
@@ -106,6 +110,8 @@ Route::get('/vendor/{idvendor}', [LayananController::class, 'index']);;
 Route::get('/vendor/{idvendor}/layanan/{idlayanan}', [LayananController::class, 'getDetailLayanan']);;
 Route::get('/loadlayanan/{idvendor}/{idlayanan}/{idjenisbahan}', [LayananController::class, 'detail_layanan_load']);
 Route::middleware(['auth'])->group(function () {
+    Route::get('/masukdana', [PenggunaController::class, 'openmasukdana']);
+    Route::post('/domasukdana', [PenggunaController::class, 'masukdana'])->name('masukdana');
 
     Route::delete("/deletepesanan", [PemesananController::class, 'deletepesanan']);
     //proses pemesanan

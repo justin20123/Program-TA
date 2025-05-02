@@ -1,15 +1,11 @@
 @extends('layout.sneat')
 
-@section('breadcrumb')
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="#">Home</a></li>
-        <li class="breadcrumb-item"><a href="#">Vendors</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Vendor 3</li>
-    </ol>
-@endsection
-
 @section('menu')
     <div class="container">
+        <br>
+        <a href="/" class="px-4 pt-3 text-black">
+            <i class="fas fa-arrow-left"></i>
+        </a>
         <h2 class="mt-4">{{ $vendor->nama }}</h2>
         <h4 class="mt-4">Komentar</h4>
         @if(count($ulasan) == 0)

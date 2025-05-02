@@ -2,10 +2,11 @@
 @section('breadcrumb')
 <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="#">Home</a></li>
-    <li class="breadcrumb-item" aria-current="page">Vendors</li>
-    <li class="breadcrumb-item" aria-current="page">Orders</li>
-    <li class="breadcrumb-item active" aria-current="page">Order Detail</li>
+    <li class="breadcrumb-item" aria-current="page">Vendor</li>
+    <li class="breadcrumb-item" aria-current="page">Pesanan</li>
+    <li class="breadcrumb-item active" aria-current="page">Detail Pesanan</li>
 </ol>
+
 
 @endsection
 @section('menu')
@@ -107,4 +108,4 @@
 });
 });
 </script>
-@endsection
+@endsection 

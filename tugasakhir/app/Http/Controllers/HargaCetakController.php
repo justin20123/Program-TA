@@ -27,8 +27,6 @@ class HargaCetakController extends Controller
         ->select('layanan_cetaks.satuan as satuan','jenis_bahan_cetaks.nama as nama_jenis_bahan', 'jenis_bahan_cetaks.id as id_jenis_bahan', 'vendors_has_jenis_bahan_cetaks.layanan_cetaks_id as id_layanan_cetak', 'vendors_has_jenis_bahan_cetaks.vendors_id as id_vendor')
         ->first();
 
-
-
         return view('layanan.opsiharga', compact('hargas','detail'));
     }
 

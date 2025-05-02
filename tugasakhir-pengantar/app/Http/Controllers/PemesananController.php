@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Nota;
 use App\Models\Pemesanan;
+use App\Models\Pengguna;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -174,61 +175,6 @@ class PemesananController extends Controller
         return view('pesanan.orderdetail', compact('notaDetail', 'isVerifikasiSelesai','isMenungguSelesai','isSelesai'));
     }
 
-    public function pilihpengantar(Request $request)
-    {
-        $notaData = DB::table('notas')
-            ->where('id', '=', $request->idnota)
-            ->select()
-            ->first();
-
-        $vendor = DB::table('pemesanans')
-        ->where('notas_id', '=', $request->idnota)
-        ->select('vendors_id')
-        ->first();
-
-        $pengantar = DB::table('penggunas')
-            ->where('vendors_id', '=', $vendor->vendors_id)
-            ->where('role', '=', 'pengantar')
-            ->select('nama as namapengantar', 'id')
-            ->get();
-
-        $data_pemesan = DB::table('pemesanans')
-            ->join('penggunas', 'penggunas.email', '=', 'pemesanans.penggunas_email')
-            ->where('pemesanans.notas_id', '=', $request->idnota)
-            ->select('penggunas.nama', 'penggunas.email')
-            ->first();
-        $notaData->namaPemesan = $data_pemesan->nama;
-
-        // dd($notaData);
-        // dd($pengantar);
-
-        return view('pesanan.pilihpengantar', compact('notaData', 'pengantar'));
-    }
-
-    public function tugaskanpengantar(Request $request)
-    {
-        $nota = Nota::findOrFail($request->idnota);
-        $nota->waktu_diantar = Carbon::now('Asia/Jakarta');
-        $nota->idpengantar = $request->idpengantar;
-        $nota->save();
-
-        $pemesanans = DB::table('pemesanans')
-            ->where('notas_id', '=', $request->idnota)
-            ->select('id', 'vendors_id')
-            ->get();
-
-        // foreach($pemesanans as $p){
-        //     $pesanan = Pemesanan::findOrFail($p->id);
-
-        // }
-        // $pemesanan->pengantar = $emailpengantar;
-        // $pemesanan->save();
-
-        $url = '/pesanancetak2/' . $pemesanans[0]->vendors_id;
-        return redirect($url);
-        // return redirect()->route('pemesanans.index', [$pemesanans[0]->vendors_id]);
-    }
-
     public function requestambil(Request $request){
         $nota = Nota::findOrFail($request->idnota);
         $nota->waktu_tunggu_diambil = Carbon::now('Asia/Jakarta');
@@ -244,9 +190,22 @@ class PemesananController extends Controller
         $nota->waktu_selesai = Carbon::now('Asia/Jakarta');
         $nota->save();
 
+        $idvendor = Auth::user()->vendors_id;
+
+        $idmanajer = DB::table('penggunas')
+        ->where('vendors_id', '=', $idvendor)
+        ->where('role', '=', 'manajer')
+        ->first();
+
+        $manajer = Pengguna::find($idmanajer->id);
+        $saldo = $manajer->saldo;
+        $saldobaru = $saldo + $nota->harga_total;
+        $manajer->saldo = $saldobaru;
+        $manajer->save();
+
         $_SESSION['message'] = 'Pesanan berhasil diselesaikan';
 
-        return ['status'=>'done'];
+        return ['status' => 'done'];
     }
 
     public function lihatcatatan($idpemesanan) {

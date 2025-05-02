@@ -1,25 +1,14 @@
 @extends('layout.sneat')
 @section('breadcrumb')
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="#">Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Cart</li>
+        <li class="breadcrumb-item"><a href="#">Beranda</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Keranjang</li>
     </ol>
 @endsection
 @section('menu')
     <div class="text-center h2 pt-4">Keranjang</div>
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <div class="d-flex align-items-center">
-            <label class="p-5 mb-0">Urutkan Berdasarkan:</label>
-            <div class="select-container">
-                <select class="form-control custom-select" style="width: 200px;">
-                    <option>Urutan Transaksi</option>
-                    <option>Harga: Tinggi ke Rendah</option>
-                    <option>Harga: Rendah ke Tinggi</option>
-                </select>
-                <span class="caret-down-icon"><i class="fas fa-caret-down"></i></span>
-            </div>
-            
-        </div>
+
     </div>
 
 

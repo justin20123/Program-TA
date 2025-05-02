@@ -63,7 +63,6 @@
             <button type="submit" class="btn btn-primary btn-block">Masuk</button>
 
             <div class="text-center mt-3">
-                <button type="button" class="btn btn-outline-dark btn-block">Masuk dengan Google</button>
                 <p class="mt-3"><a href="{{ route('register') }}">Belum punya akun? Daftar di sini</a></p>
 
             </div>

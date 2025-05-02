@@ -1,8 +1,8 @@
 @extends('layout.sneat')
 @section('breadcrumb')
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="#">Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Cart</li>
+        <li class="breadcrumb-item"><a href="#">Beranda</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Keranjang</li>
     </ol>
 @endsection
 @section('menu')
@@ -54,7 +54,9 @@
         </div>
     </div>
     <div class="container my-5">
-        <!-- Cart Table -->
+        <a href="/cart" class="px-2 py-3 mb-3 text-black">
+            <i class="fas fa-arrow-left"></i>
+        </a>
         <h4 class="mb-3">Keranjang Vendor A</h4>
         <div class="table-responsive-md" style="overflow-x: auto; overflow-y: hidden;">
             <table class="table table-bordered">
@@ -67,75 +69,84 @@
                         <th>Kuantitas</th>
                         <th>Biaya Tambahan</th>
                         <th>Sub-total (Rupiah)</th>
-                        <th>Catatan</th>
+                        <th>Detail dan catatan</th>
                         <th>Hapus Pesanan</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($pemesanans as $p)
+                        <input type="hidden" name="detail-pesanan-{{ $p->id }}" value="{{ $p->detail_pesanan }}">
                         <tr>
-                            @if($p->status == 'deleted')
-                             <td colspan="9">
+                            @if ($p->status == 'deleted')
+                                <td colspan="9">
                                     <div class="alert alert-warning" role="alert">
-                                        <p class="p">Jenis bahan {{$p->nama_jenis_bahan}} untuk pesanan {{ $p->layanan }} - {{ $p->jumlah }} {{$p->satuan}} sudah tidak tersedia!</p>
-                                        <a href="/editpesanan/{{ $p->id }}" class="btn btn-link">Klik untuk ubah pesanan</a>
+                                        <p class="p">Jenis bahan {{ $p->nama_jenis_bahan }} untuk pesanan
+                                            {{ $p->layanan }} - {{ $p->jumlah }} {{ $p->satuan }} sudah tidak
+                                            tersedia!</p>
+                                        <a href="/editpesanan/{{ $p->id }}" class="btn btn-link">Klik untuk ubah
+                                            pesanan</a>
                                     </div>
                                 </td>
-                            
                             @elseif($p->status == 'updated')
-                            <td colspan="9">
-                                <div class="alert alert-warning" role="alert">
-                                    <p class="p">Terdapat perubahan pada jenis bahan {{$p->nama_jenis_bahan}} untuk pesanan {{ $p->layanan }} - {{ $p->jumlah }} {{$p->satuan}}!</p>
-                                    <a href="/editpesanan/{{ $p->id }}" class="btn btn-link">Klik untuk ubah pesanan</a>
-                                </div>
-                            </td>
-                            @else
-                            <td>
-                                <input type="checkbox" id="item-{{ $p->id }}" value="{{ $p->id }}" checked />
-                            </td>
-
-                            <td>
-                                <div>
-                                    <iframe src="/{{ $p->url_file }}"
-                                        style="width: 100px; height: 100px; border: none; overflow: hidden;"></iframe>
-                                    <br>
-                                    <a class="btn btn-primary" href="/{{ $p->url_file }}" target="_blank">Preview</a>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-center">
-
-                                    <div>
-                                        {{ $p->layanan }}<br>
-                                        <a href="/editpesanan/{{ $p->id }}" class="text-primary">Edit</a>
+                                <td colspan="9">
+                                    <div class="alert alert-warning" role="alert">
+                                        <p class="p">Terdapat perubahan pada jenis bahan {{ $p->nama_jenis_bahan }}
+                                            untuk pesanan {{ $p->layanan }} - {{ $p->jumlah }} {{ $p->satuan }}!
+                                        </p>
+                                        <a href="/editpesanan/{{ $p->id }}" class="btn btn-link">Klik untuk ubah
+                                            pesanan</a>
                                     </div>
-                                </div>
-                            </td>
-                            <td>{{ number_format($p->harga_satuan, 0, '.', ',') }}</td>
+                                </td>
+                            @else
+                                <td>
+                                    <input type="checkbox" id="item-{{ $p->id }}" value="{{ $p->id }}"
+                                        checked />
+                                </td>
 
-                            <td>{{ number_format($p->jumlah, 0, '.', ',') }} {{ $p->satuan }}</td>
-                            <td>Rp.{{ number_format($p->biaya_tambahan, 0, '.', ',') }}</td>
-                            <td class="font-weight-bold">
-                                <div id='hargaitem-{{ $p->id }}'>
-                                    {{ number_format($p->subtotal_pesanan, 0, '.', ',') }}
-                                </div>
+                                <td>
+                                    <div>
+                                        <iframe src="/{{ $p->url_file }}"
+                                            style="width: 100px; height: 100px; border: none; overflow: hidden;"></iframe>
+                                        <br>
+                                        <a class="btn btn-primary" href="/{{ $p->url_file }}" target="_blank">Lihat
+                                            File</a>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
 
-                            </td>
-                            <td>
-                                <button class="btn btn-link bukacatatan" data-idpemesanan="{{ $p->id }}">Lihat
-                                    Catatan
-                                </button>
-                            </td>
-                            <td>
-                                <button class="btn btn-danger button-delete" data-id="{{ $p->id }}"
-                                    data-layanan="{{ $p->layanan }}" data-jumlah="{{ $p->jumlah }}"
-                                    data-satuan="{{ $p->satuan }}" data-idvendor="{{ $p->vendors_id }}">Hapus</button>
-                            </td>
-                        
-                        <input type="hidden" name="biaya_tambahan-{{ $p->id }}"
-                            id="biaya_tambahan-{{ $p->id }}" value="{{ $p->biaya_tambahan }}">
-                        <input type="hidden" name="jumlah-{{ $p->id }}" id="jumlah-{{ $p->id }}"
-                            value="{{ $p->jumlah }}">
+                                        <div>
+                                            {{ $p->layanan }}<br>
+                                            <a href="/editpesanan/{{ $p->id }}" class="text-primary">Ubah</a>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ number_format($p->harga_satuan, 0, '.', ',') }}</td>
+
+                                <td>{{ number_format($p->jumlah, 0, '.', ',') }} {{ $p->satuan }}</td>
+                                <td>Rp.{{ number_format($p->biaya_tambahan, 0, '.', ',') }}</td>
+                                <td class="font-weight-bold">
+                                    <div id='hargaitem-{{ $p->id }}'>
+                                        {{ number_format($p->subtotal_pesanan, 0, '.', ',') }}
+                                    </div>
+
+                                </td>
+                                <td>
+                                    <button class="btn btn-link bukacatatan" data-idpemesanan="{{ $p->id }}">Lihat
+                                        Detail dan Catatan
+                                    </button>
+                                </td>
+                                <td>
+                                    <button class="btn btn-danger button-delete" data-id="{{ $p->id }}"
+                                        data-layanan="{{ $p->layanan }}" data-jumlah="{{ $p->jumlah }}"
+                                        data-satuan="{{ $p->satuan }}"
+                                        data-idvendor="{{ $p->vendors_id }}">Hapus</button>
+                                </td>
+
+                                <input type="hidden" name="biaya_tambahan-{{ $p->id }}"
+                                    id="biaya_tambahan-{{ $p->id }}" value="{{ $p->biaya_tambahan }}">
+                                <input type="hidden" name="jumlah-{{ $p->id }}" id="jumlah-{{ $p->id }}"
+                                    value="{{ $p->jumlah }}">
                             @endif
                         </tr>
                     @endforeach
@@ -150,21 +161,20 @@
                 {!! nl2br(e(session('message'))) !!}
             </div>
         @endif
-        <!-- Cart Buttons -->
+
+
+
         <div class="d-flex justify-content-between mb-4 flex-wrap">
 
             <a href="/vendor/{{ $pemesanans[0]->vendors_id }}" class="btn btn-primary mb-2">Tambah Barang</a>
         </div>
 
-        <!-- Balance and Checkout Summary -->
         <div class="d-flex justify-content-between align-items-start flex-wrap">
-            <!-- Balance -->
-            <h5 class="mb-2">Balance: Rp. 500,000</h5>
+            <h5 class="mb-2">Saldo: Rp. {{ number_format(Auth::user()->saldo, 0, '.', ',') }}</h5>
 
-            <!-- Card Totals -->
             <div class="card" style="width: 18rem;">
                 <div class="card-body">
-                    <h6 class="card-title">Card Totals</h6>
+                    <h6 class="card-title">Total Pesanan</h6>
                     <div class="d-flex justify-content-between">
                         <span>Sub-total</span>
                         <span class="font-weight-bold" id='subtotal'>Rp.
@@ -175,7 +185,7 @@
                         <div id="hiddens">
 
                         </div>
-                        <input type="submit" value="UPDATE CHECKOUT"
+                        <input type="submit" value="MENUJU CHECKOUT"
                             class="btn btn-primary btn-block mt-3 font-weight-bold">
                     </form>
 
@@ -257,7 +267,8 @@
                     type: 'GET',
                     url: '/lihatcatatan/' + idpemesanan,
                     success: function(data) {
-                        var title = "Layanan: " + data.layanan + " " + data.jumlah + " " + data.satuan;
+                        var title = "Layanan: " + data.layanan + " " + data.jumlah + " " + data
+                            .satuan;
                         var catatan = data.catatan;
                         var text = "";
                         if (!catatan) {
@@ -266,8 +277,28 @@
                             text = "Catatan: " + catatan;
                         }
 
+                        var htmlCatatanDetail = "";
+
+                        var detailPesanan = $(`input[name="detail-pesanan-${idpemesanan}"]`).val();
+                        var detailItem = detailPesanan.split(';');
+                        detailItem.pop();
+
+                        var detailHtml = "Detail: ";
+                        for (var i = 0; i < detailItem.length; i++) {
+                            detailHtml += "<p>"+ (i+1)+ ". " + detailItem[i] + "</p>"; 
+                        }
+                        if (detailItem.length == 0){
+                            detailHtml = "Tidak ada detail yang diperlukan dalam pesanan ini"
+                        }
+
+                        htmlCatatanDetail = detailHtml;
+                        htmlCatatanDetail += "<p>Catatan: " + text + "</p>";
+
+
+                        $("#modalcatatantext").html(detailHtml);
+
                         $("#modalcatatantitle").text(title);
-                        $("#modalcatatantext").text(text);
+                        $("#modalcatatantext").html(htmlCatatanDetail);
                         $('#modalcatatan').modal('show');
                     },
                     error: function(xhr, status, error) {
@@ -279,4 +310,3 @@
         });
     </script>
 @endsection
-</create_file>

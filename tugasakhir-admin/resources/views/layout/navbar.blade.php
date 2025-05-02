@@ -1,6 +1,6 @@
 <nav class="navbar navbar-light bg-light w-100">
     <a class="navbar-link">&ensp;</a>
-    <a class="navbar-brand">Logo</a>
+<div class="navbar-brand"><img src="{{ asset('assets/logo/printajalogo.png') }}" width="75px" height="75px"></div>
     <div class="navbar-item justify-content-between">
         <a href="/" class="navbar-link">Pemblokiran</a>
         <a class="navbar-link">&ensp;</a>
@@ -15,9 +15,8 @@
   
       @endif
     </div>
-    <div class="navbar-brand">Saldo: Rp 500.000</div>
     <div class="navbar-item">
-      <a href="/logout" class="btn-logout">Logout</a>
+      <a href="/logout" class="btn-logout">Keluar</a>
     </div>
 
     <a class="navbar-link">&ensp;</a>

@@ -219,103 +219,45 @@
     height: 400px; /* Ensure this is set */
     width: 100%; /* Optional: set the width */
 }
-.progress-container {
-            position: relative;
-            margin: 20px 0;
-        }
-
-        .progress-bar {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background-color: #f8d3a8;
-            z-index: 1;
-            transform: translateY(-50%);
-        }
-
-        .progress-bar-filled {
-            position: absolute;
-            top: 50%;
-            left: 0;
-            width: 50%; /* Update for progress percentage */
-            height: 4px;
-            background-color: #ff6f00;
-            z-index: 2;
-            transform: translateY(-50%);
-        }
-
-        .step {
-            position: relative;
-            width: 25%; /* Adjust for 4 steps */
-            text-align: center;
-            z-index: 3;
-        }
-
-        .step-circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: #f8d3a8;
-            border: 2px solid #f8d3a8;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto;
-            position: relative;
-            z-index: 3;
-        }
-
-        .step-circle.active {
-            background-color: #ff6f00;
-            border-color: #ff6f00;
-            color: #fff;
-        }
-
-        .step-circle.completed {
-            background-color: #fff;
-            border-color: #ff6f00;
-        }
-
-        .step-circle i {
-            font-size: 18px;
-        }
-
-        .step-label {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #6c757d;
-        }
-
-        .step-label.active {
-            color: #ff6f00;
-            font-weight: bold;
-        }
-
-        .progress-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .star {
-            font-size: 50px;
-            cursor: pointer;
-            color: #ccc; /* Unselected color */
-        }
-        .star.selected {
-            color: gold; /* Selected color */
-        }
-        .dd {
+.stepper {
+  display: flex;
+  justify-content: space-between;
   position: relative;
-  display: inline-block;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  background-color: #4CAF50;
+}
+
+.step-item {
+  flex: 1;
+  text-align: center;
+  position: relative;
+}
+
+.step-item.active {
+  color: #337ab7;
+}
+
+.step-item.active .step-number {
+  background-color: #337ab7;
   color: #fff;
-  cursor: pointer;
-  transition: background-color 0.3s;
+}
+
+.step-item .step-number {
+  display: inline-block;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #ddd;
+  color: #666;
+  text-align: center;
+  line-height: 30px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.step-item .step-title {
+  display: block;
+  margin-top: 5px;
+  font-size: 14px;
+  font-weight: bold;
 }
 
 .dd-content {

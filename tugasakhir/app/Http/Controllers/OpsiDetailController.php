@@ -129,6 +129,7 @@ class OpsiDetailController extends Controller
             $opsi_detail->deskripsi = $request->input('deskripsi');
         }
         $opsi_detail->biaya_tambahan = $request->input('biaya_tambahan');
+        $opsi_detail->tipe = $request->input('tipe');
         $opsi_detail->detail_cetaks_id = $detail_id;
         $opsi_detail->save();
 
@@ -136,7 +137,6 @@ class OpsiDetailController extends Controller
         $jenis_bahan->updated_at = Carbon::now('Asia/Jakarta');
         $jenis_bahan->save();
 
-        // Redirect to the detail_layanan method
         return redirect()->route('opsidetail.index', [$detail_id]);
     }
 

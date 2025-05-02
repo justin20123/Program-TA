@@ -26,10 +26,10 @@
                     <input type="email" name="email" class="form-control" placeholder="Email" value="{{ old('email') }}" required>
                 </div>
                 <div class="mb-3">
-                    <input type="password" name="password" class="form-control" placeholder="Password" required>
+                    <input type="password" name="password" class="form-control" placeholder="Kata Sandi" required>
                 </div>
                 <div class="mb-3">
-                    <input type="password" name="confirmpassword" class="form-control" placeholder="Confirm Password" 
+                    <input type="password" name="confirmpassword" class="form-control" placeholder="Konfirmasi Kata Sandi" 
                         required>
                 </div>
                 <button typ e="submit" class="btn btn-primary w-100">Buat Akun</button>
@@ -38,7 +38,7 @@
                 <p class="text text-danger">{{ session('error') }}</p>
             @endif
             <p class="text-center text-muted mt-3">
-                Already have an account? <a href="{{ route('login') }}">Masuk</a>
+                Sudah memiliki akun? <a href="{{ route('login') }}">Masuk</a>
             </p>
         </div>
     </div>
