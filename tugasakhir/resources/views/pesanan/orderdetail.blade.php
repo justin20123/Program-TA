@@ -12,7 +12,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="modalKirimContohLabel">Submit Data</h5>
+                    <h5 class="modal-title" id="modalKirimContohLabel">Kirim Data</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -21,13 +21,13 @@
                     <form action="/kirimcontoh" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="form-group">
-                            <label for="fileperubahan">Upload File</label>
+                            <label for="fileperubahan">Unggah File</label>
                             <input type="file" class="form-control-file" name="fileperubahan" id="fileperubahan"
                                 accept=".pdf, image/jpeg, image/jpg, image/png, image/gif" required>
                         </div>
                         <button class="btn btn-primary close">Batalkan</button>
                         <input type="hidden" name="idpemesanan" id="idpemesananhidden">
-                        <input type="submit" value="Submit" class="btn btn-primary">
+                        <input type="submit" value="Kirim" class="btn btn-primary">
                     </form>
                 </div>
             </div>
@@ -56,7 +56,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Perubahan</h5>
+                    <h5 class="modal-title">Konfirmasi Pengantaran</h5>
                 </div>
                 <div class="modal-body">
                     <p>Apakah anda sudah memastikan semua produk selesai?</p>
@@ -65,7 +65,7 @@
                         @csrf
                         <input type="hidden" name="idnota" id="idnota" value="{{ $nota_detail[0]['nota']->id }}">
 
-                        <input type="submit" value="Submit" class="btn btn-primary">
+                        <input type="submit" value="Kirim" class="btn btn-primary">
                     </form>
 
                 </div>
@@ -78,7 +78,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Perubahan</h5>
+                    <h5 class="modal-title">Konfirmasi Permintaan Diambil</h5>
                 </div>
                 <div class="modal-body">
                     <p>Apakah anda sudah memastikan semua produk selesai?</p>
@@ -95,7 +95,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Perubahan</h5>
+                    <h5 class="modal-title">Konfirmasi Selesai</h5>
                 </div>
                 <div class="modal-body">
                     <p>Apakah anda sudah memastikan barang diterima pemesan?</p>

@@ -1,7 +1,7 @@
 @extends('layout.sneat')
 @section('breadcrumb')
     <ol class="breadcrumb">
-        <li class="breadcrumb-item active"><a href="#">Home</a></li>
+        <li class="breadcrumb-item active"><a href="#">Beranda</a></li>
     </ol>
 @endsection
 @section('menu')
@@ -38,7 +38,7 @@
                     </ul>
                     <div class="d-flex justify-content-between py-3">
                         <a href="/detail/pengantaran/{{ $md['nota']->id }}"
-                            class="btn btn-primary">Detil</a>
+                            class="btn btn-primary">Detail</a>
                     </div>
                 </div>
             </div>

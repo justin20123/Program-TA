@@ -47,7 +47,7 @@
                         <input type="text" class="form-control form-input" id="lokasi"
                             placeholder="Lokasi Pengambilan" disabled>
                         <div class="d-flex justify-content-between p-3", style="width: 100%">
-                            <button id="bukainputlatlong" type="button" class="btn btn-outline-primary">Input
+                            <button id="bukainputlatlong" type="button" class="btn btn-outline-primary">Masukkan
                                 Lokasi</button>
                             <button id="lokasisekarang" type="button" class="btn btn-primary">Gunakan Lokasi
                                 Anda</button>
@@ -129,6 +129,8 @@
                     </div>
 
                     <hr>
+
+                    <input type="hidden" id="jumlahsaldo" value="{{ Auth::user()->saldo }}">
 
                     <div class="order-total d-flex justify-content-between font-weight-bold">
                         <span>Saldo</span>
@@ -216,8 +218,13 @@
                         totalBiaya = subtotal;
                     }
                     $('#totalBiaya').html(totalBiaya.toLocaleString());
-
-
+                    var saldo = $('#jumlahsaldo').val();
+                    if(saldo < totalBiaya){
+                        $('#btnPlaceOrder').prop('disabled', true);
+                    }
+                    else{
+                        $('#btnPlaceOrder').prop('disabled', false);
+                    }
 
 
                 },

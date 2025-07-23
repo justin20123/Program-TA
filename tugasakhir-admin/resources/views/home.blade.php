@@ -1,8 +1,8 @@
 @extends('layout.sneat')
 @section('breadcrumb')
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="#">Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Cart</li>
+        <li class="breadcrumb-item"><a href="#">Beranda</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Pemblokiran Vendor</li>
     </ol>
 @endsection
 @section('menu')
@@ -16,8 +16,8 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
-                    Apakah anda yakin ingin memblokir vendor ini?
+                <div class="modal-body" id="modaltext">
+                    
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
@@ -69,7 +69,7 @@
                         {{-- @if ($v->rating > 0 && $v->rating < 3) --}}
                             <a href="{{ route('tinjau', $v->id) }}" class="btn btn-primary">Tinjau</a>
                         {{-- @endif --}}
-                        <button class="btn btn-danger" id="btnopenblokir" data-id="{{ $v->id }}">Blokir Vendor</button>
+                        <button class="btn btn-danger btnopenblokir" data-id="{{ $v->id }}" data-nama=" {{ $v->nama }}">Blokir Vendor</button>
                     </div>
                 </div>
             </div>
@@ -79,8 +79,10 @@
 @section('script')
     <script>
         $(document).ready(function() {
-            $('#btnopenblokir').click(function() {
+            $(document).on('click', '.btnopenblokir', function() {
                 const id = $(this).data('id');
+                const nama = $(this).data('nama');
+                $('#modaltext').text("Apakah anda yakin ingin memblokir vendor: " + nama + "?");
                 $('#hiddens').html(
                     `<input type="hidden" name="idvendor" value="${id}">`
                 );

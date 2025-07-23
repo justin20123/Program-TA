@@ -6,9 +6,11 @@
         <a class="navbar-link">&ensp;</a>
         <a href="/pesanancetak" class="navbar-link">Pesanan</a>
         <a class="navbar-link">&ensp;</a>
-        <a href="/pengantar" class="navbar-link">Pengantar</a>
-        <a class="navbar-link">&ensp;</a>
-        <a href="/pegawai" class="navbar-link">Pegawai</a>
+        @if (Auth::user()->role=="manajer")
+          <a href="/pengantar" class="navbar-link">Pengantar</a>
+          <a class="navbar-link">&ensp;</a>
+          <a href="/pegawai" class="navbar-link">Pegawai</a>
+        @endif
     </div>
     <div class="navbar-brand">Hak Akses: 
       @if(Auth::check())
@@ -17,7 +19,7 @@
       @endif
     </div>
     <div class="navbar-brand">
-      @if (Auth::user())
+      @if (Auth::user() && Auth::user()->role=="manajer")
         <div>
             Saldo: Rp. {{ number_format(Auth::user()->saldo, 0, '.', ',') }}
         </div>
@@ -28,7 +30,9 @@
         <span>Menu</span>
         <div class="dd-content">
           <ul>
-            <li><a href="/masukdana">Masukkan Dana</a></li>
+            @if (Auth::user() && Auth::user()->role=="manajer")
+              <li><a href="/tarikdana">Tarik Dana</a></li>
+            @endif
             <li><a href="/logout">Keluar</a></li>
           </ul>
         </div>

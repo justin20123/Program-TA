@@ -127,8 +127,8 @@ class VendorController extends Controller
         ]);
 
         $file = $request->file('fotopercetakan');
-        $file_extension = $file->getClientOriginalExtension();
-        $file_name = "$id_vendor.$file_extension";
+        // $file_extension = $file->getClientOriginalExtension();
+        $file_name = "$id_vendor.jpeg";
 
         $directory = base_path('../vendors');
 
@@ -195,8 +195,8 @@ class VendorController extends Controller
         $vendor->nama = $request->input('nama');
         if ($request->file('fotopercetakan')) {
             $file = $request->file('fotopercetakan');
-            $file_extension = $file->getClientOriginalExtension();
-            $file_name = "$id_vendor.$file_extension";
+            // $file_extension = $file->getClientOriginalExtension();
+            $file_name = "$id_vendor.jpeg";
 
             $directory = base_path('../vendors');
             $file->move($directory, $file_name);

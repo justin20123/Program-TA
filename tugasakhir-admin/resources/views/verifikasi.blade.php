@@ -11,7 +11,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body modaltolaktext">
                     Apakah anda yakin ingin menolak vendor ini?
                 </div>
                 <div class="modal-footer">
@@ -37,8 +37,8 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
-                    Apakah anda yakin ingin menerima vendor ini?
+                <div class="modal-body modalterimatext">
+                    
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
@@ -78,8 +78,8 @@
                         </div>
                     </div>
                     <div class="col-md-2 text-end">
-                        <button class="btn btn-danger" id="btnopentolak" data-id="{{ $v->id }}">Tolak</button>
-                        <button class="btn btn-primary" id="btnopenterima" data-id="{{ $v->id }}">Terima</button>
+                        <button class="btn btn-danger btnopentolak" data-id="{{ $v->id }}" data-nama=" {{ $v->nama }}">Tolak</button>
+                        <button class="btn btn-primary btnopenterima" data-id="{{ $v->id }}" data-nama=" {{ $v->nama }}">Terima</button>
                     </div>
                 </div>
             </div>
@@ -91,15 +91,19 @@
     <script>
         $(document).ready(function() {
             // Open rejection modal
-            $('#btnopentolak').click(function() {
+            $(document).on('click', '.btnopentolak', function() {
                 const id = $(this).data('id');
+                const nama = $(this).data('nama');
+                $('#modaltolaktext').text("Apakah anda yakin ingin menolak vendor:" + nama +"?");
                 $('#hiddens-tolak').html(`<input type="hidden" name="idvendor" value="${id}">`);
                 $('#confirmTolakModal').modal('show');
             });
 
             // Open approval modal
-            $('#btnopenterima').click(function() {
+            $(document).on('click', '.btnopenterima', function() {
                 const id = $(this).data('id');
+                const nama = $(this).data('nama');
+                $('#modalterimatext').text("Apakah anda yakin ingin menerima vendor:" + nama +"?");
                 $('#hiddens-terima').html(`<input type="hidden" name="idvendor" value="${id}">`);
                 $('#confirmTerimaModal').modal('show');
             });

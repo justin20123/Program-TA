@@ -25,12 +25,9 @@ class PemesananController extends Controller
     public function cekperubahan($idpemesanan)
     {
         $pemesanan = Pemesanan::find($idpemesanan);
-
         $tanggal_pemesanan = $pemesanan->updated_at;
         $jenisbahan = JenisBahanCetak::findOrFail($pemesanan->jenis_bahan_cetaks_id);
         $tanggal_update_detail = $jenisbahan->updated_at;
-        // dd("update detail: $tanggal_update_detail - pemesanan: $tanggal_pemesanan");
-
         if ($tanggal_pemesanan->lt($tanggal_update_detail)) {
             return true;
         } else {
@@ -52,6 +49,8 @@ class PemesananController extends Controller
             return redirect()->route('indexCart');
         }
 
+
+        // dd($pemesanans);
         $subtotal = 0;
         $detail_pesanan = "";
         foreach ($pemesanans as $p) {
@@ -71,6 +70,7 @@ class PemesananController extends Controller
                 $p->layanan = $layanan->namalayanan;
                 $p->satuan = $layanan->satuanlayanan;
                 $p->nama_jenis_bahan = $jenisbahan->nama;
+                $p->isberubah = true;
             } else {
                 if ($this->cekperubahan($p->id)) {
                     $p->status = 'updated';
@@ -82,6 +82,7 @@ class PemesananController extends Controller
                     $p->layanan = $layanan->namalayanan;
                     $p->satuan = $layanan->satuanlayanan;
                     $p->nama_jenis_bahan = $jenisbahan->nama;
+                    $p->isberubah = true;
                 } else {
                     $p->status = 'available';
                     $harga_cetaks = DB::table('harga_cetaks')
@@ -96,6 +97,7 @@ class PemesananController extends Controller
                         ->first();
                     $p->layanan = $layanan->namalayanan;
                     $p->satuan = $layanan->satuanlayanan;
+                    $p->isberubah = false;
 
                     $subtotal += $p->subtotal_pesanan;
                     $pemesanan_opsi_detail = DB::table('pemesanans_has_opsi_details')
@@ -393,14 +395,12 @@ class PemesananController extends Controller
         $pemesanan = Pemesanan::find($id);
         $pemesanan->url_file = $relativePath;
         $pemesanan->save();
-
         $filePath = $directory . '/' . $fileName;
         $uploadDirectory = 'uploads';
 
         if (!is_dir($uploadDirectory)) {
             mkdir($uploadDirectory, 0755, true);
         }
-
         copy($filePath, $uploadDirectory . '/' . $fileName);
 
         return ["idpemesanan" => $id, "idvendor" => $request->input('vendors_id'), 'message' => "Pesanan dimasukkan ke dalam cart"];
@@ -425,8 +425,9 @@ class PemesananController extends Controller
         $jumlah = $request->input('jumlah');
 
         $hargacetakcontroller = new HargaCetakController();
-        $idhargacetak = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id, true);
-        $hargasatuan = $hargacetakcontroller->cekHarga($request->jumlah, $request->jenis_bahan_cetaks_id);
+        $idhargacetak = $hargacetakcontroller->cekHarga($jumlah, $request->input('jenis_bahan_cetaks_id'), true);
+        $hargasatuan = $hargacetakcontroller->cekHarga($jumlah, $request->input('jenis_bahan_cetaks_id'));
+
         $harga = $hargasatuan * $jumlah;
         $biaya_tambahan = 0;
 

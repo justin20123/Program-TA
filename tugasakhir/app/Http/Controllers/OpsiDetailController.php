@@ -36,8 +36,12 @@ class OpsiDetailController extends Controller
             ->where('detail_cetaks_id', '=', $id_detail)
             ->where('deleted_at', '=', null)
             ->get();
+        $jenisbahan = JenisBahanCetak::find($detail->jenis_bahan_cetaks_id);
+        $vendorlayanan = DB::table("vendors_has_jenis_bahan_cetaks")
+        ->where("jenis_bahan_cetaks_id", "=", $jenisbahan->id)
+        ->first();
 
-        return view('layanan.options', compact('detail', 'opsiDetails'));
+        return view('layanan.options', compact('detail', 'opsiDetails',"vendorlayanan"));
     }
 
     public function create($id_detail)
@@ -59,7 +63,14 @@ class OpsiDetailController extends Controller
 
     public function store(Request $request, OpsiDetail $opsi_detail)
     {
+        if(!$request->input('opsi')){
+            return back()->with("error", "Opsi harus diisi");
+        }
         $detail_id = $request->input('id_detail');
+        $biaya_tambahan = 0;
+        if($request->input('biaya_tambahan')){
+            $biaya_tambahan = $request->input('biaya_tambahan');
+        }
         $detail = DB::table('detail_cetaks')
             ->where('id', '=', $detail_id)
             ->first();
@@ -86,7 +97,7 @@ class OpsiDetailController extends Controller
         if ($request->input('deskripsi')) {
             $opsi_detail->deskripsi = $request->input('deskripsi');
         }
-        $opsi_detail->biaya_tambahan = $request->input('biaya_tambahan');
+        $opsi_detail->biaya_tambahan = $biaya_tambahan;
         $opsi_detail->tipe = $request->input('tipe');
         $opsi_detail->detail_cetaks_id = $detail_id;
 
@@ -117,18 +128,25 @@ class OpsiDetailController extends Controller
 
     public function update(Request $request)
     {
+        if(!$request->input('opsi')){
+            return back()->with("error", "Opsi harus diisi");
+        }
         $detail_id = $request->input('id_detail');
 
         $detail = DB::table('detail_cetaks')
             ->where('id', $detail_id)
             ->first();
+        $biaya_tambahan = 0;
+        if ($request->input('biaya_tambahan')){
+            $biaya_tambahan = $request->input('biaya_tambahan');
+        }
 
-        $opsi_detail = OpsiDetail::findOrFail($detail_id);
+        $opsi_detail = OpsiDetail::findOrFail($request->input('id_opsi_detail'));
         $opsi_detail->opsi = $request->input('opsi');
         if ($request->input('deskripsi')) {
             $opsi_detail->deskripsi = $request->input('deskripsi');
         }
-        $opsi_detail->biaya_tambahan = $request->input('biaya_tambahan');
+        $opsi_detail->biaya_tambahan = $biaya_tambahan;
         $opsi_detail->tipe = $request->input('tipe');
         $opsi_detail->detail_cetaks_id = $detail_id;
         $opsi_detail->save();
@@ -136,6 +154,9 @@ class OpsiDetailController extends Controller
         $jenis_bahan = JenisBahanCetak::find($detail->jenis_bahan_cetaks_id);
         $jenis_bahan->updated_at = Carbon::now('Asia/Jakarta');
         $jenis_bahan->save();
+
+        $jenisbahan = new JenisBahanController;
+        $jenisbahan->updateJenisBahan($detail->jenis_bahan_cetaks_id);
 
         return redirect()->route('opsidetail.index', [$detail_id]);
     }
@@ -153,6 +174,9 @@ class OpsiDetailController extends Controller
         $jenis_bahan = JenisBahanCetak::find($detail->jenis_bahan_cetaks_id);
         $jenis_bahan->updated_at = Carbon::now('Asia/Jakarta');
         $jenis_bahan->save();
+
+        $jenisbahancontroller  = new JenisBahanController;
+        $jenisbahancontroller ->updateJenisBahan($detail->jenis_bahan_cetaks_id);
 
         return redirect()->route('opsidetail.index', [$detail->id]);
     }

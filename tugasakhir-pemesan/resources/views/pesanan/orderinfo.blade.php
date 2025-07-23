@@ -107,17 +107,17 @@
             </div>
             <div>
                 @if ($status_antar == 'diambil')
-                    @if($prediksi_selesai && (count($arrSummaryReverse) < 4)) <!-- Sampai menunggu diambil --> 
+                    @if($prediksi_selesai && ($totalproses < 4)) <!-- Sampai menunggu diambil --> 
                         <p class="mb-0 text-muted py-2">Perkiraan selesai proses: {{$prediksi_selesai}}</p>
-                    @elseif(count($arrSummaryReverse) == 4) 
+                    @elseif($totalproses == 4) 
                         <p class="mb-0 text-muted py-2">Pesanan sudah selesai dibuat pada: {{$arrSummaryReverse[0]["waktu_progress_format"]}}, silahkan diambil</p>
-                    @elseif(count($arrSummaryReverse) == 5) 
+                    @elseif($totalproses == 5) 
                         <p class="mb-0 text-muted py-2">Pesanan selesai pada: {{$arrSummaryReverse[0]["tanggal_selesai"]}}</p>
                     @endif
                 @else
-                    @if($prediksi_selesai && (count($arrSummaryReverse) < 5)) <!-- Sampai menunggu diambil --> 
+                    @if($prediksi_selesai && ($totalproses < 5)) <!-- Sampai menunggu diambil --> 
                         <p class="mb-0 text-muted py-2">Perkiraan sampai: {{$prediksi_selesai}}</p>
-                    @elseif(count($arrSummaryReverse) == 5) 
+                    @elseif($totalproses == 5) 
                         <p class="mb-0 text-muted py-2">Pesanan selesai pada: {{$arrSummaryReverse[0]["tanggal_selesai"]}}</p>
                     @endif
                 @endif
@@ -207,7 +207,7 @@
                 {{ session('message') }}
             </div>
         @endif
-            @if(count($arrSummaryReverse) == 5)
+            @if($totalproses == 5)
                 @if(!$israted)
                 <div style="display: flex; justify-content: center;">
                     <button class="btn btn-primary" id="btnopenreview">Review</button>

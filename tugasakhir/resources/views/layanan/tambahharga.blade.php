@@ -37,7 +37,7 @@
         </div>
         <input type="hidden" name='id_jenis_bahan' value="{{ $detail->id }}">
         <div style="display: flex; justify-content: center;" class="pb-5 pt-2">
-          <input type="submit" valu e="Submit" class="btn btn-success">
+          <input type="submit" value="Tambah" class="btn btn-success">
         </div>
     </form>
 @endsection

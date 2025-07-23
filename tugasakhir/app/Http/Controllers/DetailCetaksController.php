@@ -11,11 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class DetailCetaksController extends Controller
 {
-    public function updateJenisBahan($id){
-        $jenis_bahan = JenisBahanCetak::find($id);
-        $jenis_bahan->updated_at = Carbon::now('Asia/Jakarta');
-        $jenis_bahan->save();
-    }
+    
 
     public function cekDupikatNama($value, $id_jenis_bahan){
         $detail_cetaks = DB::table('detail_cetaks')
@@ -44,12 +40,16 @@ class DetailCetaksController extends Controller
     }
 
     public function store(Request $request){
+        if(!$request->input('value')){
+            return redirect()->back()->with('error', 'Nama detail tidak boleh kosong');
+        }
+        
         $id_vendor = $request->input('id_vendor');
         $id_layanan = $request->input('id_layanan');
 
         if(!$request->input('ubah_semua')){
             if($this->cekDupikatNama($request->input('value'),$request->input('id_jenis_bahan'))){
-                return redirect()->back()->with('error', 'Nama sudah ada');
+                return redirect()->back()->with('error', 'Nama detail sudah ada');
             }
 
 
@@ -59,7 +59,8 @@ class DetailCetaksController extends Controller
             $detail_cetaks->jenis_bahan_cetaks_id = $request->input('id_jenis_bahan');
             $detail_cetaks->save();
 
-            $this->updateJenisBahan($request->input('id_jenis_bahan'));
+            $jenisbahan = new JenisBahanController;
+            $jenisbahan->updateJenisBahan($request->input('id_jenis_bahan'));
         }
         else{
             $id_jenis_bahan = DB::table('vendors_has_jenis_bahan_cetaks')
@@ -77,7 +78,8 @@ class DetailCetaksController extends Controller
                     $detail_cetaks->jenis_bahan_cetaks_id = $j->jenis_bahan_cetaks_id;
                     $detail_cetaks->save();
     
-                    $this->updateJenisBahan($j->jenis_bahan_cetaks_id);
+                    $jenisbahan = new JenisBahanController;
+                    $jenisbahan->updateJenisBahan($j->jenis_bahan_cetaks_id);
                     $count++;
                 }
             }
@@ -96,7 +98,8 @@ class DetailCetaksController extends Controller
         $details->value = $request->input('value');
         $details->save();
 
-        $this->updateJenisBahan($details->jenis_bahan_cetaks_id);
+        $jenisbahan = new JenisBahanController;
+        $jenisbahan->updateJenisBahan($details->jenis_bahan_cetaks_id);
 
         return response()->json(['success' => 'Detail with id ' . $id. ' updated successfully.']);
     }

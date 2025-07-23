@@ -62,6 +62,9 @@ class HargaCetakController extends Controller
 
         $harga_cetak->save();    
 
+        $jenisbahan = new JenisBahanController;
+        $jenisbahan->updateJenisBahan($harga_cetak->id_bahan_cetaks);
+
         return redirect()->route('harga.index', $request->input('id_jenis_bahan'));
     }
 
@@ -114,6 +117,9 @@ class HargaCetakController extends Controller
 
         $harga_cetak->save();
         
+        $jenisbahan = new JenisBahanController;
+        $jenisbahan->updateJenisBahan($harga_cetak->id_bahan_cetaks);
+
         return redirect()->route('harga.index', $request->input('id_jenis_bahan'));
     }
 
@@ -127,6 +133,9 @@ class HargaCetakController extends Controller
     {
         $harga_cetak = HargaCetak::findOrFail($request->input('id_harga'));
         $harga_cetak->delete();
+        
+        $jenisbahan = new JenisBahanController;
+        $jenisbahan->updateJenisBahan($harga_cetak->id_bahan_cetaks);
         return redirect()->route('harga.index', $request->input('id_jenis_bahan'));
     }
 }

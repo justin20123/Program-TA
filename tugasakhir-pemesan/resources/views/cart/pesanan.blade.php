@@ -75,7 +75,9 @@
                 </thead>
                 <tbody>
                     @foreach ($pemesanans as $p)
+                        @if(!$p->isberubah)
                         <input type="hidden" name="detail-pesanan-{{ $p->id }}" value="{{ $p->detail_pesanan }}">
+                        @endif
                         <tr>
                             @if ($p->status == 'deleted')
                                 <td colspan="9">
@@ -162,6 +164,7 @@
             </div>
         @endif
 
+        <input type="hidden" id="saldo" value="{{ Auth::user()->saldo }}">
 
 
         <div class="d-flex justify-content-between mb-4 flex-wrap">
@@ -186,7 +189,7 @@
 
                         </div>
                         <input type="submit" value="MENUJU CHECKOUT"
-                            class="btn btn-primary btn-block mt-3 font-weight-bold">
+                            class="btn btn-primary btn-block mt-3 font-weight-bold" id="btnsubmit">
                     </form>
 
                 </div>
@@ -200,6 +203,7 @@
         $(document).ready(function() {
 
             let subtotal = 0;
+            let saldo = $("#saldo").val();
 
             function updateSubtotal() {
                 subtotal = 0;
@@ -228,6 +232,13 @@
                             `<input type="hidden" name="biaya_tambahan[]" value="${biayaTambahan}">`);
                     }
                 });
+
+                if (saldo < subtotal || subtotal == 0) {
+                    $('#btnsubmit').prop('disabled', true);
+                } else {
+                    $('#btnsubmit').prop('disabled', false);
+                }
+
                 $('#subtotal').text('Rp. ' + subtotal.toLocaleString());
                 $('#hiddens').append(`<input type="hidden" name="subtotal" value="${subtotal}">`);
 
@@ -279,15 +290,16 @@
 
                         var htmlCatatanDetail = "";
 
-                        var detailPesanan = $(`input[name="detail-pesanan-${idpemesanan}"]`).val();
+                        var detailPesanan = $(`input[name="detail-pesanan-${idpemesanan}"]`)
+                            .val();
                         var detailItem = detailPesanan.split(';');
                         detailItem.pop();
 
                         var detailHtml = "Detail: ";
                         for (var i = 0; i < detailItem.length; i++) {
-                            detailHtml += "<p>"+ (i+1)+ ". " + detailItem[i] + "</p>"; 
+                            detailHtml += "<p>" + (i + 1) + ". " + detailItem[i] + "</p>";
                         }
-                        if (detailItem.length == 0){
+                        if (detailItem.length == 0) {
                             detailHtml = "Tidak ada detail yang diperlukan dalam pesanan ini"
                         }
 

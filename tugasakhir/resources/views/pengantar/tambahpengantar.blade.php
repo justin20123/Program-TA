@@ -1,12 +1,9 @@
 @extends ("layout.sneat")
 @section ("breadcrumb")
 <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="#">Home</a></li>
-    <li class="breadcrumb-item"><a href="#">Vendors</a></li>
-    <li class="breadcrumb-item" aria-current="page">Layanan</li>
-    <li class="breadcrumb-item" aria-current="page">Detail Layanan</li>
-    <li class="breadcrumb-item" aria-current="page">Opsi Layanan</li>
-    <li class="breadcrumb-item active" aria-current="page">Create</li>
+  <li class="breadcrumb-item"><a href="#">Beranda</a></li>
+  <li class="breadcrumb-item" aria-current="page">Pengantar</li>
+    <li class="breadcrumb-item active" aria-current="page">Tambah Pengantar</li>
   </ol>
 @endsection
 @section("menu")
@@ -36,9 +33,9 @@
 </div>
 <div class="h3 px-4 py-2">
   <div class="form-group">
-    <label for="password">Password</label>
+    <label for="password">Kata Sandi</label>
     <div class="input-group">
-      <input type="password" class="form-control" name="password" id="password" aria-describedby="helpId" placeholder="Enter your password" required>
+      <input type="password" class="form-control" name="password" id="password" aria-describedby="helpId" placeholder="Masukkan kata sandi" required>
       <div class="input-group-append">
         <button class="btn btn-outline-secondary" type="button" id="togglePassword" required>
           <i class="fa fa-eye" aria-hidden="true"></i>
@@ -49,9 +46,9 @@
 </div>
 <div class="h3 px-4 py-2">
   <div class="form-group">
-    <label for="password1">Confirm Password</label>
+    <label for="password1">Konfirmasi Kata Sandi</label>
     <div class="input-group">
-      <input type="password" class="form-control" name="confirmpassword" id="password1" aria-describedby="helpId" placeholder="Enter your password" required>
+      <input type="password" class="form-control" name="confirmpassword" id="password1" aria-describedby="helpId" placeholder="Masukkan konfirmasi kata sandi" required>
       <div class="input-group-append">
         <button class="btn btn-outline-secondary" type="button" id="togglePassword1">
           <i class="fa fa-eye" aria-hidden="true"></i>
@@ -62,7 +59,7 @@
 </div>
 <input type="hidden" name="idvendor" value="{{$vendor[0]}}"> 
 <div style="display: flex; justify-content: center;" class="pb-5 pt-2">
-  <input type="submit" value="Submit" class="btn btn-success">
+  <input type="submit" value="Kirim" class="btn btn-success">
 </div>
 </form>
 @if (session('error'))

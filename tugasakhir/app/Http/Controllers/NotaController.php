@@ -76,7 +76,6 @@ class NotaController extends Controller
         $nota_progress->waktu_progress = Carbon::now('Asia/Jakarta');
         $nota_progress->progress = 'menunggu verifikasi';
         $nota_progress->url_ubah_file = $relative_path;
-        
         $nota_progress->save();
 
         return back()->with('message', 'Contoh file berhasil dikirim');
@@ -106,11 +105,9 @@ class NotaController extends Controller
         ->where('urutan_progress', '=', $notas_progress_latest->urutan_progress)
         ->select('perubahan')
         ->first();
-
         if (!$perubahan_db) {
             return response()->json(['perubahan' => 'Belum ada perubahan ditemukan']);
         }
-
         $perubahan = $perubahan_db->perubahan;
 
         return response()->json(['perubahan' => $perubahan]);

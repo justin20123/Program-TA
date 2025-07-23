@@ -6,7 +6,6 @@
     </ol>
 @endsection
 @section('menu')
-
     <div id="loading">
         <div class="d-flex align-items-center justify-content-center" style="height: 100vh; display: flex;">
             <strong>Memuat...</strong>
@@ -17,8 +16,8 @@
     <div id="content">
         <div class="container mt-3">
             <div class="d-flex justify-content-between align-items-center">
-                @if(Auth::user())
-                <h5>Selamat datang {{Auth::user()->nama}}</h5>
+                @if (Auth::user())
+                    <h5>Selamat datang {{ Auth::user()->nama }}</h5>
                 @endif
                 <div class="form-inline">
                     <label class="mr-2">Perbandingan Harga:</label>
@@ -31,8 +30,8 @@
                         </div>
                     </div>
                 </div>
-                
-                
+
+
             </div>
         </div>
 
@@ -44,20 +43,18 @@
 
     <p id="status" class="px-5"></p>
     @auth
-    <script>
-        var isLoggedIn = true;
-    </script>
-@endauth
-@guest
-    <script>
-        var isLoggedIn = false;
-    </script>
-@endguest
-    
+        <script>
+            var isLoggedIn = true;
+        </script>
+    @endauth
+    @guest
+        <script>
+            var isLoggedIn = false;
+        </script>
+    @endguest
 @endsection
 
 @section('script')
-
     <script>
         var isLoaded;
         //ambil lokasi sekarang
@@ -67,6 +64,7 @@
                     navigator.geolocation.getCurrentPosition(resolve, reject);
                 } else {
                     reject("Geolocation tidak dapat dilakukan melalui browser ini.");
+                    $('#content').text(error);
                 }
             });
         }
@@ -80,6 +78,44 @@
                     'X-CSRF-TOKEN': '{{ csrf_token() }}' // Include CSRF token for security
                 }
             });
+        }
+
+        function showProcess(data) {
+            //weight
+            console.log('weight:')
+            var weights = [];
+            $.each(data['weights'], function(index, item) {
+                
+                weights.push({
+                    index: data["weightsindex"][index],
+                    weight: data["weights"][index]
+                });
+            });
+            console.table(weights);
+
+            //matriks topsis
+            console.log("matriks topsis");
+            console.table(data["matriksTopsis"]);
+
+            //matriks normal
+            console.log("matriks normal (rating 0 diubah menjadi bilangan sangat kecil (agar tdk terjadi zeroDivisionError))");
+            console.table(data["matriksNormal"]);
+
+            //matriks berbobot
+            console.log("matriks berbobot");
+            console.table(data["matriksBerbobot"]);
+
+            //solusi ideal
+            console.log("solusi ideal");
+            console.table(data["solusiIdeal"]);
+
+            //D
+            console.log("D");
+            console.table(data["d"]);
+
+            //nilai akhir variabel
+            console.log("nilai akhir variabel");
+            console.table(data["nilaiAkhirVariabel"]);
         }
         //kirim lokasi ke controller
         function kirimLokasi(latitude, longitude) {
@@ -190,7 +226,7 @@
                     longitude: longitude
                 }),
                 headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}' // Include CSRF token for security
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}' 
                 }
             });
         }
@@ -270,7 +306,9 @@
                     let layanan = data['layanan'];
                     let satuan = data['satuan'];
                     let vendors = data['vendors'];
-                     // Center the container
+
+                    showProcess(data["data"]);
+
                     let items = ['Terdekat', 'Termurah', 'Direkomendasikan'];
 
                     for (let i = 0; i < items.length; i++) {
@@ -306,13 +344,12 @@
 
                     html += `</div>`;
 
-                    
-                }
-                else{
+
+                } else {
                     html += '<p>Layanan ini belum memiliki vendor</p>'
                 }
                 $('#untuk-anda').html(html);
-                    return "done";
+                return "done";
             } catch (error) {
                 console.error('Error:', error);
                 return "error";
@@ -327,17 +364,15 @@
             let latitude, longitude, statusUntukAnda, statusTerdekat;
 
             try {
-                
+
                 if (!isLoaded) {
                     statusDropDown = await pageLoadDropDownLayanan();
                 }
                 $('#layanans').val(idlayanan);
 
-                // Get the user's location
                 const position = await ambilLokasiUser();
                 latitude = position.coords.latitude;
                 longitude = position.coords.longitude;
-                // Load the necessary data
 
                 if (!isLoaded) {
                     statusLayananTerdekat = await pageLoadLayananTerdekat(latitude, longitude);
@@ -345,11 +380,10 @@
                     statusUntukAnda = await pageLoadUntukAnda(latitude, longitude, idlayanan);
                 }
                 if (isLoggedIn) {
-                    
-                }   
-                else{
+
+                } else {
                     statusUntukAnda = "done";
-                }             
+                }
                 if (!isLoaded) {
                     if (statusDropDown == "done" && statusLayananTerdekat == "done" && statusUntukAnda == "done" &&
                         statusTerdekat == "done") {
@@ -375,6 +409,12 @@
             } catch (error) {
                 console.error('Error getting location or loading data:', error);
                 $('#loading').hide();
+                $("#content").html(
+                    "<h5>Gagal Mengambil Lokasi</h5>" +
+                    "<p>Silahkan gunakan koneksi internet dan berikan ijin penggunaan lokasi untuk mengambil lokasi</p>"
+
+                );
+                $('#content').show();
             }
         }
 
@@ -387,30 +427,28 @@
         }
 
         async function isvendorada() {
-            
+
             return $.ajax({
-        url: 'isvendorada',
-        type: 'GET',
-        contentType: 'application/json',
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        }
-    }).then(function(response) {
-        return response.value; // Ensure the response value is returned
-    }).fail(function(jqXHR, textStatus, errorThrown) {
-        console.error(jqXHR);
-        throw new Error('AJAX request failed');
-    });
+                url: 'isvendorada',
+                type: 'GET',
+                contentType: 'application/json',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            }).then(function(response) {
+                return response.value; // Ensure the response value is returned
+            }).fail(function(jqXHR, textStatus, errorThrown) {
+                console.error(jqXHR);
+                throw new Error('AJAX request failed');
+            });
         }
         async function checkVendorAda() {
             try {
                 var isAdaVendor = await isvendorada()
                 console.log(isAdaVendor);
-                if(isAdaVendor){
+                if (isAdaVendor) {
                     await pageLoad();
-                } 
-                else 
-                {
+                } else {
                     console.log('masuk');
                     $('#loading').hide();
                     $("#tidak-ada-vendor").html("<p class='text text-default'>Belum ada vendor yang aktif</p>");

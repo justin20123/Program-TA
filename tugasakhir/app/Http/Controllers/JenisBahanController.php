@@ -3,12 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\JenisBahanCetak;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class JenisBahanController extends Controller
 {
+    public function updateJenisBahan($id){
+        $jenis_bahan = JenisBahanCetak::find($id);
+        if ($jenis_bahan) {
+            $jenis_bahan->updated_at = Carbon::now('Asia/Jakarta');
+            $jenis_bahan->save();
+        }
+    }
     public function store(Request $request)
     {
         try {
@@ -79,7 +87,8 @@ class JenisBahanController extends Controller
         $jenisbahan = JenisBahanCetak::findOrFail($id);
         $jenisbahan->delete();
 
-
+        $this->updateJenisBahan($id);
+        
         DB::table('vendors_has_jenis_bahan_cetaks')
             ->where('jenis_bahan_cetaks_id', '=', $id)
             ->update(['deleted_at' => now()]);

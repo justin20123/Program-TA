@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\JenisBahanCetak;
 use App\Models\Layanan;
+use App\Models\Vendor;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
@@ -103,7 +104,7 @@ class LayananController extends Controller
         ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
         ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $id_layanan)
         ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $jenis_bahan[0]->id_jenis_bahan)
-        ->where('jenis_bahan_cetaks.deleted_at', '=', null)
+        ->where('detail_cetaks.deleted_at', '=', null)
         ->select('detail_cetaks.*', 'opsi_details.id as id_opsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan')
         ->get();
 
@@ -155,7 +156,7 @@ class LayananController extends Controller
         ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
         ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $id_layanan)
         ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $id_jenis_bahan)
-        ->where('jenis_bahan_cetaks.deleted_at', '=', null)
+        ->where('detail_cetaks.deleted_at', '=', null)
         ->select('detail_cetaks.*', 'opsi_details.id as id_opsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan')
         ->get();
 
@@ -1241,4 +1242,11 @@ class LayananController extends Controller
         return redirect()->route('layananindex', [$idvendor]);
     }
 
+    public function ubahaktif(Request $request){
+        $vendor = Vendor::find($request->input('idvendor'));
+        $vendor->status = $request->input('newStatus');
+        $vendor->save();
+
+        return;
+    }
 }

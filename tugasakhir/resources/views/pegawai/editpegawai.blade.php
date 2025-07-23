@@ -1,16 +1,15 @@
 @extends ("layout.sneat")
 @section('breadcrumb')
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="#">Home</a></li>
-        <li class="breadcrumb-item"><a href="#">Vendors</a></li>
-        <li class="breadcrumb-item" aria-current="page">Layanan</li>
-        <li class="breadcrumb-item" aria-current="page">Detail Layanan</li>
-        <li class="breadcrumb-item" aria-current="page">Opsi Layanan</li>
-        <li class="breadcrumb-item active" aria-current="page">Create</li>
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#">Beranda</a></li>
+        <li class="breadcrumb-item" aria-current="page">Pegawai</li>
+          <li class="breadcrumb-item active" aria-current="page">Ubah Pegawai</li>
+        </ol>
     </ol>
 @endsection
 @section('menu')
-    <div class="h3 px-4 py-2">Edit Pegawai: {{ $pegawai->nama }}</div>
+    <div class="h3 px-4 py-2">Ubah Pegawai: {{ $pegawai->nama }}</div>
     <form action="{{ route('pegawai.update', $pegawai->id) }}" method="post">
         @csrf
         @method('PUT')
@@ -30,7 +29,7 @@
         </div>
         <input type="hidden" name="idvendor" value="{{ $pegawai->vendors_id }}">
         <div style="display: flex; justify-content: center;" class="pb-5 pt-2">
-          <input type="submit" value="Submit" class="btn btn-success">
+          <input type="submit" value="Kirim" class="btn btn-success">
         </div>    
       </form>
       @if (session('error'))

@@ -7,7 +7,7 @@
   <div class="navbar-brand"></div>    
   <div class="navbar-brand"> </div>    
   <div class="navbar-item">
-    <a href="/logout" class="btn-logout">Logout</a>
+    <a href="/logout" class="btn-logout">Keluar</a>
   </div>
   <a class="navbar-link">&ensp;</a>
 </nav>

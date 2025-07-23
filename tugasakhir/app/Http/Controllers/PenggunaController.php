@@ -192,6 +192,31 @@ class PenggunaController extends Controller
         return redirect()->route('pengantar.index',[$request->idvendor]);
     }
 
+    public function tarikdana(){
+        return view('tarikdana');
+    }
+    public function dotarikdana(Request $request){
+        
+        if(!$request->input('nominal')){
+            return back()->with("error", "Nominal harus terisi");
+        }
+        if(!$request->input('norek')){
+            return back()->with("error", "Nomor Rekening harus terisi");
+        }
+        $nominal = $request->input('nominal');
+        if($nominal>Auth::user()->saldo){
+            return back()->with("error", "Saldo tidak cukup untuk melakukan penarikan");
+        }
+        if($nominal<1000){
+            return back()->with("error", "Saldo minimal untuk ditarik adalah Rp. 1.000");
+        }
+        $user = Pengguna::find(Auth::user()->id);
+        $saldobaru = $user->saldo - $nominal;
+        $user->saldo = $saldobaru;
+        $user->save();
+        return redirect()->to('/');
+    }
+
     public function create()
     {
         return view('penggunas.create');

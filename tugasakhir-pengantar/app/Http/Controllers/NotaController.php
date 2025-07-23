@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Nota;
+use App\Models\Pengguna;
 use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -107,11 +108,27 @@ class NotaController extends Controller
         return view('detailpengantaran', compact('nota', 'pesanans'));
     }
 
-    public function selesaipesanan($id){
-        $nota = Nota::find($id);
+    public function selesaikanpesanan(Request $request)
+    {
+        $nota = Nota::findOrFail($request->idnota);
         $nota->waktu_selesai = Carbon::now('Asia/Jakarta');
         $nota->save();
 
-        return redirect()->route('home');
+        $idvendor = Auth::user()->vendors_id;
+
+        $idmanajer = DB::table('penggunas')
+        ->where('vendors_id', '=', $idvendor)
+        ->where('role', '=', 'manajer')
+        ->first();
+
+        $manajer = Pengguna::find($idmanajer->id);
+        $saldo = $manajer->saldo;
+        $saldobaru = $saldo + $nota->harga_total;
+        $manajer->saldo = $saldobaru;
+        $manajer->save();
+
+        $_SESSION['message'] = 'Pesanan berhasil diselesaikan';
+
+        return route("home");
     }
 }

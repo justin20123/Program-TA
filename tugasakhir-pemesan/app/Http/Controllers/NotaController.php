@@ -11,6 +11,7 @@ use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\Validator;
 
 class NotaController extends Controller
@@ -186,6 +187,7 @@ class NotaController extends Controller
         $arrSummary = [];
         $arrProgress = [];
         $maxPrioritas = 0;
+        $totalproses = 0;
 
         $nota = DB::table('notas')
             ->join('pemesanans', 'notas.id', '=', 'pemesanans.notas_id')
@@ -250,21 +252,21 @@ class NotaController extends Controller
             'waktu_progress_format' => $this->formatDateTime($nota->waktu_transaksi),
             'progress' => 'Transaksi berhasil'
         ];
-
+        $totalproses += 1;
         array_push($arrSummary, $transaksi);
 
         $terima = [
             'waktu_progress_format' => $this->formatDateTime($nota->waktu_menerima_pesanan),
             'progress' => 'Pesanan diterima'
         ];
-
+        $totalproses += 1;
         array_push($arrSummary, $terima);
 
         $proses = [
             'waktu_progress_format' => $this->formatDateTime($nota->waktu_menerima_pesanan),
             'progress' => 'Pesanan diproses'
         ];
-
+        $totalproses += 1;
         array_push($arrSummary, $proses);
 
         $notas_progress = DB::table('notas_progress')
@@ -335,6 +337,7 @@ class NotaController extends Controller
                     'progress' => 'Pesanan sedang diantar'
                 ];
             }
+            $totalproses += 1;
             array_push($arrSummary, $array);
         }
 
@@ -369,9 +372,7 @@ class NotaController extends Controller
         if($ratingcount > 0){
             $israted = true;
         }
-        // dd($waktustart);
-        // dd($arrSummaryReverse);
-        return view('pesanan.orderinfo', compact('arrProgressReverse', 'arrSummaryReverse', 'harga_total', 'jumlah_pesanan', 'waktustart', 'prediksi_selesai', 'status_antar', 'nota', 'israted'));
+        return view('pesanan.orderinfo', compact('arrProgressReverse', 'arrSummaryReverse', 'harga_total', 'jumlah_pesanan', 'waktustart', 'prediksi_selesai', 'status_antar', 'nota', 'israted', 'totalproses'));
     }
 
     public function bukaverifikasi($idpemesanan, $idnota, $urutanprogress)
@@ -431,15 +432,15 @@ class NotaController extends Controller
     }
     public function ajukanperubahan(Request $request)
     {
+        Lang::setLocale('id');
 
         $validator = Validator::make($request->all(), [
             'perubahan' => 'required|string|min:1|max:250'
         ]);
         if ($validator->fails()) {
-            // Handle the failure, for example:
             return redirect()->back()
-                ->withErrors($validator) // Pass the error messages
-                ->withInput(); // Keep the old input
+                ->withErrors($validator) 
+                ->withInput(); 
         }
 
         $notas_progress_latest = DB::table('notas_progress')

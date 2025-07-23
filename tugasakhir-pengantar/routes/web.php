@@ -39,7 +39,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/', [NotaController::class, 'index'])->name('home');
     
     Route::get('/detail/pengantaran/{idnota}', [NotaController::class, 'detail'])->name('detail');
-    Route::get('/selesaipesanan/{idnota}', [NotaController::class, 'selesaipesanan'])->name('selesai');
+    Route::post('/selesaikanpesanan', [NotaController::class, 'selesaikanpesanan'])->name('selesai');
 
     Route::get('/pemesanan/{filename}', function ($filename) {
         $path = base_path('../pemesanan/' . $filename);

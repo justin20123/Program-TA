@@ -31,7 +31,7 @@ use Illuminate\Support\Facades\Route;
 //login
 Route::get('login', [LoginController::class, 'bukalogin'])->name('login');
 Route::post('login', [LoginController::class, 'login']);
-Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+Route::get('logout', [LoginController::class, 'logout'])->name('logout');
 
 //register
 Route::get('register', [RegisterController::class, 'bukaregister'])->name('register');
@@ -61,10 +61,15 @@ Route::middleware(['auth'])->group(function () {
         abort(404);
     });
 
+    //tarik dana
+    Route::get('/tarikdana', [PenggunaController::class, 'tarikdana'])->name('tarikdana');
+    Route::post('/dotarikdana', [PenggunaController::class, 'dotarikdana'])->name('dotarikdana');
+
 
     //home
     Route::get('/home', [VendorController::class, 'index'])->name('home');
     Route::get('/layanans', [LayananController::class, 'index'])->name('layananindex');
+    Route::post('/ubahaktif', [LayananController::class, 'ubahaktif'])->name('ubahaktif');
     Route::get('/layanans/{vendor_id}/details/{idlayanan}', [LayananController::class, 'detail_layanan'])->name('layanan.detail_layanan');
     //opsi detail
     Route::get('/layanans/{vendor_id}/details/{idlayanan}/{idjenisbahan}', [LayananController::class, 'detail_layanan_load'])->name('layanan.detail_layanan_load');

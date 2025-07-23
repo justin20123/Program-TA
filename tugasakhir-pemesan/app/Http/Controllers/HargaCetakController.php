@@ -23,22 +23,23 @@ class HargaCetakController extends Controller
         $hargaMaxJumlahMin = 0;
         $harga = null;
         $id = null;
+        $hargafinal = null;
         foreach($hargacetak as $h){
-            
-            if($h->jumlah_cetak_minimum <= $jumlahCetak && $h->jumlah_cetak_maksimum >= $jumlahCetak){
-                $harga = $h->harga_satuan;
-                $id = $h->id;
+            $id=$h->id;
+            if ($h->jumlah_cetak_minimum <= $jumlahCetak && $h->jumlah_cetak_maksimum >= $jumlahCetak) {
+                $hargafinal = $h;
                 break;
             }
-            if($h->jumlah_cetak_minimum > $maxJumlahMin){
+            if ($h->jumlah_cetak_minimum > $maxJumlahMin) {
                 $maxJumlahMin = $h->jumlah_cetak_minimum;
                 $hargaMaxJumlahMin = $h->harga_satuan;
-                $id = $h->id;
-            
             }
-            if(!$harga){
+            if ($hargafinal) {
+                $harga = $hargafinal->harga_satuan;
+                $id = $hargafinal->id;
+            } else {
                 $harga = $hargaMaxJumlahMin;
-                //kalau sampai terakhir belum dapat, masukkan ke minimum yang terbesar
+                // kalau sampai terakhir belum dapat, masukkan ke minimum yang terbesar
             }
         }
         if($getId){

@@ -8,7 +8,7 @@
   </ol>
 @endsection
 @section("title")
-<a href="{{ url()->previous() }}" class="px-4 py-2 text-black">
+<a href="/layanans/{{$vendorlayanan->vendors_id}}/details/{{$vendorlayanan->layanan_cetaks_id}}" class="px-4 py-2 text-black">
     <i class="fas fa-arrow-left"></i>
 </a>
 <div class="h3 px-4 py-2">Opsi Detail: {{ $detail->value }}</div>
@@ -52,7 +52,7 @@
         @if($od->biaya_tambahan == 0)
             <td scope="row">{{ $od->opsi }}</td>
         @else
-            <td scope="row">{{ $od->opsi }} (+ Rp. {{ $od->biaya_tambahan }}/{{$od->tipe}})</td>
+            <td scope="row">{{ $od->opsi }} (+ Rp. {{ $od->biaya_tambahan }}) Tipe: {{$od->tipe}}</td>
         @endif
         <td>
             <ul class="list-inline">

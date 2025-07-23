@@ -109,7 +109,6 @@ class PemesananController extends Controller
         if (!$nota_data->waktu_diantar && !$nota_data->waktu_tunggu_diambil) {
             $is_menunggu_selesai = false; 
         }
-
         if (!$nota_data->waktu_selesai) {
             $is_selesai = false; 
         }

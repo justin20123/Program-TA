@@ -16,14 +16,14 @@
             <form method="POST" action="{{ route('login') }}">
                 @csrf
                 <div class="mb-3">
-                    <label for="email" class="form-label">Username</label>
+                    <label for="email" class="form-label">Nama Pengguna</label>
                     <input type="text" name="email" id="email" class="form-control" required autofocus>
                 </div>
                 <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
+                    <label for="password" class="form-label">Kata Sandi</label>
                     <input type="password" name="password" id="password" class="form-control" required>
                 </div>
-                <button type="submit" class="btn btn-primary w-100 mt-3">Log in</button>
+                <button type="submit" class="btn btn-primary w-100 mt-3">Masuk</button>
             </form>
             @if (session('error'))
                 <p class="text text-danger">{{ session('error') }}</p>

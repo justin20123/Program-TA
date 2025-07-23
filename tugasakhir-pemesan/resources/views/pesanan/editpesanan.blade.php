@@ -11,15 +11,14 @@
         <div class="row">
             <div class="col-md-4">
                 <div class="mb-4">
-                    <img src="https://picsum.photos/300/200" alt="Main Product" class="img-fluid rounded">
-                </div>
-                <div class="d-flex mb-4">
-                    <img src="https://picsum.photos/300/200" class="img-thumbnail px-2" style="width: 75px; height: 75px;"
-                        alt="Thumbnail 1">
-                    <img src="https://picsum.photos/300/200" class="img-thumbnail px-2" style="width: 75px; height: 75px;"
-                        alt="Thumbnail 2">
-                    <img src="https://picsum.photos/300/200" class="img-thumbnail px-2" style="width: 75px; height: 75px;"
-                        alt="Thumbnail 3">
+                    <div id="gambarjenisbahan">
+                        @if ($jenisbahan[0]->gambar)
+                            <img src="{{ url($jenisbahan[0]->gambar) }}" alt="Main Product" class="img-fluid rounded">
+                        @else
+                            <img src="{{ url('jenisbahan/noimg.png') }}" alt="Main Product" class="img-fluid rounded">
+                        @endif
+                    </div>
+
                 </div>
 
 

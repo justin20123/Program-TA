@@ -79,22 +79,33 @@ class RatingController extends Controller
             )
             ->groupBy('notas.id')
             ->get();
+
             if($ratings->isNotEmpty()){
+                $jumlahrating = 0;
                 $totalRating = 0;
-                $totalNota = DB::table('notas')
-                ->join('pemesanans', 'pemesanans.notas_id', '=', 'notas.id')
-                ->where('pemesanans.vendors_id', '=', $idvendor)
-                ->distinct('notas.id') // Ensure distinct count
-                ->count('notas.id');
+
+                $totalNota = DB::table('pemesanans')
+                ->where('vendors_id', '=', $idvendor)
+                ->distinct('notas_id') 
+                ->get('notas_id');
+
+                foreach($totalNota as $tn){
+                    $countrating = DB::table("ratings")
+                    ->where('notas_id' , '=', $tn->notas_id)
+                    ->count();
+                    if($countrating > 0){
+                        $jumlahrating += 1;
+                    }
+                }
         
                 foreach ($ratings as $r) {
                     $totalRating += $r->average_rating;
 
                 }        
-                $vendor_rating = $totalRating / $totalNota;
+                $vendor_rating = $totalRating / $jumlahrating;
                 return [
                     'vendor_rating' => $vendor_rating,
-                    'total_nota' => $totalNota
+                    'total_nota' => count($totalNota)
                 ];              
             }
             else{

@@ -1,8 +1,8 @@
 @extends('layout.sneat')
 @section('breadcrumb')
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="#">Home</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Cart</li>
+        <li class="breadcrumb-item"><a href="#">Beranda</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Lepas Blokir</li>
     </ol>
 @endsection
 @section('menu')
