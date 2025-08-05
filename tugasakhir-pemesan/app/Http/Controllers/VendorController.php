@@ -216,9 +216,6 @@ class VendorController extends Controller
 
     public function loadUntukAnda(Request $request)
     {
-
-
-
         $latitude = $request->latitude;
         $longitude = $request->longitude;
         $idlayanan = $request->idlayanan;
@@ -455,13 +452,22 @@ class VendorController extends Controller
             ->distinct()
             ->having('count_layanan', '>', 0)
             ->get();
+        $listvendors = [];
+        foreach ($vendors as $v){
+            $vendor = Vendor::find($v->id);
+            array_push($listvendors, $vendor["nama"]);    
+        }
+        $datacheck['vendors'] = $listvendors;
 
 
-        $kualitasWeight = (4.96 + 4.89) / 2; //rata-rata dari kualitas hasil cetak dan kesesuaian permintaan
+        //rata-rata dari kualitas hasil cetak dan kesesuaian permintaan
+        $kualitasWeight = (4.96 + 4.89) / 2; 
         $pelayananWeight = 4.66;
         $jarakWeight = 4.57;
-        $hargaWeight = 4.53; //rata-rata harga cetak yang diinginkan oleh customer
-        $fasilitasWeight = (4.45 + 4.38) / 2; //rata-rata dari fasilitas pemesanan online dan fasilitas edit sebelum diambil
+        //rata-rata harga cetak yang diinginkan oleh customer
+        $hargaWeight = 4.53; 
+        //rata-rata dari fasilitas pemesanan online dan fasilitas edit sebelum diambil
+        $fasilitasWeight = (4.45 + 4.38) / 2; 
         $ratingRataRataWeight = 3.87;
         $weights = [$kualitasWeight, $pelayananWeight, $jarakWeight, $hargaWeight, $fasilitasWeight, $ratingRataRataWeight];
 
@@ -470,7 +476,7 @@ class VendorController extends Controller
 
 
         $matriksTopsis = [];
-        foreach ($vendors as $v) {
+        foreach ($vendors as $key => $v) {
 
             $rating = $this->getRating($v->id);
             $values = [];
@@ -489,8 +495,9 @@ class VendorController extends Controller
             array_push($values, $jarak);
 
             //harga
-            $harga = $this->checkzero($this->getHarga($v->id, $layanan));
-            array_push($values, $harga['avg_harga']);
+            $hargaarr = $this->getHarga($v->id, $layanan);
+            $harga = $this->checkzero($hargaarr['avg_harga']);
+            array_push($values, $harga);
 
             //fasilitas pengantaran
             $fasilitas = $this->checkzero($rating['fasilitas']['vendor_rating']);

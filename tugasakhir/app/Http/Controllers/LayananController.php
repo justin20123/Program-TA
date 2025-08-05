@@ -100,12 +100,11 @@ class LayananController extends Controller
         $detail_cetaks = DB::table('detail_cetaks')
         ->join('jenis_bahan_cetaks', 'detail_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
         ->join('vendors_has_jenis_bahan_cetaks', 'vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', 'jenis_bahan_cetaks.id')
-        ->leftJoin('opsi_details', 'detail_cetaks.id', '=', 'opsi_details.detail_cetaks_id') 
         ->where('vendors_has_jenis_bahan_cetaks.vendors_id', '=', $vendor_id)
         ->where('vendors_has_jenis_bahan_cetaks.layanan_cetaks_id', '=', $id_layanan)
         ->where('vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id', '=', $jenis_bahan[0]->id_jenis_bahan)
         ->where('detail_cetaks.deleted_at', '=', null)
-        ->select('detail_cetaks.*', 'opsi_details.id as id_opsi', 'opsi_details.opsi as opsi', 'opsi_details.biaya_tambahan as biaya_tambahan')
+        ->select('detail_cetaks.*')
         ->get();
 
         $opsi_detail = [];
@@ -116,11 +115,15 @@ class LayananController extends Controller
                     'opsi' => [],
                 ];
             }
-            if ($detail->id_opsi) { 
+            $opsidetail = DB::table('opsi_details')
+                ->where('detail_cetaks_id','=',$detail->id)
+                ->where('deleted_at', '=', null)
+                ->select('id', 'opsi', 'biaya_tambahan')
+                ->get();
+            if ($opsidetail) { 
+                
                 $opsi_detail[$detail->id]['opsi'][] = [
-                    'id' => $detail->id_opsi,
-                    'opsi' => $detail->opsi, 
-                    'biaya_tambahan' => $detail->biaya_tambahan, 
+                    $opsidetail
                 ];
             }
         } 

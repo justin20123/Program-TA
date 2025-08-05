@@ -43,7 +43,7 @@
                 <h6 class="fw-bold">Pesanan</h6>
                 <ul class="list-group mb-3">
                     @foreach ($pesanans as $p)
-                        <li class="list-group-item">{{ $p->layanan }}: {{ $p->jumlah }} {{ $p->satuan }}</li>
+                        <li class="list-group-item">Fotokopi: {{ $p->jumlah }} Lembar</li>
                         <h6 class="fw-bold">Dokumen</h6>
                         <div>
                             <iframe src="/{{ $p->url_file }}"
@@ -91,8 +91,8 @@
                 processData: false,
                 contentType: false,
                 success: function() {
-                    $('#modalselesai').modal('hide');
-                    window.location.reload();
+                   window.location.href = '/';
+                    
                 },
                 error: function(xhr, status, error) {
                     console.error('AJAX Error:', error);

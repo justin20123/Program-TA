@@ -53,6 +53,7 @@ class HargaCetakController extends Controller
     }
 
     public function getHarga($idvendor, $idlayanan){
+
         $jenisbahan = DB::table('vendors_has_jenis_bahan_cetaks')
         ->join('jenis_bahan_cetaks', 'jenis_bahan_cetaks.id','=','vendors_has_jenis_bahan_cetaks.jenis_bahan_cetaks_id')
         ->join('harga_cetaks', 'harga_cetaks.id_bahan_cetaks','=', 'jenis_bahan_cetaks.id')
@@ -61,21 +62,23 @@ class HargaCetakController extends Controller
         ->select()
         ->get();
 
-        $arrAvgHarga = [];
+        $datacount = count($jenisbahan);
 
-        if(count($jenisbahan) == 0) {
+        $arrAvgHarga = [];
+        
+        if($datacount == 0) {
             return ['avg_harga'=> 0];
         }
 
         foreach($jenisbahan as $jb){
             //cek harga satuan tergeneralisasi dengan 10, 100, 200, 300, 400, 500, 1000
-            $harga10 = $this->cekHarga(10, $jb->id);
-            $harga100 = $this->cekHarga(100, $jb->id);
-            $harga200 = $this->cekHarga(200, $jb->id);
-            $harga300 = $this->cekHarga(300, $jb->id);
-            $harga400 = $this->cekHarga(400, $jb->id);
-            $harga500 = $this->cekHarga(500, $jb->id);
-            $harga1000 = $this->cekHarga(1000, $jb->id);
+            $harga10 = $this->cekHarga(10, $jb->jenis_bahan_cetaks_id);
+            $harga100 = $this->cekHarga(100, $jb->jenis_bahan_cetaks_id);
+            $harga200 = $this->cekHarga(200, $jb->jenis_bahan_cetaks_id);
+            $harga300 = $this->cekHarga(300, $jb->jenis_bahan_cetaks_id);
+            $harga400 = $this->cekHarga(400, $jb->jenis_bahan_cetaks_id);
+            $harga500 = $this->cekHarga(500, $jb->jenis_bahan_cetaks_id);
+            $harga1000 = $this->cekHarga(1000, $jb->jenis_bahan_cetaks_id);
 
             $avgHarga = ($harga10 + $harga100 + $harga200 + $harga300 + $harga400 + $harga500 + $harga1000)/7;
             array_push($arrAvgHarga, $avgHarga);

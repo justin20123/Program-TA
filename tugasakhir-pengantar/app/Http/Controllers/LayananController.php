@@ -110,11 +110,15 @@ class LayananController extends Controller
                     'opsi' => [],
                 ];
             }
-            if ($detail->idopsi) { 
-                $opsiDetail[$detail->id]['opsi'][] = [
-                    'id' => $detail->idopsi,
-                    'opsi' => $detail->opsi, 
-                    'biaya_tambahan' => $detail->biaya_tambahan, 
+            $opsidetail = DB::table('opsi_details')
+                ->where('detail_cetaks_id','=',$detail->id)
+                ->where('deleted_at', '=', null)
+                ->select('id', 'opsi', 'biaya_tambahan')
+                ->get();
+            if ($opsidetail) { 
+                
+                $opsi_detail[$detail->id]['opsi'][] = [
+                    $opsidetail
                 ];
             }
         } 

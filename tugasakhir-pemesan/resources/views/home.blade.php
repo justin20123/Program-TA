@@ -81,6 +81,11 @@
         }
 
         function showProcess(data) {
+            //vendors
+            console.log('list vendor:');
+            console.table(data['vendors']);
+
+
             //weight
             console.log('weight:')
             var weights = [];
@@ -323,9 +328,7 @@
                                   <div class="col-md-8">
                                     <div class="card-body">
                                       <h6 class="card-title" style="font-size: 1.1rem; font-weight: bold;">${vendors[i].nama}</h6>
-                                      <p class="card-text text-muted" style="margin-bottom: 0;">
-                                        ${vendors[i].jarak} km dari lokasi anda<br>
-                                      </p>
+
                                       <div class="d-flex align-items-center mb-2">
                                         <span class="mr-2">${vendors[i].rating}</span>
                                         <i class="fas fa-star text-warning"></i>

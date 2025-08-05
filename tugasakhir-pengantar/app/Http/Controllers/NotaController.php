@@ -47,6 +47,7 @@ class NotaController extends Controller
                     ->where('jenis_bahan_cetaks_id', '=', $p->id)
                     ->select('layanan_cetaks_id')
                     ->first();
+            
 
                 $layanan = DB::table('layanan_cetaks')
                     ->where('id', '=', $layananid->layanan_cetaks_id)
@@ -68,6 +69,7 @@ class NotaController extends Controller
             } else {
                 array_push($layanan_menunggu_diantar, $data_nota);
             }
+            
         }
         return view('home', compact('layanan_menunggu_diantar', 'layanan_selesai'));
     }
@@ -109,26 +111,28 @@ class NotaController extends Controller
     }
 
     public function selesaikanpesanan(Request $request)
-    {
+    { 
         $nota = Nota::findOrFail($request->idnota);
-        $nota->waktu_selesai = Carbon::now('Asia/Jakarta');
-        $nota->save();
+        if(!$nota->waktu_selesai)
+        {
+           
+            $nota->waktu_selesai = Carbon::now('Asia/Jakarta');
+            $nota->save();
 
-        $idvendor = Auth::user()->vendors_id;
+            $idvendor = Auth::user()->vendors_id;
 
-        $idmanajer = DB::table('penggunas')
-        ->where('vendors_id', '=', $idvendor)
-        ->where('role', '=', 'manajer')
-        ->first();
+            $idmanajer = DB::table('penggunas')
+            ->where('vendors_id', '=', $idvendor)
+            ->where('role', '=', 'manajer')
+            ->first();
 
-        $manajer = Pengguna::find($idmanajer->id);
-        $saldo = $manajer->saldo;
-        $saldobaru = $saldo + $nota->harga_total;
-        $manajer->saldo = $saldobaru;
-        $manajer->save();
+            $manajer = Pengguna::find($idmanajer->id);
+            $saldo = $manajer->saldo;
+            $saldobaru = $saldo + $nota->harga_total;
+            $manajer->saldo = $saldobaru;
+            $manajer->save();
+        }
 
-        $_SESSION['message'] = 'Pesanan berhasil diselesaikan';
-
-        return route("home");
+        return;
     }
 }

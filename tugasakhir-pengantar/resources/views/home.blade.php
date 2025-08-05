@@ -33,7 +33,8 @@
                 <div class="accordion-body">
                     <ul>
                         @foreach ($md['pesanan'] as $p)
-                            <li>{{ $p->jumlah . ' ' . $p->satuan . ' ' . $p->layanan }}</li>
+                            
+                            <li>{{ $p->jumlah }} lembar Fotokopi</li>
                         @endforeach
                     </ul>
                     <div class="d-flex justify-content-between py-3">

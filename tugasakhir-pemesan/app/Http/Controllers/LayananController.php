@@ -111,6 +111,7 @@ class LayananController extends Controller
 
             $opsi = DB::table('opsi_details')
                 ->where('detail_cetaks_id', '=', $detail->id)
+                ->where('deleted_at', '=', null)
                 ->get();
 
             // dd($detail->id);
